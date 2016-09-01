@@ -1,0 +1,17 @@
+package com.etaoguan.wea.client.web.vo;
+
+import com.etaoguan.wea.client.vo.BaseSearch;
+
+public class AlipayKeysSearch extends BaseSearch {
+
+	private String userName;
+
+	public String getUserName() {
+		return userName;
+	}
+
+	public void setUserName(String userName) {
+		this.userName = userName;
+	}
+
+}

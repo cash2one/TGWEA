@@ -1,0 +1,35 @@
+package com.etaoguan.wea.client.mobile.service.impl;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.etaoguan.wea.client.mobile.service.IMPaymentService;
+import com.etaoguan.wea.client.mobile.vo.OrderPay;
+import com.etaoguan.wea.constant.WeaConstant;
+import com.etaoguan.wea.service.IAlipayWapPaymentService;
+
+@Service("mpaymentService")
+public class MPaymentService implements IMPaymentService{
+
+	@Autowired
+	private IAlipayWapPaymentService alipayWapPaymentService;
+
+	@Override
+	public void processPayOrder(OrderPay orderPay) {
+		// TODO Auto-generated method stub
+		switch(orderPay.getPayType()){
+		case WeaConstant.PAY_ALIPAY_WAP:
+			alipayWapPaymentService.pay(orderPay.getOrderNum());
+			break;
+		default:
+			break;
+		
+		}
+	}
+
+	@Override
+	public void processAlipayWapResp(String notifyData) {
+		alipayWapPaymentService.processAlipayWapResp(notifyData);
+		
+	}
+}

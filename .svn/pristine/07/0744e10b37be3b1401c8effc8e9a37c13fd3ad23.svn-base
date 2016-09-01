@@ -1,0 +1,93 @@
+package com.etaoguan.wea.client.mobile.action.cust;
+
+import javax.annotation.Resource;
+
+import org.apache.struts2.convention.annotation.Action;
+import org.apache.struts2.convention.annotation.Result;
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Service;
+
+import com.etaoguan.wea.annotation.WeaFunction;
+import com.etaoguan.wea.annotation.WeaModule;
+import com.etaoguan.wea.client.mobile.action.MOwnerBaseAction;
+import com.etaoguan.wea.client.mobile.service.IMPaymentService;
+import com.etaoguan.wea.client.mobile.vo.OrderPay;
+import com.etaoguan.wea.service.IAlipayKeysService;
+import com.etaoguan.wea.service.IAlipayWapPayResultService;
+import com.etaoguan.wea.service.IOrderPayInfoService;
+import com.etaoguan.wea.vo.AlipayWapPayResult;
+import com.etaoguan.wea.vo.OrderPayInfo;
+
+
+@WeaModule(mname="支付管理")
+@Service("custMPaymentAction") @Scope("prototype")
+public class MPaymentAction extends MOwnerBaseAction{
+
+	private static final long serialVersionUID = 854960251297615394L;
+
+	private OrderPay orderPay;
+	
+	@Resource(name="malipayWapPaymentService")
+	private IMPaymentService imPaymentService;
+	
+	
+	@Resource(name = "alipayKeysService")
+	private IAlipayKeysService iAlipayKeysService;
+	
+	@Resource(name = "alipayWapPayResultService")
+	private IAlipayWapPayResultService iAlipayWapPayResultService;
+	
+	@Resource(name = "orderPayInfoService")
+	private IOrderPayInfoService iOrderPayInfoService;
+	
+	/*保存微信返回的结果      测试用*/
+	@Action(value="kk",results = { @Result(name = "success", type = "dispatcher",location="/owner/select_cust.jsp")})
+	public String kk(){
+		AlipayWapPayResult alipayWapPayResult = new AlipayWapPayResult();
+		alipayWapPayResult.setNotifyNotifyData("11");
+		alipayWapPayResult.setBuyerEmail("11");
+		alipayWapPayResult.setGmtCreate("11");
+		alipayWapPayResult.setOutTradeNo("11");
+		alipayWapPayResult.setNotifyTime("11");
+		alipayWapPayResult.setTradeStatus("11");
+		alipayWapPayResult.setTotalFee(Double.valueOf("11"));
+		alipayWapPayResult.setGmtPayment("11");
+	int id =iAlipayWapPayResultService.saveAlipayWapPayResult(alipayWapPayResult);
+		
+		OrderPayInfo orderPayInfo = new OrderPayInfo();
+		orderPayInfo.setPayTransId(id);
+		orderPayInfo.setOrderNum("33");
+//		orderPayInfo.setOwnerNum("33");
+//		orderPayInfo.setCustNum("33");
+		orderPayInfo.setPayType(0);
+		orderPayInfo.setCreateBy("333");
+		
+		iOrderPayInfoService.saveOrderPayInfoDao(orderPayInfo);
+		System.out.println();
+		return SUCCESS;
+	}
+	
+	@WeaFunction(fname="客户订单支付(移动端)",oname=WeaFunction.Operation.UPDATE)
+	@Action(value="mPayOrder")
+	public String payOrder() throws Exception {
+		
+		orderPay.setOwnerNum(ownerNum);
+		orderPay.setCustNum(getCurrentCust().getCustNum());
+		String xml =imPaymentService.processPayOrder(orderPay,getDomainBaseUrl());
+		
+		writeResponse(xml);
+		
+		return null;
+		
+	}
+
+	public OrderPay getOrderPay() {
+		return orderPay;
+	}
+
+	public void setOrderPay(OrderPay orderPay) {
+		this.orderPay = orderPay;
+	}
+
+
+}

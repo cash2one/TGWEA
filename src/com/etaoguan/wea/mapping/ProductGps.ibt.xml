@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+
+<sqlMap>
+
+	<typeAlias alias="ProductGps" type="com.etaoguan.wea.vo.ProductGps" />
+
+	<resultMap id="prodgps" class="ProductGps">
+		<result property="custNum" column="cust_num" />
+		<result property="ownerNum" column="owner_num" />
+		<result property="prodNum" column="prod_num" />
+		<result property="prodName" column="prod_name" />
+		<result property="createDate" column="create_date" />
+		<result property="createBy" column="create_by" />
+	</resultMap>
+
+	<resultMap id="prodgpscustomer" class="ProductGps">
+		<result property="custNum" column="cust_num" />
+		<result property="ownerNum" column="owner_num" />
+		<result property="prodNum" column="prod_num" />
+		<result property="prodName" column="prod_name" />
+		<result property="createDate" column="create_date" />
+		<result property="createBy" column="create_by" />
+		<result property="contactPerson" column="contact_person" />
+	</resultMap>
+
+	
+	<select id="getProductGpsList" parameterClass="ProductGps" resultMap="prodgps">
+	SELECT cust_num, owner_num, prod_num, prod_name, create_date, create_by 
+	FROM wea.special_prod_cust_ref where owner_num = #ownerNum#
+	<dynamic>
+			<isNotEmpty property="custNum" prepend="and">
+				cust_num = #custNum#
+			</isNotEmpty>
+		</dynamic>
+	</select>
+	
+	<!-- 添加 产品定位 -->
+	<insert id="addGps" parameterClass="ProductGps">
+		insert into wea.special_prod_cust_ref
+		(cust_num,prod_num,owner_num,prod_name,create_by)
+		values
+		(#custNum#,#prodNum#,#ownerNum#,#prodName#,#createBy#)
+	</insert>
+	
+	<!-- 删除 产品定位 -->
+	<delete id="deleteproductGps" parameterClass="java.util.HashMap">
+		DELETE FROM wea.special_prod_cust_ref
+		WHERE cust_num = #custNum#
+		 <dynamic>
+			<isNotEmpty property="prodNum" prepend="and">
+				prod_num = #prodNum#
+			</isNotEmpty>
+		</dynamic>
+	</delete>
+
+	<!-- 产品定位 页数统计 -->
+	<select id="getProdcutsGpsCount" parameterClass="java.util.HashMap"
+		resultClass="java.lang.Integer">
+		SELECT count(1) FROM special_prod_cust_ref where owner_num =
+		#ownerNum#
+
+		<dynamic>
+			<isNotEmpty property="custNum" prepend="and">
+				cust_num = #custNum#
+			</isNotEmpty>
+			<isNotEmpty property="prodName" prepend="and">
+				prod_name like CONCAT('%',#prodName#, '%')
+			</isNotEmpty>
+		</dynamic>
+
+	</select>
+
+	<!-- 产品定位 列表 -->
+	<select id="getProdcutsGpsDatSet" parameterClass="java.util.HashMap"
+		resultMap="prodgpscustomer">
+		SELECT special_prod_cust_ref.cust_num,customer.contact_person,
+		special_prod_cust_ref.owner_num, prod_num, prod_name,
+		special_prod_cust_ref.create_date, special_prod_cust_ref.create_by
+		FROM wea.special_prod_cust_ref,wea.customer
+		where
+		<!--  special_prod_cust_ref.cust_num = customer.cust_num and -->
+		special_prod_cust_ref.owner_num = #ownerNum#
+
+		<dynamic>
+			<isNotEmpty property="custNum" prepend="and">
+				special_prod_cust_ref.cust_num = #custNum#
+			</isNotEmpty>
+			<isNotEmpty property="prodName" prepend="and">
+				prod_name like CONCAT('%',#prodName#, '%')
+			</isNotEmpty>
+		</dynamic>
+
+		order by special_prod_cust_ref.create_date desc
+		limit #limit# offset #offset#
+	</select>
+
+
+
+
+</sqlMap>

@@ -1,0 +1,207 @@
+package com.etaoguan.wea.service.impl;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.annotation.Resource;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.etaoguan.wea.common.DataCriteria;
+import com.etaoguan.wea.common.DataSet;
+import com.etaoguan.wea.common.OffsetRequest;
+import com.etaoguan.wea.common.WeaException;
+import com.etaoguan.wea.constant.WeaConstant;
+import com.etaoguan.wea.dao.IReturnedInvDao;
+import com.etaoguan.wea.service.IDeliverInvService;
+import com.etaoguan.wea.service.IKeyGenService;
+import com.etaoguan.wea.service.IOrderService;
+import com.etaoguan.wea.service.IProdStockService;
+import com.etaoguan.wea.service.IReturnedInvService;
+import com.etaoguan.wea.service.IWareHouseService;
+import com.etaoguan.wea.vo.ProdQty;
+import com.etaoguan.wea.vo.ProdStockDelta;
+import com.etaoguan.wea.vo.ReturnedInvoice;
+import com.etaoguan.wea.vo.ReturnedInvoiceItem;
+import com.etaoguan.wea.vo.WareHouse;
+
+@Service("returnedInvService")
+public class ReturnedInvService  extends BaseService implements IReturnedInvService {
+
+	@Autowired
+	private IReturnedInvDao iReturnedInvDao;
+	
+	@Resource(name="orderService")
+	private IOrderService iOrderService;
+	
+	@Resource(name="prodStockService")
+	private IProdStockService iProdStockService;
+	
+	@Resource(name="retKeyGenService") 
+	protected IKeyGenService  iKeyGenService;
+	
+	@Resource(name="wareHouseService")
+	private IWareHouseService iWareHouseService;
+	
+	@Resource(name="deliverInvService")
+	private IDeliverInvService iDeliverInvService;
+	
+	public void addReturnedInv(ReturnedInvoice returnedInv) {
+		if(returnedInv.getReturnedInvItemList()==null||returnedInv.getReturnedInvItemList().size()==0){
+			throw new WeaException("无效的产品信息");
+		}
+		String retNum = iKeyGenService.saveNGetKey();
+		returnedInv.setRetNum(retNum);
+		returnedInv.setCreateBy(getCurrentOperator());
+		returnedInv.setUpdateBy(getCurrentOperator());
+		iReturnedInvDao.addReturnedInv(returnedInv);
+		for(ReturnedInvoiceItem returnedInvItem:returnedInv.getReturnedInvItemList()){
+			returnedInvItem.setRetNum(retNum);
+			iReturnedInvDao.addReturnedInvItem(returnedInvItem);
+		}
+
+	}
+
+	public void delReturnedInv(String returnedInvNum) {
+		DataCriteria dataCriteria = new DataCriteria();
+		dataCriteria.setParam("retNum",returnedInvNum);
+		iReturnedInvDao.delReturnedInv(dataCriteria);
+	}
+
+	public boolean havePutin2WH(String returnedInvNum) {
+		if(getReturnedInvHeader(returnedInvNum).getRetWhStatus()==WeaConstant.RETURNEDINV_PUTINSTATUS_PUTIN){
+			return true;
+		}
+		return false;
+	}
+
+	@SuppressWarnings("rawtypes")
+	public DataSet listReturnedInvs(DataCriteria dataCriteria,
+			OffsetRequest offsetRequest) {
+		
+		return iReturnedInvDao.getReturnedInvs(dataCriteria, offsetRequest);
+	}
+
+	public void saveReturnedInvStockChange(String returnedInvNum,
+			String whNum) {
+		WareHouse wareHouse = iWareHouseService.getWarehouse(whNum);
+		ReturnedInvoice returnedInv = getReturnedInv(returnedInvNum);
+		List<ProdQty> prodQtyList =  new ArrayList<ProdQty>();
+		for(ReturnedInvoiceItem returnedInvItem:returnedInv.getReturnedInvItemList()){
+			ProdQty prodQty = new ProdQty();
+			prodQty.setProdNum(returnedInvItem.getProdNum());
+			prodQty.setProdName(returnedInvItem.getProdName());
+			prodQty.setCases(returnedInvItem.getCases());
+			prodQty.setPieces(returnedInvItem.getPieces());
+			prodQtyList.add(prodQty);
+		}
+		if(!iDeliverInvService.chkLegalRetInv(returnedInv.getReferDeliverNum(), prodQtyList)){
+			
+			throw new WeaException("回库产品数量不能大于出库产品数量");
+		}
+
+		iOrderService.saveOrderItems4ReturnedInv(returnedInv.getReferOrderNum());
+		
+		ProdStockDelta prodStockDelta = new ProdStockDelta();
+		prodStockDelta.setProdQtyList(prodQtyList);
+		prodStockDelta.setOwnerNum(returnedInv.getOwnerNum());
+		prodStockDelta.setWhNum(whNum);
+		prodStockDelta.setWhName(wareHouse.getWhName());
+		prodStockDelta.setReferNum(returnedInv.getRetNum());
+		prodStockDelta.setReferModule(WeaConstant.MODULE_RETURNED);
+		iProdStockService.updateRaiseStock(prodStockDelta);
+		
+		DataCriteria dataCriteria = new DataCriteria();
+		dataCriteria.setParam("retNum",returnedInvNum);
+		dataCriteria.setParam("whNum",whNum);
+		dataCriteria.setParam("whName",wareHouse.getWhName());
+		dataCriteria.setParam("retWhStatus",WeaConstant.RETURNEDINV_PUTINSTATUS_PUTIN);
+		iReturnedInvDao.updateReturnedInv(dataCriteria);
+
+	}
+
+	public void updateReturnedInv2Putin(String returnedInvNum) {
+		DataCriteria dataCriteria = new DataCriteria();
+		dataCriteria.setParam("retNum",returnedInvNum);
+		dataCriteria.setParam("retWhStatus",WeaConstant.RETURNEDINV_PUTINSTATUS_PUTIN);
+		iReturnedInvDao.updateReturnedInv(dataCriteria);
+
+	}
+
+	public void updateReturnedInvRetReason(String returnedInvNum,String retReason) {
+		DataCriteria dataCriteria = new DataCriteria();
+		dataCriteria.setParam("retNum",returnedInvNum);
+		dataCriteria.setParam("retReason",retReason);
+		iReturnedInvDao.updateReturnedInv(dataCriteria);
+		
+	}
+
+	public void updateReturnedInvRetType(String returnedInvNum,int retType) {
+		DataCriteria dataCriteria = new DataCriteria();
+		dataCriteria.setParam("retNum",returnedInvNum);
+		dataCriteria.setParam("retType",retType);
+		iReturnedInvDao.updateReturnedInv(dataCriteria);
+		
+	}
+
+	public void updateReturnedInvItem(ReturnedInvoiceItem returnedInvItem) {
+		iReturnedInvDao.updateReturnedInvItem(returnedInvItem);
+		
+	}
+
+	public List<ReturnedInvoiceItem> getReturnedInvItems(String returnedInvNum) {
+		DataCriteria dataCriteria = new DataCriteria();
+		dataCriteria.setParam("retNum",returnedInvNum);
+		return iReturnedInvDao.getReturnedInvItems(dataCriteria);
+	}
+
+	public ReturnedInvoice getReturnedInv(String returnedInvNum) {
+		DataCriteria dataCriteria = new DataCriteria();
+		dataCriteria.setParam("retNum",returnedInvNum);
+		ReturnedInvoice returnedInv = iReturnedInvDao.getReturnedInv(dataCriteria);
+		returnedInv.setReturnedInvItemList(iReturnedInvDao.getReturnedInvItems(dataCriteria));
+		return returnedInv;
+	}
+
+	public ReturnedInvoice getReturnedInvHeader(String returnedInvNum) {
+		DataCriteria dataCriteria = new DataCriteria();
+		dataCriteria.setParam("retNum",returnedInvNum);
+		return iReturnedInvDao.getReturnedInv(dataCriteria);
+	}
+
+	public void updateReturnedInv(ReturnedInvoice returnedInv) {
+		if(returnedInv.getReturnedInvItemList()==null||returnedInv.getReturnedInvItemList().size()==0){
+			throw new WeaException("无效的产品信息");
+		}
+		if(havePutin2WH(returnedInv.getRetNum())){
+			throw new WeaException("产品已入库");
+		}
+		returnedInv.setUpdateBy(getCurrentOperator());
+		iReturnedInvDao.updateReturnedInv(returnedInv);
+		DataCriteria dataCriteria = new DataCriteria();
+		dataCriteria.setParam("retNum",returnedInv.getRetNum());
+		iReturnedInvDao.delReturnedInvItem(dataCriteria);
+
+		for(ReturnedInvoiceItem returnedInvItem:returnedInv.getReturnedInvItemList()){
+			returnedInvItem.setRetNum(returnedInv.getRetNum());
+			iReturnedInvDao.addReturnedInvItem(returnedInvItem);
+		}
+		
+	}
+
+	public ReturnedInvoice getReturnedInvByOrderNum(String referOrderNum) {
+		DataCriteria dataCriteria = new DataCriteria();
+		dataCriteria.setParam("referOrderNum",referOrderNum);
+		ReturnedInvoice returnedInv = iReturnedInvDao.getReturnedInv(dataCriteria);
+		if (returnedInv == null) {
+			return null;
+		} else {
+			returnedInv.setReturnedInvItemList(getReturnedInvItems(returnedInv.getRetNum()));
+			return returnedInv;
+		}
+	}
+
+
+
+}

@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE log4j:configuration SYSTEM "log4j.dtd">
+
+<log4j:configuration xmlns:log4j="http://jakarta.apache.org/log4j/">
+	<!-- The log file which should be used in production environments -->
+	<appender name="dailyLogAppender"
+		class="org.apache.log4j.RollingFileAppender">
+		<param name="File" value="wealog/wea.log" />
+		<param name="Append" value="true" />
+		<param name="MaxFileSize" value="5000KB" />
+		<param name="Threshold" value="debug" />
+
+		<layout class="org.apache.log4j.PatternLayout">
+			<param name="ConversionPattern"
+				value="%d %-5p [%t][%c{1}] %m%n" />
+		</layout>
+	</appender>
+
+	<appender name="consoleAppender"
+		class="org.apache.log4j.ConsoleAppender">
+		<param name="threshold" value="DEBUG" />
+		<layout class="org.apache.log4j.PatternLayout">
+			<param name="conversionPattern"
+				value="%d %-5p [%c{1}] %m %n" />
+		</layout>
+	</appender>
+	<category name="com.etaoguan" additivity="true">
+		<priority value="DEBUG" />	
+	</category>
+
+	<category name="com.ibatis" additivity="true">
+		<priority value="DEBUG" />	
+	</category>
+	<category name="java.sql" additivity="true">
+		<priority value="DEBUG" />	
+	</category>
+
+	<root>
+		<priority value="ERROR"/>
+		<appender-ref ref="dailyLogAppender" />
+		<appender-ref ref="consoleAppender"/>
+	</root>
+
+</log4j:configuration>

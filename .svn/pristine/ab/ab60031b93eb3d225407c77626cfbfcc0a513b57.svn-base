@@ -1,0 +1,70 @@
+var httpUrl = "http://" + window.location.host + "/";
+// var httpUrl = "http://taoguan.zzt.com/";
+var errImg = httpUrl + "images/nopic.jpg";
+var parametersClass = {
+index: 1,					//幻灯片播放选择按钮编号
+timeout: 0,
+loadingPage: 1,		        //下拉加载当前页数
+isLoding: false,
+i: 5,						//广告关闭时间
+isComShopping: false, 		//是否强制购物
+isAlertShow: false,		    //判断悬浮框是否显示
+isNoLoading: false,		    //是否停止滚动响应
+saveSearchKey: "",			//保存产品展示页面传递搜索条件
+searchUserKey: 1,			//搜索客户条件
+orderSearchKey: 1,			//搜索订单条件
+userName: "",
+orderNum: 0,
+userNum: "",
+
+poppage: "",				//保存上一页
+pushpage: "",				//保存下一页
+productIndex: 0,				                                //保存产品显示页产品信息
+IsToProductInfo: false,	                                        //是否从登陆跳转到产品信息
+defaultuImg: "images/nopic.jpg",				                //默认图片目录
+proImgUrl: httpUrl,                                             //图片根目录
+userUrlHead: httpUrl + "cust/",                                 //用户链接头
+userLogin: "mLogin.action",							            //用户登陆
+userGetProductList: "mListProducts.action",			            //用户获取产品列表页
+userGetProductInfo: "mGetProductInfo.action",			        //用户获取产品信息
+userGetProCats: "mListProdCats.action",				            //用户获取产品分类
+userGetSuperPro: "mGetProductsList.action",			            //用户获取特供商品
+userWaitingOrderList: "mUnauditedOrders.action",	            //用户待审核订单
+userGetOrderList: "mListOrders.action",				            //用户获取订单列表
+//var userGetOrderInfo = "mGetOrderInfo.action";		        //用户获取订单信息
+userGetGuestBooks: "mListGuestBooks.action",			        //用户获取留言板信息
+userAddGuestBook: "mAddGuestBook.action",				        //用户发表留言
+userAddOrder: "mAddOrigOrder.action",					        //用户提交订单
+userGetCust: "mGetCust.action",						            //获取用户个人信息
+userUpdateCust: "mUpdateCust.action",					        //用户修改个人信息
+userUpdatePwd: "mUpdateCustPwd.action",				            //用户修改密码
+userReg: "mRegCust.action",							            //用户注册
+userExistCustname: "mExistCustname.action",			            //用户名重复
+userGetAliasNTags: "mGetCustPushMessageAliasNTags.action",      //获取推送注册信息;
+
+adminUrlHead: httpUrl + "owner/",                                   //管理员链接头
+adminLogin: "mLogin.action",								        //管理员登陆
+adminInfo: "mGetOwnerData.action",							        //获取管理员信息
+adminGetOrderInfo: "mGetOrderInfo.action",					        //管理员获取订单信息
+adminGetOrderList: "mListOrders.action",					        //管理员获取订单列表
+adminUpdatePwd: "mUpdateOwnerAdminPwd.action",				        //管理员修改密码
+adminUpdateStockBalance: "mUpdateProdDispStockBalance.action",		//管理员更新产品库存
+adminUpadtePrice: "mUpdateProdPrice.action",				        //管理员更新产品价格
+adminUserList: "mListCusts.action",						            //管理员查看客户列表
+//var adminGetAdImg = "mGetRecommendOwners.action";				    //管理员获取广告图片
+getIsLogin: "mGetLoginStatus.action",						        //获取登陆状态
+getOwnerInfo: "mGetOwnerInfo.action",						        //获取企业信息
+getBannerImg: "mGetOwnerBanners.action",					        //获取Banner图片
+loginOut: "mLogout.action",								            //退出登陆
+getSetting: "mGetOwnerSettingForceToLocal.action"			        //强制购买
+};
+
+var publicParameter = {
+    parameters: Object.create(parametersClass)
+};
+var publicParameterObj = Object.create(publicParameter);
+
+if(localStorage.userName !== undefined){
+    publicParameterObj.parameters.userName = (localStorage.userName).replace(/\"/g,"");		//用户名
+}
+

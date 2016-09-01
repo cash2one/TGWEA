@@ -1,0 +1,230 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+
+<!-- author 刘卿 -->
+<!-- 感谢ibatis的持久层框架 -->
+
+<sqlMap>
+
+	<typeAlias alias="CODENAME" type="com.etaoguan.wea.vo.TableCodeName"/>
+	<!-- 表字段值信息之SQL映射 -->
+	<resultMap id="codeName" class="CODENAME">
+		<result property="tableName" column="table_name"/>
+		<result property="columnName" column="column_name"/>
+		<result property="columnCode" column="column_code"/>
+		<result property="nameCh" column="name_ch"/>
+		<result property="nameEn" column="name_en"/>
+		<result property="columnDesc" column="column_desc"/>
+	</resultMap>
+	
+	<!-- 表字段值信息总数-->
+	<select id="getCodeNameCount" parameterClass="java.util.HashMap" resultClass="java.lang.Integer">
+		select count(1) from table_code_name  where 1=1 
+
+		<isNotEmpty property="tableName" prepend="and">
+		    table_name = #tableName#
+		</isNotEmpty>
+		<isNotEmpty property="columnName" prepend="and">
+		    column_name = #columnName#
+		</isNotEmpty>
+		<!-- 自动定义扩展sql条件definex,在参数map里放完整的sql条件-->
+		<isNotEmpty property="definesql" prepend="and">
+		    $definesql$
+		</isNotEmpty>
+
+	</select>
+	
+	<!-- 获取表字段值信息分页信息-->
+	<select id="getCodeNameDataSet" parameterClass="java.util.HashMap" resultMap="codeName">
+		select    table_name,
+					column_name,
+					column_code,
+					name_ch,
+					name_en,
+					column_desc  
+			from table_code_name where 1=1
+
+		<isNotEmpty property="tableName" prepend="and">
+		    table_name = #tableName#
+		</isNotEmpty>
+		<isNotEmpty property="columnName" prepend="and">
+		    column_name = #columnName#
+		</isNotEmpty>
+		<!-- 自动定义扩展sql条件definex,在参数map里放完整的sql条件-->
+		<isNotEmpty property="definesql" prepend="and">
+		    $definesql$
+		</isNotEmpty>
+
+		
+		<!-- 页面传递的降序字段 -->
+		<isNotEmpty property="desc">
+		   order by $desc$ desc
+		</isNotEmpty>
+		<!-- 页面传递的升序字段 -->
+		<isNotEmpty property="asc">
+		   order by  $asc$ asc
+		</isNotEmpty>
+		<!-- 自定排序字段 -->
+		<isNull property="asc">
+			<isNull property="desc">order by table_name,column_name,column_code asc
+			</isNull>
+		</isNull>
+		limit #limit# offset #offset#
+	</select>
+	
+	<!-- 获取表字段值信息列表-->
+	<select id="getCodeNameList" parameterClass="java.util.HashMap" resultMap="codeName">
+		select    table_name,
+					column_name,
+					column_code,
+					name_ch,
+					name_en,
+					column_desc  
+			from table_code_name where 1=1 
+		<isNotEmpty property="tableName" prepend="and">
+		    table_name = #tableName#
+		</isNotEmpty>
+		<isNotEmpty property="columnName" prepend="and">
+		    column_name = #columnName#
+		</isNotEmpty>
+		<!-- 自动定义扩展sql条件definex,在参数map里放完整的sql条件-->
+		<isNotEmpty property="definesql" prepend="and">
+		    $definesql$
+		</isNotEmpty>
+
+		
+		<!-- 页面传递的降序字段 -->
+		<isNotEmpty property="desc">
+		   order by $desc$ desc
+		</isNotEmpty>
+		<!-- 页面传递的升序字段 -->
+		<isNotEmpty property="asc">
+		   order by  $asc$ asc
+		</isNotEmpty>
+		<!-- 自定排序字段 -->
+		<isNull property="asc">
+			<isNull property="desc">order by table_name,column_name,column_code asc
+			</isNull>
+		</isNull>
+	</select>
+	
+	<!-- 获取可用表字段值信息列表-->
+	<select id="getAvailableCodeNameList" parameterClass="java.util.HashMap" resultMap="codeName">
+		SELECT 
+		t1.table_name,
+		t1.column_name,
+		t1.column_code,
+		t1.name_ch,
+		t1.name_en,
+		column_desc 
+		from (
+		SELECT
+		table_name,
+		column_name,
+		column_code,
+		name_ch,
+		name_en,
+		column_desc 
+		FROM
+		table_code_name  
+		where table_name=#tableName# and column_name=#columnName#
+		) t1 
+		LEFT OUTER JOIN (SELECT 
+		distinct $columnName$ $columnName$ 
+		FROM
+		$tableName$  
+		<!-- 自动定义扩展sql条件definex,在参数map里放完整的sql条件-->
+		<isNotEmpty property="definesql" prepend="where">
+		    $definesql$
+		</isNotEmpty>
+		) t2
+		on t1.column_code = t2.$columnName$ 
+		where t2.$columnName$ is null
+		order by t1.column_name,t1.column_code asc
+
+	</select>
+	
+	<!-- 获取表字段值信息-->
+	<select id="getCodeName" parameterClass="java.util.HashMap" resultMap="codeName">
+		select    table_name,
+				column_name,
+				column_code,
+				name_ch,
+				name_en,
+				column_desc 
+			from table_code_name 
+			where table_name = #tableName# 
+			and column_name = #columnName# 
+			and column_code = #columnCode#
+		limit 1 
+	</select>
+	
+	<!-- 删除表字段值信息 -->
+	<delete id="deleteCodeName" parameterClass="java.util.HashMap">
+		delete from table_code_name 
+		where table_name = #tableName# 
+		and column_name = #columnName# 
+		and column_code = #columnCode#
+
+	</delete>
+
+	<!-- 保存表字段值信息 -->
+	<insert id="createCodeName"  parameterClass="CODENAME">
+		insert into table_code_name 
+		(
+			table_name,
+			column_name,
+			column_code,
+			name_ch,
+			name_en,
+			column_desc 
+		)
+		values(
+				#tableName#,		
+				#columnName#,
+				#columnCode#	
+			<isNotEmpty property="nameCh" prepend=",">
+				#nameCh#
+			</isNotEmpty>
+			<isEmpty property="nameCh" prepend=",">
+				''
+			</isEmpty>						
+			<isNotEmpty property="nameEn" prepend=",">
+				#nameEn#
+			</isNotEmpty>
+			<isEmpty property="nameEn" prepend=",">
+				''
+			</isEmpty>	
+			<isNotEmpty property="columnDesc" prepend=",">
+				#columnDesc#
+			</isNotEmpty>
+			<isEmpty property="columnDesc" prepend=",">
+				''
+			</isEmpty>			
+		)
+
+	</insert>
+	
+	<!-- 修改表字段值信息 -->
+	<update id="updateCodeName"  parameterClass="CODENAME">
+			update table_code_name set 
+			
+			<isNotEmpty property="nameEn">
+		    	name_en = #nameEn#
+			</isNotEmpty>
+			<isEmpty property="nameEn">
+		    	name_en = name_en
+			</isEmpty>
+			<isNotEmpty property="nameCh" prepend=",">
+		    	name_ch = #nameCh#
+			</isNotEmpty>
+			<isNotEmpty property="columnDesc" prepend=",">
+		    	column_desc = #columnDesc#
+			</isNotEmpty>
+			where table_name = #tableName# 
+			and column_name = #columnName#
+			and column_code = #columnCode#
+
+	</update>
+
+</sqlMap>

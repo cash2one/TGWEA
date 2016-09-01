@@ -1,0 +1,70 @@
+package com.etaoguan.wea.vo;
+
+public class ProdStock extends BaseVo{
+	
+	private String whNum;
+	private String whName;
+	private String ownerNum;
+	private String prodNum;
+	private String differName;
+	private Product product;
+	private int cases;
+	private int pieces;
+	private double sku;
+	public String getWhNum() {
+		return whNum;
+	}
+	public void setWhNum(String whNum) {
+		this.whNum = whNum;
+	}
+	public String getOwnerNum() {
+		return ownerNum;
+	}
+	public void setOwnerNum(String ownerNum) {
+		this.ownerNum = ownerNum;
+	}
+	public String getProdNum() {
+		return prodNum;
+	}
+	public void setProdNum(String prodNum) {
+		this.prodNum = prodNum;
+	}
+	public int getCases() {
+		return cases;
+	}
+	public void setCases(int cases) {
+		this.cases = cases;
+	}
+	public int getPieces() {
+		return pieces;
+	}
+	public void setPieces(int pieces) {
+		this.pieces = pieces;
+	}
+	public double getSku() {
+		return sku;
+	}
+	public void setSku(double sku) {
+		this.sku = sku;
+	}
+	public String getWhName() {
+		return whName;
+	}
+	public void setWhName(String whName) {
+		this.whName = whName;
+	}
+	public Product getProduct() {
+		return product;
+	}
+	public void setProduct(Product product) {
+		this.product = product;
+	}
+	public String getDifferName() {
+		return differName;
+	}
+	public void setDifferName(String differName) {
+		this.differName = differName;
+	}
+	
+
+}

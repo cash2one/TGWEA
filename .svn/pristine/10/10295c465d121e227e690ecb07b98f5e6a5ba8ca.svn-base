@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+
+<sqlMap>
+
+	<typeAlias alias="AlipayKeys" type="com.etaoguan.wea.vo.AlipayKeys" />
+
+	<resultMap id="alipayKeysMap" class="AlipayKeys">
+
+		<result property="id" column="id" />
+		<result property="userId" column="user_id" />
+		<result property="userName" column="user_name" />
+		<result property="userPartner" column="user_partner" />
+		<result property="userKey" column="user_key" />
+		<result property="createDate" column="create_date" />
+
+	</resultMap>
+
+	<insert id="addAlipayKeys" parameterClass="AlipayKeys">
+		insert into alipay_keys (user_id,user_name,user_partner,user_key,create_date) values (#userId#,#userName#,#userPartner#,#userKey#,now())
+	</insert>
+
+	<delete id="deleteAlipayKeys" parameterClass="java.util.HashMap">
+		delete from alipay_keys where id = #id#
+	</delete>
+
+	<update id="updateAlipaykeys" parameterClass="java.util.HashMap">
+		update alipay_keys set user_partner = #userPartner#,user_key=#userKey# where id = #id#
+	</update>
+
+	<select id="alipayKeysDatSet" parameterClass="java.util.HashMap" resultMap="alipayKeysMap">
+		SELECT
+		alipay_keys.id,
+		alipay_keys.user_id,
+		alipay_keys.user_name,
+		alipay_keys.user_partner,
+		alipay_keys.user_key,
+		alipay_keys.create_date
+		FROM 
+		alipay_keys where 1 = 1
+		<isNotEmpty property="userName" prepend="and">
+				user_name like
+				CONCAT('%',#userName#, '%')
+			</isNotEmpty>
+		order by create_date desc limit #limit# offset #offset#
+	</select>
+
+	<select id="alipayKeysCount" parameterClass="java.util.HashMap" resultClass="java.lang.Integer">
+		SELECT count(1) FROM alipay_keys
+	</select>
+
+
+</sqlMap>

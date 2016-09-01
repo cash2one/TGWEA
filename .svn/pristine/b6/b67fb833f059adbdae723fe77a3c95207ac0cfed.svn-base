@@ -1,0 +1,262 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+
+<!-- author 刘卿 -->
+<!-- 感谢ibatis的持久层框架 -->
+
+<sqlMap>
+
+	<typeAlias alias="WECHATMESSAGE" type="com.etaoguan.wea.vo.WechatMessage"/>
+	<typeAlias alias="WECHATMESSAGEDATA" type="com.etaoguan.wea.vo.WechatMessageData"/>
+	<resultMap id="wechatMessage" class="WECHATMESSAGE">
+		<result property="messageId" column="message_id"/>
+		<result property="ownerNum" column="owner_num"/>
+		<result property="subject" column="subject"/>
+		<result property="messageType" column="message_type"/>
+		<result property="replyKey" column="reply_key"/>
+		<result property="remark" column="remark"/>
+		<result property="createDate" column="create_date"/>
+		<result property="createBy" column="create_by"/>
+		<result property="updateDate" column="update_date"/>
+		<result property="updateBy" column="update_by"/>
+	</resultMap>
+	<resultMap id="wechatMessageData" class="WECHATMESSAGEDATA">
+		<result property="messageId" column="message_id"/>
+		<result property="itemNum" column="item_num"/>
+		<result property="dataName" column="data_name"/>
+		<result property="dataValue" column="data_value"/>
+	</resultMap>
+	
+	<resultMap id="compWechatMessage" extends = "wechatMessage" class="WECHATMESSAGE">
+		<result property="wechatMessageDatas" column="message_id"  select="selectWechatMessageDatas"/>
+	</resultMap>
+	
+	<!-- 检查消息要不要转发给多客服 -->
+	<select id="checkManyCustomerMsg" parameterClass="java.util.HashMap" resultClass="java.lang.Integer">
+	
+		SELECT
+		IFNULL(
+			Count(
+				wea.wechat_message.reply_key
+			),
+			0
+		) reply_key
+	FROM
+		wea.wechat_message
+	WHERE
+		wea.wechat_message.reply_key = #replyKey#
+	AND wea.wechat_message.owner_num = #ownerNum# 
+	
+	</select>
+	
+	<select id="selectWechatMessageDatas" resultMap="wechatMessageData">
+    	select 		message_id,
+		item_num,
+		data_name,
+		data_value from wechat_message_data where message_id=#message_id# 
+		order by item_num asc
+    </select>
+    
+	<select id="getWechatMessageCount" parameterClass="java.util.HashMap" resultClass="java.lang.Integer">
+		select count(1) from wechat_message  
+		wechat_message where owner_num = #ownerNum# 
+		<dynamic> 
+			<isNotEmpty property="messageType">
+				<isNotEqual property="messageType" compareValue="-1" prepend="and">
+				    message_type = #messageType#
+				</isNotEqual>
+			</isNotEmpty>
+		</dynamic>
+	</select>
+	
+	<select id="getWechatMessageDataSet" parameterClass="java.util.HashMap" resultMap="wechatMessage">
+		SELECT
+		message_id,
+		owner_num,
+		`subject`,
+		message_type,
+		reply_key,
+		remark,
+		create_date,
+		create_by,
+		update_date,
+		update_by
+		FROM
+		wechat_message where owner_num = #ownerNum# 
+		<dynamic> 
+			<isNotEmpty property="messageType">
+				<isNotEqual property="messageType" compareValue="-1" prepend="and">
+				    message_type = #messageType#
+				</isNotEqual>
+			</isNotEmpty>
+		</dynamic>
+		
+		limit #limit# offset #offset#
+	</select>
+
+	<statement id="deleteWechatMessage" parameterClass="java.util.HashMap">
+		DELETE 
+		FROM
+		wechat_message where message_id = #messageId#;
+		DELETE 
+		FROM
+		wechat_message_data where message_id = #messageId#;
+		
+
+	</statement>
+	
+	 <insert id="createWechatMessage"  parameterClass="WECHATMESSAGE">
+		insert into wechat_message 
+		(
+		owner_num,
+		`subject`,
+		message_type,
+		reply_key,
+		remark,
+		create_date,
+		create_by,
+		update_date,
+		update_by
+		)
+		values(	
+			#ownerNum#,
+			#subject#,
+			#messageType#,
+			#replyKey#,
+			#remark#
+			<isNotEmpty property="createDate" prepend=",">
+				#createDate#
+			</isNotEmpty>
+			<isEmpty property="createDate" prepend=",">
+				now()
+			</isEmpty>			
+			<isNotEmpty property="createBy" prepend=",">
+				#createBy#
+			</isNotEmpty>
+			<isEmpty property="createBy" prepend=",">
+				''
+			</isEmpty>			
+			<isNotEmpty property="updateDate" prepend=",">
+				#updateDate#
+			</isNotEmpty>
+			<isEmpty property="updateDate" prepend=",">
+				now()
+			</isEmpty>			
+			<isNotEmpty property="updateBy" prepend=",">
+				#updateBy#
+			</isNotEmpty>
+			<isEmpty property="updateBy" prepend=",">
+				''
+			</isEmpty>		
+			
+		)
+		<selectKey resultClass="java.lang.Long">
+		   SELECT @@IDENTITY AS id
+		</selectKey>
+	</insert>
+	
+	<insert id="createWechatMessageData"  parameterClass="WECHATMESSAGEDATA">
+		insert into wechat_message_data 
+		(
+		message_id,
+		item_num,
+		data_name,
+		data_value
+		)
+		values(	
+			#messageId#,
+			#itemNum#,
+			#dataName#,
+			#dataValue#
+		)
+
+	</insert>
+	
+	<select id="getMaxWechatMessageDataItemNum"  parameterClass="java.util.HashMap" resultClass="java.lang.Integer">
+		SELECT
+		IFNULL(max(item_num),0)
+		FROM
+		wechat_message_data where message_id = #messageId#
+	</select>
+	
+	<delete id="deleteWechatMessageData" parameterClass="java.util.HashMap">
+
+		DELETE 
+		FROM
+		wechat_message_data where message_id = #messageId# 
+		<isNotEmpty property="itemNum" prepend="and">
+			item_num = #itemNum#
+		</isNotEmpty>	
+		
+
+	</delete>
+
+	<update id="updateWechatMessage"  parameterClass="WECHATMESSAGE">
+			update wechat_message set 
+			
+			update_date = now(),
+			`subject` = #subject#,	
+			message_type = #messageType#,
+			reply_key = #replyKey#,
+			remark = #remark#
+			<isNotNull property="updateBy" prepend=",">
+				update_by = #updateBy#
+			</isNotNull>
+			<isNull property="updateBy" prepend=",">
+				update_by = ''
+			</isNull>
+			where
+			message_id = #messageId#
+
+	</update>
+	
+	<update id="updateWechatMessageByMap"  parameterClass="java.util.HashMap">
+			update wechat_message set 
+			
+			update_date = now()
+			<isNotEmpty property="subject" prepend=",">
+				`subject` = #subject#
+			</isNotEmpty>
+			<isNotEmpty property="messageType" prepend=",">
+				message_type = #messageType#
+			</isNotEmpty>
+			<isNotEmpty property="replyKey" prepend=",">
+				reply_key = #replyKey#
+			</isNotEmpty>
+			<isNotEmpty property="messageType" prepend=",">
+				remark = #remark#
+			</isNotEmpty>
+			<isNotNull property="updateBy" prepend=",">
+				update_by = #updateBy#
+			</isNotNull>
+			<isNull property="updateBy" prepend=",">
+				update_by = ''
+			</isNull>
+			where
+			message_id = #messageId#
+
+	</update>
+	
+	<select id="getWechatMessage" parameterClass="java.util.HashMap" resultMap="compWechatMessage">
+		
+		SELECT
+		message_id,
+		owner_num,
+		`subject`,
+		message_type,
+		reply_key,
+		remark,
+		create_date,
+		create_by,
+		update_date,
+		update_by
+		FROM
+		wechat_message where 
+		<isNotEmpty property="messageId">
+			message_id = #messageId#
+		</isNotEmpty>
+		<isEmpty property="messageId">
+			owner_num = #ownerNum# and reply_key = #replyKey#
+		</isEmpty>
+	</select>
+</sqlMap>

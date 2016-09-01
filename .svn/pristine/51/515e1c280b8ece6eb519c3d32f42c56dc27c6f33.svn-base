@@ -1,0 +1,89 @@
+package com.etaoguan.wea.client.web.service.impl;
+
+import java.util.HashMap;
+import java.util.Map;
+
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.etaoguan.wea.client.vo.SortParam;
+import com.etaoguan.wea.client.web.service.IWCustService;
+import com.etaoguan.wea.client.web.service.IWDeliverInvService;
+import com.etaoguan.wea.client.web.service.IWReturnedInvService;
+import com.etaoguan.wea.client.web.service.IWWareHouseService;
+import com.etaoguan.wea.client.web.vo.ReturnedInvSearch;
+import com.etaoguan.wea.client.web.vo.WPage;
+import com.etaoguan.wea.client.web.vo.WPagingRequest;
+import com.etaoguan.wea.common.DataCriteria;
+import com.etaoguan.wea.common.DataSet;
+import com.etaoguan.wea.common.OffsetRequest;
+import com.etaoguan.wea.common.WeaDataCache;
+import com.etaoguan.wea.service.impl.ReturnedInvService;
+import com.etaoguan.wea.vo.DeliverInvoice;
+import com.etaoguan.wea.vo.ReturnedInvoice;
+
+@Service("wreturnedInvService")
+public class WReturnedInvService extends ReturnedInvService implements IWReturnedInvService{
+
+	@Autowired
+	IWWareHouseService iWWareHouseService;
+	
+	@Autowired
+	IWDeliverInvService iWDeliverInvService;
+	
+	@Autowired
+	IWCustService iWCustService;
+	
+	@SuppressWarnings("rawtypes")
+	public WPage listReturnedInvs(ReturnedInvSearch returnedInvSearch,
+			SortParam sortParam, WPagingRequest wpagingRequest) {
+		OffsetRequest offsetRequest = wpagingRequest.format2OffsetRequest();
+		DataCriteria dataCriteria = new DataCriteria();
+		dataCriteria.setParam("custNum", returnedInvSearch.getCustNum());
+		dataCriteria.setParam("referOrderNum", returnedInvSearch.getReferOrderNum());
+		dataCriteria.setParam("ownerNum", returnedInvSearch.getOwnerNum());
+		DataSet dataSet = listReturnedInvs(dataCriteria, offsetRequest);
+		
+		return new WPage(wpagingRequest,dataSet);
+	}
+	
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	public Map getEditReturnedInvInitData(String ownerNum,String orderNum, String retInvNum) {
+		Map dataMap = new HashMap();
+		String deliverNum;
+		if(StringUtils.isNotEmpty(retInvNum)){
+			ReturnedInvoice returnedInv = getReturnedInv(retInvNum);
+			dataMap.put("returnedInv",returnedInv);
+			deliverNum = returnedInv.getReferDeliverNum();
+		}else{
+			
+			deliverNum = getDeliverInvNumByOrderNum(orderNum);
+		}
+		DeliverInvoice deliverInv =iWDeliverInvService.getDeliverInv(deliverNum);
+		dataMap.put("deliverInv",deliverInv);
+		dataMap.put("customer",iWCustService.getCust(deliverInv.getCustNum()));
+		dataMap.put("retReasons", WeaDataCache.getCache().getReturnedReasonCodeNameMap());
+		return dataMap;
+	}
+	
+	public void saveOrUpdateReturnedInv(ReturnedInvoice returnedInv) {
+		if(StringUtils.isEmpty(returnedInv.getRetNum())){
+			addReturnedInv(returnedInv);
+		}else{
+			updateReturnedInv(returnedInv);
+		}
+		
+	}
+
+	public String getDeliverInvNumByOrderNum(String orderNum) {
+		return iWDeliverInvService.getDeliverInvByOrderNum(orderNum).getDeliverNum();
+	}
+	
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	public Map getListReturnedInvsSearchInitData(String ownerNum) {
+		Map dataMap = new HashMap();
+		dataMap.put("warehouses",iWWareHouseService.getAllWarehouses(ownerNum));
+		return dataMap;
+	}
+}

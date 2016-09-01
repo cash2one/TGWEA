@@ -1,0 +1,118 @@
+﻿<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>指掌通</title>
+
+<link href="style/index/css/bootstrap.min.css" rel="stylesheet">
+<link href="style/index/css/font-awesome.min.css" rel="stylesheet">   
+<link href="style/index/css/bootstrap-responsive.css" rel="stylesheet">    
+<link href="style/index/css/index.css" rel="stylesheet">
+<script src="style/index/js/jquery.min.js"></script>
+<script src="style/index/js/bootstrap.min.js"></script>
+</head>
+
+<body>
+
+<div class="container-fluid">
+	<div class="row-fluid top1">
+		<div class="span2 logo">
+		<img src="style/index/img/logo.png" />
+		</div>
+		<div class="span5 top2">
+			<h3>指掌通</h3>
+            <h4>手机上的诚信通</h4>
+		</div>
+		<div class="span5 top3">
+			<form class="form-search" name="invcode" id="invcode" action="./common/wE688Login.action" method="post">
+				<input class="input-medium search-query" type="text" name="inviteCode" id="inviteCode" placeholder="请输入入驻邀请码" /> <button type="button" class="btn login" onclick="submitcode()">诚信通企业入驻 <i class="icon-circle-arrow-right"> </i></button>
+			</form>
+		</div>
+	</div>
+    
+<div class="row-fluid cont1">
+		<div class="span5">
+			<img/>
+  </div>
+		<div class="span7">
+		   <h3>
+				<span class="hts">微</span>网站
+		  </h3>
+			
+		</div>
+	</div>
+    
+    
+<div class="row-fluid cont2">
+<div class="span7">
+			<h3>
+				一键<span class="hts">同步诚信通</span>的产品
+			</h3>
+			<p>
+				和您的诚信通旺铺数据无缝连接，您的旺铺里做了产品的更新，手机端会及时同步，省去了您重复铺货的工作量；
+			</p>
+		</div>
+	<div class="span5">
+			<img/>
+		</div>
+		
+	
+  </div>
+  
+    	<div class="row-fluid cont3">
+		<div class="span5">
+			<img/>
+		</div>
+		<div class="span7">
+			<h3>
+				<span class="hts">客户</span>管理 <span class="hts">订单</span>管理
+			</h3>
+			<p>帮助卖家加强客户联系，随时记录客户订单，微信推送产品信息
+			</p>
+		</div>
+	</div>
+    
+    
+	<div class="row-fluid cont4">
+		<div class="span12">
+			<h3>
+				指掌通4大核心功能
+			</h3>
+			<div class="row-fluid">
+				<div class="span3">
+					<img alt="140x140" src="style/index/img/cont4-1.png" />
+				</div>
+				<div class="span3">
+					<img alt="140x140" src="style/index/img/cont4-2.png" />
+				</div>
+				<div class="span3">
+					<img alt="140x140" src="style/index/img/cont4-3.png" />
+				</div>
+				<div class="span3">
+					<img alt="140x140" src="style/index/img/cont4-4.png" />
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="row-fluid footer">
+		<div class="span12">
+			<p class="text-center">
+				杭州淘冠电子商务有限公司所有 2012-2013 浙ICP备12040251号
+			</p>
+		</div>
+	</div>
+</div>
+<script src="js/jquery/jquery-1.7.1.min.js" type="text/javascript"></script>
+<script type="text/javascript">
+function submitcode(){
+	
+	var code = $("#inviteCode").val();
+		if (code.trim() != "") {
+			$("#invcode").submit();
+		} else {
+			alert("请输入邀请码！");
+		}
+}
+</script> 
+</body>
+</html>

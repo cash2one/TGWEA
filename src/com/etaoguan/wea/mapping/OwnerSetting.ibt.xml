@@ -1,0 +1,178 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+
+<!-- author 刘卿 -->
+<!-- 感谢ibatis的持久层框架 -->
+
+<sqlMap>
+
+	<typeAlias alias="OWNERSETTING" type="com.etaoguan.wea.vo.OwnerSetting"/>
+	
+	<resultMap id="ownerSetting" class="OWNERSETTING">
+		<result property="settingId" column="setting_id"/>
+		<result property="ownerNum" column="owner_num"/>
+		<result property="paramName" column="param_name"/>
+		<result property="paramValue" column="param_value"/>
+		<result property="createDate" column="create_date"/>
+		<result property="createBy" column="create_by"/>
+		<result property="updateDate" column="update_date"/>
+		<result property="updateBy" column="update_by"/>
+	</resultMap>
+	
+	<resultMap id="compOwnerSetting" extends = "ownerSetting" class="OWNERSETTING">
+		<result property="showName" column="show_name"/>
+		<result property="owner.companyName" column="company_name"/>
+	</resultMap>
+	
+
+	<select id="getOwnerSettingCount" parameterClass="java.util.HashMap" resultClass="java.lang.Integer">
+		select count(1) from owner_setting  where owner_num = #ownerNum# 
+	</select>
+	
+	<select id="getOwnerSettingDataSet" parameterClass="java.util.HashMap" resultMap="compOwnerSetting">
+		select
+		t3.*, t4.company_name 
+		from 
+		(select  t1.setting_id,
+		t1.owner_num,
+		t1.param_name,
+		t1.param_value,
+		t1.create_date,
+		t1.create_by,
+		t1.update_date,
+		t1.update_by,
+		case  
+		when t2.column_code IS NULL THEN t1.param_name 
+		ELSE t2.name_ch END 
+		show_name 
+		from 
+		(SELECT * FROM owner_setting where owner_num = #ownerNum# 
+		) t1
+		LEFT OUTER JOIN (SELECT
+		table_name,
+		column_name,
+		column_code,
+		name_ch,
+		name_en
+		FROM
+		table_code_name  
+		where table_name='owner_setting' and column_name='param_name') t2
+		on t1.param_name=t2.column_code 
+		) t3,
+		owner t4 
+		where t3.owner_num = t4.owner_num
+		
+		limit #limit# offset #offset#
+	</select>
+
+	<select id="getOwnerSettingList" parameterClass="java.util.HashMap" resultMap="ownerSetting">
+		select    setting_id,
+			owner_num,
+			param_name,
+			param_value,
+			create_date,
+			create_by,
+			update_date,
+			update_by
+			from owner_setting where 1=1 
+			<isNotEmpty property="ownerNum" prepend="and">
+			    owner_num = #"ownerNum"#
+			</isNotEmpty>
+
+	</select>
+	
+	<select id="getOwnerSetting" parameterClass="java.util.HashMap" resultMap="ownerSetting">
+		select    setting_id,
+			owner_num,
+			param_name,
+			param_value,
+			create_date,
+			create_by,
+			update_date,
+			update_by   
+			from owner_setting where 1=1 
+			<isNotEmpty property="settingId" prepend="and">
+		    	setting_id = #settingId#
+			</isNotEmpty>
+			<isNotEmpty property="paramName" prepend="and">
+			    param_name = #paramName#
+			</isNotEmpty>
+
+	</select>
+
+	<delete id="deleteOwnerSetting" parameterClass="java.util.HashMap">
+		delete from owner_setting where setting_id = #settingId#
+	</delete>
+	
+	<insert id="createOwnerSetting"  parameterClass="OWNERSETTING">
+		insert into owner_setting 
+		(
+		owner_num,
+		param_name,
+		param_value,
+		create_date,
+		create_by,
+		update_date,
+		update_by
+		)
+		values(
+				#ownerNum#,
+				#paramName#	
+			<isNotNull property="paramValue" prepend=",">
+				#paramValue#
+			</isNotNull>
+			<isNull property="paramValue" prepend=",">
+				''
+			</isNull>					
+			<isNotNull property="createDate" prepend=",">
+				#createDate#
+			</isNotNull>
+			<isNull property="createDate" prepend=",">
+				now()
+			</isNull>			
+			<isNotNull property="createBy" prepend=",">
+				#createBy#
+			</isNotNull>
+			<isNull property="createBy" prepend=",">
+				''
+			</isNull>			
+			<isNotNull property="updateDate" prepend=",">
+				#updateDate#
+			</isNotNull>
+			<isNull property="updateDate" prepend=",">
+				now()
+			</isNull>			
+			<isNotNull property="updateBy" prepend=",">
+				#updateBy#
+			</isNotNull>
+			<isNull property="updateBy" prepend=",">
+				''
+			</isNull>			
+		)
+		
+		<selectKey resultClass="java.lang.Long">
+		   SELECT @@IDENTITY AS id
+		</selectKey>
+
+	</insert>
+	
+	<update id="updateOwnerSetting"  parameterClass="OWNERSETTING">
+			update owner_setting set 
+			
+			update_date = now()
+			
+			<isNotNull property="updateBy" prepend=",">
+				update_by = #updateBy#
+			</isNotNull>
+			<isNull property="updateBy" prepend=",">
+				update_by = ''
+			</isNull>
+			<isNotEmpty property="paramValue" prepend=",">
+				param_value = #paramValue#
+			</isNotEmpty>						
+
+			where
+			setting_id = #settingId#
+
+	</update>
+</sqlMap>

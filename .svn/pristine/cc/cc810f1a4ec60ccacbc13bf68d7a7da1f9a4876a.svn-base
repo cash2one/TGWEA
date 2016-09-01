@@ -1,0 +1,271 @@
+package com.etaoguan.wea.vo;
+
+import java.util.Date;
+
+/**
+ * @author cunli 微信异步返回结果
+ *
+ */
+public class WechatNotifyEvent {
+	private int id;
+	private int totalFee;
+	private int cashFee;
+	private int couponFee;
+	private int couponCount;
+	private int couponFeeN;
+	private String returnCode;
+	private String returnMsg;
+	private String appid;
+	private String mchId;
+	private String deviceInfo;
+	private String nonceStr;
+	private String sign;
+	private String resultCode;
+	private String errCode;
+	private String errCodeDes;
+	private String openid;
+	private String isSubscribe;
+	private String tradeType;
+	private String bankType;
+	private String feeType;
+	private String cashFeeType;
+	private String couponBatchIdN;
+	private String couponIdN;
+	private String transactionId;
+	private String outTradeNo;
+	private String attach;
+	private String timeEnd;
+	private Date createDate;
+
+	public Date getCreateDate() {
+		return createDate;
+	}
+
+	public void setCreateDate(Date createDate) {
+		this.createDate = createDate;
+	}
+
+	public int getId() {
+		return id;
+	}
+
+	public void setId(int id) {
+		this.id = id;
+	}
+
+	public int getTotalFee() {
+		return totalFee;
+	}
+
+	public void setTotalFee(int totalFee) {
+		this.totalFee = totalFee;
+	}
+
+	public int getCashFee() {
+		return cashFee;
+	}
+
+	public void setCashFee(int cashFee) {
+		this.cashFee = cashFee;
+	}
+
+	public int getCouponFee() {
+		return couponFee;
+	}
+
+	public void setCouponFee(int couponFee) {
+		this.couponFee = couponFee;
+	}
+
+	public int getCouponCount() {
+		return couponCount;
+	}
+
+	public void setCouponCount(int couponCount) {
+		this.couponCount = couponCount;
+	}
+
+	public int getCouponFeeN() {
+		return couponFeeN;
+	}
+
+	public void setCouponFeeN(int couponFeeN) {
+		this.couponFeeN = couponFeeN;
+	}
+
+	public String getReturnCode() {
+		return returnCode;
+	}
+
+	public void setReturnCode(String returnCode) {
+		this.returnCode = returnCode;
+	}
+
+	public String getReturnMsg() {
+		return returnMsg;
+	}
+
+	public void setReturnMsg(String returnMsg) {
+		this.returnMsg = returnMsg;
+	}
+
+	public String getAppid() {
+		return appid;
+	}
+
+	public void setAppid(String appid) {
+		this.appid = appid;
+	}
+
+	public String getMchId() {
+		return mchId;
+	}
+
+	public void setMchId(String mchId) {
+		this.mchId = mchId;
+	}
+
+	public String getDeviceInfo() {
+		return deviceInfo;
+	}
+
+	public void setDeviceInfo(String deviceInfo) {
+		this.deviceInfo = deviceInfo;
+	}
+
+	public String getNonceStr() {
+		return nonceStr;
+	}
+
+	public void setNonceStr(String nonceStr) {
+		this.nonceStr = nonceStr;
+	}
+
+	public String getSign() {
+		return sign;
+	}
+
+	public void setSign(String sign) {
+		this.sign = sign;
+	}
+
+	public String getResultCode() {
+		return resultCode;
+	}
+
+	public void setResultCode(String resultCode) {
+		this.resultCode = resultCode;
+	}
+
+	public String getErrCode() {
+		return errCode;
+	}
+
+	public void setErrCode(String errCode) {
+		this.errCode = errCode;
+	}
+
+	public String getErrCodeDes() {
+		return errCodeDes;
+	}
+
+	public void setErrCodeDes(String errCodeDes) {
+		this.errCodeDes = errCodeDes;
+	}
+
+	public String getOpenid() {
+		return openid;
+	}
+
+	public void setOpenid(String openid) {
+		this.openid = openid;
+	}
+
+	public String getIsSubscribe() {
+		return isSubscribe;
+	}
+
+	public void setIsSubscribe(String isSubscribe) {
+		this.isSubscribe = isSubscribe;
+	}
+
+	public String getTradeType() {
+		return tradeType;
+	}
+
+	public void setTradeType(String tradeType) {
+		this.tradeType = tradeType;
+	}
+
+	public String getBankType() {
+		return bankType;
+	}
+
+	public void setBankType(String bankType) {
+		this.bankType = bankType;
+	}
+
+	public String getFeeType() {
+		return feeType;
+	}
+
+	public void setFeeType(String feeType) {
+		this.feeType = feeType;
+	}
+
+	public String getCashFeeType() {
+		return cashFeeType;
+	}
+
+	public void setCashFeeType(String cashFeeType) {
+		this.cashFeeType = cashFeeType;
+	}
+
+	public String getCouponBatchIdN() {
+		return couponBatchIdN;
+	}
+
+	public void setCouponBatchIdN(String couponBatchIdN) {
+		this.couponBatchIdN = couponBatchIdN;
+	}
+
+	public String getCouponIdN() {
+		return couponIdN;
+	}
+
+	public void setCouponIdN(String couponIdN) {
+		this.couponIdN = couponIdN;
+	}
+
+	public String getTransactionId() {
+		return transactionId;
+	}
+
+	public void setTransactionId(String transactionId) {
+		this.transactionId = transactionId;
+	}
+
+	public String getOutTradeNo() {
+		return outTradeNo;
+	}
+
+	public void setOutTradeNo(String outTradeNo) {
+		this.outTradeNo = outTradeNo;
+	}
+
+	public String getAttach() {
+		return attach;
+	}
+
+	public void setAttach(String attach) {
+		this.attach = attach;
+	}
+
+	public String getTimeEnd() {
+		return timeEnd;
+	}
+
+	public void setTimeEnd(String timeEnd) {
+		this.timeEnd = timeEnd;
+	}
+}

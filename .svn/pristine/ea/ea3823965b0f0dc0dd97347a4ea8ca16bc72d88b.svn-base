@@ -1,0 +1,53 @@
+
+<ion-view title="个人中心">
+    <ion-nav-buttons side="left">
+        <button ng-click="back()" class="button button-clear ion-ios7-arrow-back "></button>
+    </ion-nav-buttons>
+
+    <ion-nav-buttons side="right">
+        <button ng-click="userLoginOut()" class="button button-clear ion-log-out" style="font-size: 30px;"></button>
+    </ion-nav-buttons>
+
+    <ion-content>
+        <div class="perHeadImg">
+           <div id="headPortrait-margin">
+                <div id="headPortrait-padding"></div>
+           </div>
+           <p id="userName" ng-bind="useriCompany"></p>
+           <p id="userPhone" ng-bind="useriName"></p>
+           <div class="perBar">
+               <div class="updateBar">
+                   <button class="button button-clear iupdBtn" ng-click="perList(4)" style="color: #ffffff;">修改密码</button>
+                   <span></span>
+                   <button class="button button-clear iupdBtn" ng-click="perList(5)" style="color: #ffffff">修改信息</button>
+               </div>
+           </div>
+        </div>
+        <div class="list list-inset perList">
+            <a href="javascript:void(0)" ng-click="perList(0)" class="item item-icon-left item-icon-right perListItem">
+                <i class="icon ion-ios7-cart" style="color: #365b88;font-size: 35px;"></i>
+                购物车
+                <i class="icon ion-ios7-arrow-right" style="color: #838381;font-size: 35px;"></i>
+            </a>
+
+            <a href="javascript:void(0)" ng-click="perList(1)" class="item item-icon-left item-icon-right perListItem ">
+                <i class="icon ion-help perItemIcon"  style="color: #365b88;font-size: 35px;"></i>
+                待审核订单
+                <i class="icon ion-ios7-arrow-right" style="color: #838381;font-size: 35px;"></i>
+            </a>
+
+            <a href="javascript:void(0)" ng-click="perList(2)" class="item item-icon-left item-icon-right perListItem">
+                <i class="icon ion-checkmark-round perItemIcon"  style="color: #365b88;font-size: 35px;"></i>
+                已下订单
+                <i class="icon ion-ios7-arrow-right" style="color: #838381;font-size: 35px;"></i>
+            </a>
+
+            <a href="javascript:void(0)" ng-click="perList(3)" class="item item-icon-left item-icon-right perListItem">
+                <i class="icon ion-ribbon-b perItemIcon"  style="color: #365b88;font-size: 35px;"></i>
+                特供商品
+                <i class="icon ion-ios7-arrow-right" style="color: #838381;font-size: 35px;"></i>
+            </a>
+
+        </div>
+    </ion-content>
+</ion-view>

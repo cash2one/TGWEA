@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+
+<!-- author 刘卿 -->
+<!-- 感谢ibatis的持久层框架 -->
+
+<sqlMap>
+
+	<typeAlias alias="PRODQTY" type="com.etaoguan.wea.vo.ProdQty"/>
+
+	<resultMap id="prodQty" class="PRODQTY">
+		<result property="prodNum" column="prod_num"/>
+		<result property="prodName" column="prod_name"/>
+		<result property="unit" column="unit"/>
+		<result property="cases" column="cases"/>
+		<result property="pieces" column="pieces"/>
+	</resultMap>	
+	
+
+	<select id="getSettleInvPriceDelta" parameterClass="java.util.HashMap" resultClass="java.lang.Double">
+		SELECT IFNULL(t1.real_price_total-t2.price_total,0.00)
+		FROM (SELECT
+		real_price_total,order_num
+		FROM
+		`order` where order_num = #orderNum#) t1,
+		(SELECT price_total,refer_order_num
+		FROM cash_invoice where refer_order_num = #orderNum#) t2
+		where t1.order_num = refer_order_num
+	</select>
+	
+	<select id="getSettleInvProdDelta" parameterClass="java.util.HashMap"  resultMap="prodQty">
+		SELECT proddelta.prod_num,
+		proddelta.prod_name,
+		proddelta.cases,
+		proddelta.unit,
+		proddelta.pieces  
+		FROM 
+		(SELECT 
+		deliveritem.prod_num ,
+		deliveritem.prod_name,
+		deliveritem.cases - IFNULL(retsumitem.cases ,0) cases,
+		deliveritem.unit,
+		deliveritem.pieces - IFNULL(retsumitem.pieces ,0) pieces  
+		FROM 
+		(SELECT 
+		prod_num,
+		prod_name, 
+		unit,
+		cases,
+		pieces 
+		FROM 
+		deliver_invoice_item deliverinv where
+		EXISTS( SELECT 1 FROM (SELECT deliver_num FROM deliver_invoice 
+		where refer_order_num = #orderNum#) delivernum 
+		where deliverinv.deliver_num = delivernum.deliver_num)) deliveritem 
+		left join 
+		(
+		SELECT retunionitem.prod_num,SUM(retunionitem.cases) cases,SUM(retunionitem.pieces) pieces FROM 
+		((SELECT 
+		prod_num,
+		cases,
+		pieces  
+		FROM
+		order_item where order_num = #orderNum#) 
+		union all 
+		(SELECT
+		prod_num, 
+		cases,
+		pieces 
+		FROM 
+		returned_invoice_item retinvitem where
+		EXISTS( SELECT 1 FROM (SELECT ret_num FROM returned_invoice 
+		where refer_order_num = #orderNum#) retnum  
+		where retinvitem.ret_num = retnum.ret_num))) retunionitem  
+		group by retunionitem.prod_num ) retsumitem 
+		on deliveritem.prod_num = retsumitem.prod_num) proddelta 
+		where proddelta.cases&lt;&gt;0
+		
+	</select>
+	
+</sqlMap>

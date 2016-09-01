@@ -1,0 +1,26 @@
+<%
+	/* *
+	 *功能：支付宝手机网页支付调试入口页面
+	 *版本：3.3
+	 *日期：2012-08-17
+	 *说明：
+	 *以下代码只是为了方便商户测试而提供的样例代码，商户可以根据自己网站的需要，按照技术文档编写,并非一定要使用该代码。
+	 */
+%>
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html>
+	<head>
+	<title>支付宝手机网页支付</title>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+</head>
+<body>
+	
+
+<iframe width=500 height=1000 frameborder=0 scrolling=auto src="index2.jsp"></iframe>
+
+
+
+</body>
+</html>

@@ -1,0 +1,15 @@
+package com.etaoguan.wea.service;
+
+import javax.servlet.http.HttpServletRequest;
+
+/**
+ * @author cunli 微信异步返回的信息
+ *
+ */
+public interface IWechatpayResultService {
+
+	/**
+	 * @param wechatpayResult 保存微信异步返回的信息
+	 */
+	public String saveWechatpayResult(HttpServletRequest request);
+}

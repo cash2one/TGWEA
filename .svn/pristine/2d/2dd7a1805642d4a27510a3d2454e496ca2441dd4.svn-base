@@ -1,0 +1,57 @@
+<ion-view title="已下订单">
+    <ion-nav-buttons side="left">
+        <button ng-click="back()" class="button button-clear">
+            <i class="ion-ios-arrow-back"></i>
+            <span id="barItemlText">返 回</span>
+        </button>
+    </ion-nav-buttons>
+    <ion-content>
+
+        <div class="list waitingList" ng-repeat="oList in oLists track by $index">
+            <div class="item waitingHead" >
+                <span ng-bind="oList.orderId"></span>
+                <button class="button button-block button-assertive " id="generateOrder" ng-click="topay(oList.orderId)" ng-if="getisPay() === true && oList.payStatus == 0">付 款</button>
+
+             <div id="generateOrderStaD" ng-if="oList.payStatus == 1">已付款</div>
+            </div>
+
+            <div id="mainContent">
+            <div class="padding-left-right-10 orderItem floorMain">
+                <div class="item item-thumbnail-left" ng-repeat="oPro in oList.oPros track by $index" ng-click="toDetailed(oPro.proId)">
+                    <img id="orderItemImg" _lazysrc="{{oPro.proImg}}" onerror=this.src=errImg>
+                    <p class="proName" ng-bind="oPro.proName"></p>
+                    <p class="margin-bottom-none"><b class="proModel itemProNum" ng-bind="oPro.proNum"></b></p>
+                    <p class="proPrice" ng-bind="oPro.proPrice"></p>
+                    <div id="spanSty" ng-bind="oPro.proType"></div>
+                </div>
+            </div>
+            <div class="padding-left-right-10 orderItem floorMain" ng-hide="oList.isProHide">
+                <div class="item item-thumbnail-left" ng-repeat="oHidePro in oList.oHidePro track by $index" ng-click="toDetailed(oHidePro.proId)">
+                    <img id="orderItemImg" _lazysrc="{{oHidePro.proImg}}" onerror=this.src=errImg>
+                    <p class="proName" ng-bind="oHidePro.proName"></p>
+                    <p class="margin-bottom-none"><b class="proModel itemProNum" ng-bind="oHidePro.proNum"></b></p>
+                    <p class="proPrice" ng-bind="oHidePro.proPrice"></p>
+                    <div id="spanSty" ng-bind="oHidePro.proType"></div>
+                </div>
+            </div>
+
+            <div class="item text-center btnItem">
+                <button class="button waitingBtn" ng-hide="oList.isHide" ng-bind="oList.btnText" ng-click="hideShowPro($index)"></button>
+            </div>
+
+            <div class="item row itemFooter">
+                <span class="col col-33" ng-bind="oList.date"></span>
+                <span class="col col-45 text-right">
+                    共 <span ng-bind="oList.oCountNum"></span> 件
+                    总价 : <span ng-bind="oList.oCountPrice" class="icountPrice"></span>
+                </span>
+            </div>
+            <div class="item row itemFooter addrView">收货地址： <span ng-bind="oList.orderAddr"></span></div>
+            </div>
+        </div>
+        <!-- ng-bind-html="text" -->
+        <ion-infinite-scroll  distance="0px" class="spinner spinner-ios" on-infinite="myOrederLoadMore()" ng-hide="loadingHide"></ion-infinite-scroll>
+        <h2 class="noMore margin-top-none" ng-hide="noMoreHide">已经到底啦</h2>
+        <div style="height: 30px;"></div>
+    </ion-content>
+</ion-view>

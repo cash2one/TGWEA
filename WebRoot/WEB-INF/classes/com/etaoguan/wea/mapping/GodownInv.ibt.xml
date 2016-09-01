@@ -1,0 +1,315 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+
+<!-- author 刘卿 -->
+<!-- 感谢ibatis的持久层框架 -->
+
+<sqlMap>
+
+	<typeAlias alias="GODOWNINV" type="com.etaoguan.wea.vo.GodownInvoice"/>
+	<typeAlias alias="GODOWNINVITEM" type="com.etaoguan.wea.vo.GodownInvoiceItem"/>
+
+	<resultMap id="godownInv" class="GODOWNINV">
+		<result property="gdNum" column="gd_num"/>
+		<result property="ownerNum" column="owner_num"/>
+		<result property="whNum" column="wh_num"/>
+		<result property="whName" column="wh_name"/>
+		<result property="gdStatus" column="gd_status"/>
+		<result property="remark" column="remark"/>
+		<result property="createDate" column="create_date"/>
+		<result property="createBy" column="create_by"/>
+		<result property="updateDate" column="update_date"/>
+		<result property="updateBy" column="update_by"/>
+	</resultMap>
+	
+	<resultMap id="godownInvDataSet" extends="godownInv" class="GODOWNINV">
+		<result property="prodCount" column="prod_count"/>
+	</resultMap>
+
+	<resultMap id="godownInvItem" class="GODOWNINVITEM">
+		<result property="gdNum" column="gd_num"/>
+		<result property="prodNum" column="prod_num"/>
+		<result property="prodName" column="prod_name"/>
+		<result property="differName" column="differ_name" />
+		<result property="unit" column="unit"/>
+		<result property="cases" column="cases"/>
+		<result property="pieces" column="pieces"/>
+	</resultMap>	
+
+	<select id="getGodownInvCount" parameterClass="java.util.HashMap" resultClass="java.lang.Integer">
+		
+		<isNotEmpty property="prodName">
+			select count(1) from 
+			(select distinct t3.gd_num from 
+			(select t1.gd_num,t1.prod_num from godown_invoice_item t1 
+			where exists (SELECT 1 FROM
+			(select gd_num
+			from godown_invoice
+			where owner_num = #ownerNum#  
+				<isNotEmpty property="whNum"  prepend="and">
+					wh_num = #whNum#
+				</isNotEmpty>
+			) t2 where t1.gd_num = t2.gd_num) ) t3 
+			where exists(SELECT 1 FROM 
+			(
+			SELECT
+			prod_num  
+			FROM 
+			product where owner_num = #ownerNum# and 
+			prod_name like CONCAT(#prodName#, '%') 
+			)  t4 where t3.prod_num = t4.prod_num)) t5
+		</isNotEmpty> 
+		<isEmpty property="prodName">
+			select count(1)
+			from godown_invoice
+			where owner_num = #ownerNum#  
+				<isNotEmpty property="whNum"  prepend="and">
+					wh_num = #whNum#
+				</isNotEmpty>
+		</isEmpty> 
+		
+
+	</select>
+
+	<select id="getGodownInvDatSet" parameterClass="java.util.HashMap"  resultMap="godownInvDataSet">
+		select gdinv.*,gdpcnt.prod_count prod_count from 
+		
+		godown_invoice gdinv,
+ 		(
+		<isNotEmpty property="prodName">
+			select t3.gd_num, count(1) prod_count from 
+			(select t1.gd_num,t1.prod_num from godown_invoice_item t1 
+			where exists (SELECT 1 FROM
+			(select gd_num
+			from godown_invoice
+			where owner_num = #ownerNum#  
+				<isNotEmpty property="whNum"  prepend="and">
+					wh_num = #whNum#
+				</isNotEmpty>
+			) t2 where t1.gd_num = t2.gd_num) ) t3 
+			where exists(SELECT 1 FROM 
+			(
+			SELECT
+			prod_num  
+			FROM 
+			product where owner_num = #ownerNum# and 
+			prod_name like CONCAT(#prodName#, '%') 
+			)  t4 where t3.prod_num = t4.prod_num) group by t3.gd_num 
+		</isNotEmpty> 
+		<isEmpty property="prodName">
+			select t1.gd_num, count(1) prod_count from godown_invoice_item t1 
+			where exists (SELECT 1 FROM
+			(select gd_num
+			from godown_invoice
+			where owner_num = #ownerNum#  
+				<isNotEmpty property="whNum"  prepend="and">
+					wh_num = #whNum#
+				</isNotEmpty>
+			) t2 where t1.gd_num = t2.gd_num) group by t1.gd_num 
+		</isEmpty> 
+		) gdpcnt 
+		
+		where gdpcnt.gd_num = gdinv.gd_num 
+			
+		order by gdinv.update_date desc 
+		
+		limit #limit# offset #offset#
+
+	</select>
+	
+	<select id="getGodownInvItemList" parameterClass="java.util.HashMap" resultMap="godownInvItem">
+	
+		SELECT
+		gd_num,
+		prod_num,
+		prod_name,
+		differ_name,
+		unit,
+		cases,
+		pieces 
+		FROM 
+		godown_invoice_item where gd_num = #gdNum#
+
+	</select>
+	
+
+	<insert id="createGodownInv"  parameterClass="GODOWNINV">
+		insert into godown_invoice 
+		(
+		gd_num,
+		owner_num,
+		wh_num,
+		wh_name,
+		gd_status,
+		remark,
+		create_date,
+		create_by,
+		update_date,
+		update_by 
+			
+		)
+		values(
+			#gdNum#,
+			#ownerNum#,
+			#whNum#,		
+			#whName#,
+			0
+			<isNotEmpty property="remark" prepend=",">
+				#remark#
+			</isNotEmpty>
+			<isEmpty property="remark" prepend=",">
+				''
+			</isEmpty>	
+			<isNotEmpty property="createDate" prepend=",">
+				#createDate#
+			</isNotEmpty>
+			<isEmpty property="createDate" prepend=",">
+				now()
+			</isEmpty>			
+			<isNotEmpty property="createBy" prepend=",">
+				#createBy#
+			</isNotEmpty>
+			<isEmpty property="createBy" prepend=",">
+				''
+			</isEmpty>			
+			<isNotEmpty property="updateDate" prepend=",">
+				#updateDate#
+			</isNotEmpty>
+			<isEmpty property="updateDate" prepend=",">
+				now()
+			</isEmpty>			
+			<isNotEmpty property="updateBy" prepend=",">
+				#updateBy#
+			</isNotEmpty>
+			<isEmpty property="updateBy" prepend=",">
+				''
+			</isEmpty>		
+		)
+
+	</insert>
+	
+	<insert id="createGodownItem"  parameterClass="GODOWNINVITEM">
+		insert into godown_invoice_item 
+		(
+		gd_num,
+		prod_num,
+		prod_name,
+		differ_name,
+		unit,
+		cases,
+		pieces 
+		)
+		values(
+			#gdNum#,
+			#prodNum#,		
+			#prodName#,	
+			#differName#,	
+			#unit#,
+			#cases#,	
+			#pieces#
+		)
+
+	</insert>
+	
+
+	<statement id="deleteGodownInv" parameterClass="java.util.HashMap">
+		DELETE 
+		FROM
+		godown_invoice where gd_num = #gdNum#;
+		DELETE 
+		FROM
+		godown_invoice_item where gd_num = #gdNum#;
+
+	</statement>
+	
+	<delete id="deleteGodownInvItem" parameterClass="java.util.HashMap">
+
+		DELETE 
+		FROM
+		godown_invoice_item where gd_num = #gdNum# 
+		<isNotEmpty property="prodNum" prepend="and">
+			prod_num = #prodNum#
+		</isNotEmpty>
+
+	</delete>
+	
+	<select id="getGodownInv" parameterClass="java.util.HashMap" resultMap="godownInv">
+		SELECT  gd_num,
+		owner_num,
+		wh_num,
+		wh_name,
+		gd_status,
+		remark,
+		create_date,
+		create_by,
+		update_date,
+		update_by 
+		FROM
+		godown_invoice 
+		where gd_num = #gdNum#
+
+	</select>
+	
+	<update id="updateGodownInvByMap"  parameterClass="java.util.HashMap">
+			update godown_invoice set 
+			<isNotEmpty property="whNum" >
+				wh_num = #whNum#
+			</isNotEmpty>
+			<isEmpty property="whNum" >
+				wh_num = wh_num
+			</isEmpty>
+			<isNotEmpty property="whName" prepend=",">
+				wh_name = #whName#
+			</isNotEmpty>
+			<isNotEmpty property="gdStatus" prepend=",">
+				gd_status = #gdStatus#
+			</isNotEmpty>
+			<isNotEmpty property="remark" prepend=",">
+				remark = #remark#
+			</isNotEmpty>									
+			<isNotEmpty property="updateDate" prepend=",">
+				update_date = #updateDate#
+			</isNotEmpty>
+			<isEmpty property="updateDate" prepend=",">
+				update_date = now()
+			</isEmpty>				
+			<isNotEmpty property="updateBy" prepend=",">
+				update_by = #updateBy#
+			</isNotEmpty>	
+			
+		where gd_num = #gdNum#
+
+	</update>
+	
+	<update id="updateGodownInv"  parameterClass="GODOWNINV">
+			update godown_invoice set 
+			<isNotEmpty property="whNum" >
+				wh_num = #whNum#
+			</isNotEmpty>
+			<isEmpty property="whNum" >
+				wh_num = wh_num
+			</isEmpty>
+			<isNotEmpty property="whName" prepend=",">
+				wh_name = #whName#
+			</isNotEmpty>
+			<isNotEmpty property="gdStatus" prepend=",">
+				gd_status = #gdStatus#
+			</isNotEmpty>
+			<isNotEmpty property="remark" prepend=",">
+				remark = #remark#
+			</isNotEmpty>									
+			<isNotEmpty property="updateDate" prepend=",">
+				update_date = #updateDate#
+			</isNotEmpty>
+			<isEmpty property="updateDate" prepend=",">
+				update_date = now()
+			</isEmpty>				
+			<isNotEmpty property="updateBy" prepend=",">
+				update_by = #updateBy#
+			</isNotEmpty>	
+			
+		where gd_num = #gdNum#
+
+	</update>
+
+</sqlMap>

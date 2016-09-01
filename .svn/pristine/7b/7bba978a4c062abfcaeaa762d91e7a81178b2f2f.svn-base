@@ -1,0 +1,78 @@
+package com.etaoguan.wea.vo;
+
+import com.etaoguan.wea.common.WeaDataCache;
+
+public class PushMessageResult  extends BaseVo{
+	
+	private long resultId;
+	
+	private String errorCode;
+	
+	private String resultStatus;
+	
+	@SuppressWarnings("unused")
+	private String resultStatusName;
+	
+	private String errorMessage;
+	
+	private long jpushMessageId;
+	
+	private long messageId;
+
+	public long getResultId() {
+		return resultId;
+	}
+
+	public void setResultId(long resultId) {
+		this.resultId = resultId;
+	}
+
+	public String getErrorCode() {
+		return errorCode;
+	}
+
+	public void setErrorCode(String errorCode) {
+		this.errorCode = errorCode;
+	}
+
+	public String getErrorMessage() {
+		return errorMessage;
+	}
+
+	public void setErrorMessage(String errorMessage) {
+		this.errorMessage = errorMessage;
+	}
+
+	public long getJpushMessageId() {
+		return jpushMessageId;
+	}
+
+	public void setJpushMessageId(long jpushMessageId) {
+		this.jpushMessageId = jpushMessageId;
+	}
+	public long getMessageId() {
+		return messageId;
+	}
+
+	public void setMessageId(long messageId) {
+		this.messageId = messageId;
+	}
+
+	public String getResultStatus() {
+		return resultStatus;
+	}
+
+	public void setResultStatus(String resultStatus) {
+		this.resultStatus = resultStatus;
+	}
+
+	public String getResultStatusName() {
+		return WeaDataCache.getCache().getPushMessageResultStatusNameMap().get(this.resultStatus);
+	}
+
+	public void setResultStatusName(String resultStatusName) {
+		this.resultStatusName = resultStatusName;
+	}
+
+
+}

@@ -1,0 +1,525 @@
+<%@ page language="java" errorPage="/error.jsp" pageEncoding="UTF-8" contentType="text/html;charset=utf-8" %>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /> 
+<title>企业信息列表</title> 
+<%@ include file="/admin/common/admin-sc.jsp"%>
+<script src="${ctx}/js/ligerui/plugins/ligerTree.js" type="text/javascript"></script>
+<script src="${ctx}/admin/js/layout.js" type="text/javascript"></script>
+</head>  
+<body>
+    <div id="main">
+         <div position="top">
+        <%@ include file="/admin/top.jsp" %>
+        </div>
+        <div id="maincontent" position="center" title=" ">
+            <div id="searchbar" style="overflow:hidden">
+                <ul>
+                    <li>
+                        <i class="i-spacing-first">
+                            公司名称：
+                        </i>
+                        <i class="i-spacing-follow">
+                            <input name="companyName" type="text" id="companyName" class="l-text" />
+                        </i>
+                        <i class="i-spacing-follow">
+                            联系人：
+                        </i>
+                        <i class="i-spacing-follow">
+                            <input type="text" id="contactPerson" name="contactPerson" class="l-text" />
+                        </i>
+                        <i class="i-spacing-follow">
+                            联系电话：
+                        </i>
+                        <i class="i-spacing-follow">
+                            <input name="phoneNum" type="text" id="phoneNum" class="l-text" />
+                        </i>
+                        <i class="i-spacing-follow">
+                            所属地区：
+                        </i>
+                        <i class="i-spacing-follow">
+                            <input name="regionCodes" type="text" id="regionCodes" />
+                        </i>
+                        <i class="i-spacing-follow">
+                            <input id="searchOwner" type="button" value="搜索" onclick="f_searchOwner()"
+                            />
+                        </i>
+                        <input id="hidCompanyName" type="hidden" />
+                        <input id="hidRegionCodes" type="hidden" />
+                        <input id="hidPhoneNum" type="hidden" />
+                        <input id="hidContactPerson" type="hidden" />
+                    </li>
+                </ul>
+            </div>
+             <br/>
+            <div id="addownerbar" style="overflow:hidden;width:1130px" align="right">
+                <a name="addNewOwner" href="${ctx}/admin/wEditOwner.action" id="addNewOwner">
+                   <img src="../images/adminBP/add_group.webp" title="新企业"/>
+                </a>
+            </div>
+            <br/>
+            <div id="batchbar" style="overflow:hidden">
+                <ul>
+                    <li>
+                        <i class="i-spacing-first">
+                            <input name="batchSuspend" onclick="javascript:f_batchSuspendOwner();" type="button"
+                            id="batchSuspend" value="暂停服务" />
+                        </i>
+                        <i class="i-spacing-follow">
+                            <input name="batchDel" onclick="javascript:f_batchDelOwner();" type="button"
+                            id="batchDel" value="批量删除" />
+                        </i>
+                        <i class="i-spacing-follow">
+                            <input name="batchDel" onclick="javascript:f_resetOwnerAdminPwd();" type="button"
+                            id="resetOwnerAdminPwd" value="重置管理员密码" />
+                        </i>
+                        <i class="i-spacing-follow">
+                            <input name="batchDel"  onclick="javascript:f_batchGenerate();" type="button"
+                            id="resetOwnerAdminPwd" value="批量生成" />
+                        </i>
+                    </li>
+                </ul>
+            </div>
+            <br/>
+            <div id="maingrid">
+            </div>
+        </div>
+       
+        <div position="left" title="主菜单">
+            <%@ include file="/admin/left.jsp" %>
+        </div>
+    </div>
+    <br />
+    <div style="display:none;">
+    </div>
+</body>
+<script type="text/javascript">
+    var g, manager;
+
+    var gcheckbox = new $.ligerGridCheckboxVO({
+        checkFieldName: 'ownerNum'
+    });
+    var gcheckbox_1 = new $.ligerGridCheckboxVO({
+        checkFieldName: 'shopNum'
+    });
+    var gcheckbox_2 = new $.ligerGridCheckboxVO({
+        checkFieldName: 'companyName'
+    });
+    
+    $(function() {
+        $.expandAccordionMenu("enterprise");
+        $("#regionCodes").ligerComboBox({
+            width: 180,
+            selectBoxWidth: 200,
+            selectBoxHeight: 200,
+            valueField: 'regionCode',
+            textField: 'regionName',
+            treeLeafOnly: false
+
+        });
+        f_initOwnersDataGrid();
+        f_initOwnerSearchData();
+        
+
+    });
+
+    function f_initOwnerSearchData() {
+
+        j4tg.ajaxPost("${ctx}/admin/wGetListOwnersSearchInitData.action", "json", false, {},
+        function(data) {
+            if (data.status == "S") {
+                //                 				alert(JSON.stringify(data));
+                liger.get("regionCodes").setTree({
+                    data: data.respData.regionCodes,
+                    idFieldName: 'regionCode',
+                    textFieldName: 'regionName',
+                    slide: false,
+                    parentIDFieldName: 'parentRegionCode'
+                });
+                liger.get("regionCodes").treeManager.collapseAll();
+                if (data.searchParams) {
+
+                    $("#hidCompanyName").val(data.searchParams['ownerSearch.companyName']);
+                    $("#hidPhoneNum").val(data.searchParams['ownerSearch.phoneNum']);
+                    $("#hidContactPerson").val(data.searchParams['ownerSearch.contactPerson']);
+                    if(data.searchParams['ownerSearch.regionCodes']){
+                    	$("#hidRegionCodes").val(data.searchParams['ownerSearch.regionCodes'].join(";"));
+                    	$.selectComboBoxTreeNodes(liger.get("regionCodes"), data.searchParams['ownerSearch.regionCodes'].join(","), "regionCode");
+                    }
+                };
+                $.reloadGridServerData(g, f_getOwnersParam(),data.searchParams);
+
+            }
+        },
+        function(data) {
+
+		});
+
+    }
+    function f_initOwnersDataGrid() {
+        g = manager = $("#maingrid").ligerGrid({
+            columns: [{
+                display: '企业编号',
+                name: 'ownerNum',
+                isSort: false,
+                align: 'left',
+                width: 200
+            },
+            {
+                display: '服务状态',
+                name: 'activeFlag',
+                isSort: false,
+                align: 'left',
+                width: 100,
+                render: function(rowdata, rowindex, value) {
+                   
+                    return rowdata.activeFlag==1?"服务中":"已停止";
+
+                }
+            },
+            {
+                display: '公司名称',
+                isSort: false,
+                align: 'left',
+                width: 250,
+                render: function(rowdata, rowindex, value) {
+                    var h = "";
+
+                    h += "<a href='${ctx}/admin/wEditOwner.action?ownerNum=" + rowdata.ownerNum + "'>" + rowdata.companyName + "</a> ";
+                    return h;
+
+                }
+            },
+            {
+                display: '店铺名',
+                name: 'shopNum',
+                width: 200,
+                isSort: false,
+                align: 'left',
+                editor: {
+                    type: 'text'
+                }
+            },
+            {
+                display: '地区',
+                name: 'regionName',
+                width: 100,
+                isSort: false,
+                align: 'left'
+            },
+            {
+                display: '行业',
+                name: 'tradeName',
+                width: 100,
+                isSort: false,
+                align: 'left'
+            },
+            {
+                display: '联系人',
+                name: 'contactPerson',
+                width: 100,
+                isSort: false,
+                align: 'left'
+            },
+            {
+                display: '联系电话',
+                name: 'phoneNum',
+                width: 150,
+                isSort: false,
+                align: 'left'
+            },
+            {
+                display: '企业来源',
+                name: 'externalSysCode',
+                width: 80,
+                isSort: false,
+                align: 'left'
+            },
+            {
+                display: '创建日期',
+                name: 'createDate',
+                width: 100,
+                isSort: false
+            },
+            {
+                display: '操作',
+                isSort: false,
+                width: 200,
+                render: function(rowdata, rowindex, value) {
+
+	            	var h = "";
+	                if (!rowdata._editing) {
+                        h += "<a href='javascript:f_editShopNum(" + rowindex + ")'>设置店铺名</a>";
+                        h += "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href='http://"+rowdata.shopNum+".zhizhangtong.com/owner/login.jsp'>企业登录</a>";
+                        h += "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href='javascript:void(0);' onclick='javascript:f_generate(" + rowindex + ")'>生成</a>";
+	                } else {
+	                    h += "<a href='javascript:void(0);' onclick='javascript:f_updateShopNumSetting(" + rowindex + ")'>保存</a> ";
+	                    h += "&nbsp;&nbsp;<a href='javascript:f_cancelUpdateShopNumSetting(" + rowindex + ")'>取消</a> ";
+	                }
+	                return h;
+
+                }
+        	}],
+            url: "${ctx}/admin/wListOwnersData.action",
+            pagesizeParmName: "wpagingRequest.perPageUnitNum",
+            pageParmName: "wpagingRequest.currentPage",
+            sortnameParmName: "sortParam.sortBy",
+            sortorderParmName: "sortParam.sortType",
+            pageSize: 15,
+            method: "post",
+            async: false,
+            checkbox: true,
+            onCheckRow: f_onCheckRow,
+            onCheckAllRow: f_onCheckAllRow,
+            enabledSort: false,
+            enabledEdit: true, 
+            parms: f_getOwnersParam(),
+            dataAction: "server",
+            clickToEdit: false,
+            isScroll: false,
+            frozen: false,
+            pageSizeOptions: [15, 30],
+            showTitle: false,
+            width: 1625,
+            columnWidth: 120,
+            allowHideColumn: false,
+            delayLoad:true
+        });
+
+    }
+    
+    /* 取消编辑 */
+    function f_cancelUpdateShopNumSetting(rowid) {
+        manager.cancelEdit(rowid);
+    }
+    
+    function  f_generate(rowid){
+    	
+    	  var param = {
+    	            "owner.companyName": manager.getRow(rowid).companyName,
+    	            "owner.shopNum":  manager.getRow(rowid).shopNum
+    	        };
+
+    	        j4tg.ajaxPost("${ctx}/admin/wGenerateProject.action", "json", false, param,
+    	        function(data) {
+
+    	            if (data.status == "S") {
+    	                $.ligerDialog.success('生成项目 成功');
+    	            }else{
+    	            	$.ligerDialog.error(data.message);
+    	            }
+
+    	        },
+    	        function(data) {
+
+    			});
+
+    }
+    
+    /* 保存编辑后的店铺名 */
+    function f_updateShopNumSetting(rowid) {
+
+    	 var shopNum = $.getGridEditColumnData(g, rowid, 'shopNum');
+         if (string.isInvalid(shopNum)) {
+             $.ligerDialog.error('店铺名不能为空');
+             return;
+         }
+
+         
+         
+        var param = {
+            "owner.ownerNum": manager.getRow(rowid).ownerNum,
+            "owner.shopNum": shopNum
+        };
+
+        j4tg.ajaxPost("${ctx}/admin/wSaveEditShopNumSetting.action", "json", false, param,
+        function(data) {
+
+            if (data.status == "S") {
+                $.ligerDialog.success('设置成功');
+                manager.endEdit(rowid);
+            }else{
+            	$.ligerDialog.error(data.message);
+            }
+
+        },
+        function(data) {
+
+		});
+
+    }
+    
+    /* 编辑店铺名 */
+    function f_editShopNum(rowid) {
+    	 manager.beginEdit(rowid);
+    }
+    
+    function f_onCheckAllRow(checked) {
+        gcheckbox.checkAllRow(g, checked);
+        gcheckbox_1.checkAllRow(g, checked);
+        gcheckbox_2.checkAllRow(g, checked);
+    }
+
+    function f_onCheckRow(checked, data) {
+        gcheckbox.checkRow(checked, data);
+    	gcheckbox_1.checkRow(checked, data);
+    	gcheckbox_2.checkRow(checked, data);
+    }
+    
+    function f_getOwnersParam() {
+        var companyname = $("#hidCompanyName").val();
+        var contactperson = $("#hidContactPerson").val();
+        var regioncodes = $("#hidRegionCodes").val().split(";");
+        var phonenum = $("#hidPhoneNum").val();
+
+        var param = {
+            "ownerSearch.companyName": companyname,
+            "ownerSearch.contactPerson": contactperson,
+            "ownerSearch.regionCodes": regioncodes,
+            "ownerSearch.phoneNum": phonenum,
+            "redtfw":"Y"
+        };
+        return param;
+
+    }
+
+    function f_searchOwner() {
+        var companyname = $.trim($("#companyName").val());
+        var contactperson = $.trim($("#contactPerson").val());
+        var regioncodes = liger.get("regionCodes").getValue();
+        var phonenum = $.trim($("#phoneNum").val());
+
+        $("#hidCompanyName").val(companyname);
+        $("#hidContactPerson").val(contactperson);
+        $("#hidRegionCodes").val(regioncodes);
+        $("#hidPhoneNum").val(phonenum);
+        f_refreshOwnerGridData();
+    }
+
+    function f_batchSuspendOwner(rowid) {
+        var checkedOwners = gcheckbox.getCheckedValue();
+        if (checkedOwners.length == 0) {
+            $.ligerDialog.error('请选择企业');
+            return;
+        }
+
+        var param = {
+            "ownerNums": checkedOwners
+        };
+        $.ligerDialog.confirm('确定要暂停服务么?',
+        function(yes) {
+            if (yes) {
+
+                j4tg.ajaxPost("${ctx}/admin/wBatchSuspendOwner.action", "json", false, param,
+                function(data) {
+                    if (data.status == "S") {
+                        $.ligerDialog.success('操作成功');
+                        f_refreshOwnerGridData();
+                    }
+                },
+                function(data) {
+
+				});
+
+            }
+        });
+    }
+    
+    
+    function f_batchGenerate(){
+    	var shopNum = gcheckbox_1.getCheckedValue();
+    	var companyName = gcheckbox_2.getCheckedValue();
+    	
+        if (shopNum.length == 0) {
+            $.ligerDialog.error('请选择企业');
+            return;
+        }
+
+        var param = {
+                "shopNum": shopNum,
+                "companyName": companyName
+            };
+
+                    j4tg.ajaxPost("${ctx}/admin/wBatchGenerate.action", "json", false, param,
+                    function(data) {
+                        if (data.status == "S") {
+                            $.ligerDialog.success('所选项目已生成');
+                        }
+                    },
+                    function(data) {
+
+    				});
+
+    }
+    
+    function f_batchDelOwner(rowid) {
+    	var checkedOwners = gcheckbox.getCheckedValue();
+        if (checkedOwners.length == 0) {
+            $.ligerDialog.error('请选择企业');
+            return;
+        }
+
+        var param = {
+            "ownerNums": checkedOwners
+        };
+        $.ligerDialog.confirm('确定要删除么?',
+        function(yes) {
+            if (yes) {
+
+                j4tg.ajaxPost("${ctx}/admin/wBatchDelOwner.action", "json", false, param,
+                function(data) {
+                    if (data.status == "S") {
+                        $.ligerDialog.success('删除成功');
+                        f_refreshOwnerGridData();
+                    }
+                },
+                function(data) {
+
+				});
+
+            }
+        });
+    }  
+
+    function f_resetOwnerAdminPwd(){
+    	var checkedOwners = gcheckbox.getCheckedValue();
+        if (checkedOwners.length == 0) {
+            $.ligerDialog.error('请选择企业');
+            return;
+        }
+
+        if (checkedOwners.length > 1) {
+            $.ligerDialog.error('只能选择一个企业');
+            return;
+        }
+
+        var param = {
+            "ownerNum": checkedOwners
+        };
+        $.ligerDialog.confirm('确定要重置密码么?',
+        function(yes) {
+            if (yes) {
+
+                j4tg.ajaxPost("${ctx}/admin/wResetOwnerAdminPwd.action", "json", false, param,
+                function(data) {
+                    if (data.status == "S") {
+                        $.ligerDialog.success('操作成功');
+                    }
+                },
+                function(data) {
+
+				});
+
+            }
+        });
+
+    }
+
+     
+    function f_refreshOwnerGridData() {
+        $.reloadGridServerData(g, f_getOwnersParam());
+        gcheckbox.initGridCheckboxStatus();
+    }
+
+</script>
+</html>

@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+
+
+<sqlMap>
+
+	<typeAlias alias="SpecialProdCustRef" type="com.etaoguan.wea.vo.SpecialProdCustRef"/>
+
+	<resultMap id="specialProdMap" class="SpecialProdCustRef">
+		<result property="custNum" column="cust_num"/>
+		<result property="prodNum" column="prod_num"/>
+		<result property="ownerNum" column="owner_num"/>
+		<result property="prodName" column="prod_name"/>
+		<result property="createDate" column="create_date"/>
+		<result property="createBy" column="create_by"/>
+	</resultMap>
+	
+	
+	
+	<select id="specialprodsCount" parameterClass="java.util.HashMap" resultClass="java.lang.Integer">
+		select count(1) from special_prod_cust_ref where owner_num = #ownerNum#
+		
+		<dynamic>
+			<isNotEmpty property="custNum" prepend="and">
+			    cust_num = #custNum#
+			</isNotEmpty>
+			<isNotEmpty property="prodName" prepend="and">
+			   prod_name = #prodName#
+			</isNotEmpty>
+		</dynamic>
+
+	</select>
+	
+	<select id="specialprods" parameterClass="java.util.HashMap"  resultMap="specialProdMap">
+	
+	select cust_num,prod_num,owner_num,prod_name,create_date,create_by from special_prod_cust_ref where owner_num = #ownerNum#
+	<dynamic>
+			<isNotEmpty property="custNum" prepend="and">
+			    cust_num = #custNum#
+			</isNotEmpty>
+			<isNotEmpty property="prodName" prepend="and">
+			   prod_name like CONCAT('%',#prodName#, '%')
+			</isNotEmpty>
+		</dynamic>
+	order by create_date desc limit #limit# offset #offset# 
+
+	</select>
+	
+	
+	
+	
+</sqlMap>

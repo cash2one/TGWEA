@@ -1,0 +1,18 @@
+package com.etaoguan.wea.service;
+
+import javax.servlet.http.HttpServletRequest;
+
+import com.etaoguan.wea.vo.SupportOnlinePayType;
+
+public interface IPaymentInfoService {
+	/**
+	 * @param orderNum 订单编号
+	 * @return 组合授权地址
+	 */
+	public String assembleUrl(String orderNum,String domainBaseUrl);
+	/**
+	 * @param wechatOrder 创建微信订单
+	 */
+	public String addWechatOrder(String code,String state,HttpServletRequest request,String domainBaseUrl);
+	public SupportOnlinePayType getSupportOnlinePayType(String ownerNum);
+}

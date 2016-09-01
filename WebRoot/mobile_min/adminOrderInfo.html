@@ -1,0 +1,36 @@
+
+
+    <ion-view title="订单详细信息">
+        <ion-nav-buttons side="left">
+            <button ng-click="back()" class="button button-clear">
+                <i class="ion-ios-arrow-back"></i>
+                <span id="barItemlText">返 回</span>
+            </button>
+        </ion-nav-buttons>
+        <ion-content>
+            <div class="list waitingList" ng-repeat="aOrderInfos in aOrderInfos track by $index">
+                <div class="item waitingHead">
+                    <span ng-bind="aOrderInfos.orderNum"></span>
+                </div>
+                <div class="clientList">
+                    <div class="item">客户: <span ng-bind="aOrderInfos.userName"></span></div>
+                    <div class="item">数量: <span ng-bind="aOrderInfos.proCount"></span></div>
+                    <div class="item">总价: <span ng-bind="aOrderInfos.proPrices"></span></div>
+                    <div class="item">收款类型: <span ng-bind="aOrderInfos.cashType"></span></div>
+                    <div class="item">结算状态: <span ng-bind="aOrderInfos.cashState"></span></div>
+                    <div class="item">发货状态: <span ng-bind="aOrderInfos.deliveryState"></span></div>
+                    <div class="item">提交时间: <span ng-bind="aOrderInfos.date"></span></div>
+                </div>
+
+                <div id="mainContent">
+                    <div class="item item-thumbnail-left floorMain" ng-repeat="iPros in aOrderInfos.iPros track by $index" ng-click="toDetailed(iPros.proId)">
+                        <img id="prListImg" _lazysrc="{{iPros.img}}}" onerror=this.src=errImg>
+                        <p class="proName" ng-bind="iPros.name"></p>
+                        <p class="margin-bottom-none"><b class="proModel itemProNum" ng-bind="iPros.num"></b></p>
+                        <p><span class="proPrice" ng-bind="iPros.price"></span></p>
+                    </div>
+                </div>
+            </div>
+            <div style="height: 30px;"></div>
+        </ion-content>
+    </ion-view>

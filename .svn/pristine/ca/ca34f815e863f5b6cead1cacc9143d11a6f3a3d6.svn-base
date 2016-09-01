@@ -1,0 +1,16 @@
+package com.etaoguan.wea.service;
+
+import com.etaoguan.wea.vo.WechatOrder;
+
+/**
+ * @author cunli 微信订单
+ *
+ */
+public interface IWechatOrderService {
+	
+	/**
+	 * @param wechatOrder 创建微信订单
+	 */
+	void createWechatOrder(WechatOrder wechatOrder);
+	
+}

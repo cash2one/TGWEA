@@ -1,0 +1,46 @@
+
+
+<ion-view title="卖 家">
+    <ion-nav-buttons side="right">
+        <button ng-click="adminOutLogin()" class="button button-clear" style="font-size: 26px;">
+             <span id="barItemrText">注 销</span>
+          <i class="ion-android-exit"></i>
+        </button>
+    </ion-nav-buttons>
+
+    <ion-content>
+        <div class="adminHeadImg">
+            <div id="adminCompany">
+                <p  ng-bind="adminCompany"></p>
+                <p id="adminName" ng-bind="adminName"></p>
+            </div>
+
+            <div id="admBar">
+                <div class="updateBar">
+                    <button id="admUpdPassBtn" class="button button-clear" ng-click="admList(3)">修改密码</button>
+                </div>
+            </div>
+        </div>
+
+
+        <div class="list list-inset perList">
+            <div class="item item-icon-left item-icon-right perListItem" ng-click="admList(0)">
+                <i class="icon ion-ios-paper" style="color: #365b88;font-size: 35px;"></i>
+                客户订单
+                <i class="icon ion-ios-arrow-right" style="color: #838381;font-size: 35px;"></i>
+            </div>
+
+            <div class="item item-icon-left item-icon-right perListItem" ng-click="admList(1)">
+                <i class="icon ion-ios-list" style="color: #365b88;font-size: 35px;"></i>
+                产品管理
+                <i class="icon ion-ios-arrow-right" style="color: #838381;font-size: 35px;"></i>
+            </div>
+            <div class="item item-icon-left item-icon-right perListItem" ng-click="admList(2)">
+                <i class="icon ion-person-stalker" style="color: #365b88;font-size: 35px;"></i>
+                我的客户
+                <i class="icon ion-ios-arrow-right" style="color: #838381;font-size: 35px;"></i>
+            </div>
+
+        </div>
+    </ion-content>
+</ion-view>

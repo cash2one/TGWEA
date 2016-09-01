@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+
+<sqlMap>
+
+	<typeAlias alias="AlipayWapPayResult" type="com.etaoguan.wea.vo.AlipayWapPayResult" />
+
+	<resultMap id="AWPRMap" class="AlipayWapPayResult">
+        
+		<result property="alipaywapResultId" column="alipaywap_result_id" />
+		<result property="notifyNotifyData" column="notify_notify_data" />
+		<result property="buyerEmail" column="buyer_email" />
+		<result property="gmtCreate" column="gmt_create" />
+		<result property="outTradeNo" column="out_trade_no" />
+		<result property="notifyTime" column="notify_time" />
+		<result property="tradeStatus" column="trade_status" />
+		<result property="totalDee" column="total_fee" />
+		<result property="gmtPayment" column="gmt_payment" />
+		<result property="createDate" column="create_date" />
+		
+	</resultMap>
+
+	
+</sqlMap>

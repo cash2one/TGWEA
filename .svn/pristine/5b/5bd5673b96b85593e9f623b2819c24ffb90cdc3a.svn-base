@@ -1,0 +1,33 @@
+package com.etaoguan.wea.client.mobile.service.impl;
+
+import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
+
+import org.springframework.stereotype.Service;
+
+import com.etaoguan.wea.client.mobile.service.IMWechatpayResultService;
+import com.etaoguan.wea.service.IWechatpayResultService;
+import com.etaoguan.wea.service.impl.WechatpayResultService;
+
+/**
+ * @author cunli 微信异步返回的信息
+ *
+ */
+@Service("mwechatpayResultService")
+public class MWechatpayResultService extends WechatpayResultService implements IMWechatpayResultService{
+	
+	@Resource(name="wechatpayResultService")
+	private IWechatpayResultService iWechatpayResultService;
+
+	/* (non-Javadoc)保存微信异步返回的信息
+	 * @see com.etaoguan.wea.client.mobile.service.IMWechatpayResultService#saveMWechatpayResult(com.etaoguan.wea.wechat.vo.WechatpayResult)
+	 */
+	@Override
+	public String saveMWechatpayResult(HttpServletRequest request) {
+		
+		return iWechatpayResultService.saveWechatpayResult(request);
+	}
+	
+
+
+}

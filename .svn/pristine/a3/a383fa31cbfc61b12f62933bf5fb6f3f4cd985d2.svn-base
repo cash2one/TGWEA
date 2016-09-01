@@ -1,0 +1,134 @@
+package com.etaoguan.wea.service.impl;
+
+import java.io.BufferedReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+
+import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.etaoguan.wea.dao.IOrderPayInfoDao;
+import com.etaoguan.wea.dao.IWechatpayResultDao;
+import com.etaoguan.wea.service.IWechatPayKeysService;
+import com.etaoguan.wea.service.IWechatpayRequestService;
+import com.etaoguan.wea.service.IWechatpayResultService;
+import com.etaoguan.wea.vo.OrderPayInfo;
+import com.etaoguan.wea.wechat.util.ResultCode;
+import com.etaoguan.wea.wechat.vo.WechatpayResult;
+import com.thoughtworks.xstream.XStream;
+import com.thoughtworks.xstream.io.xml.DomDriver;
+
+/**
+ * @author cunli 微信异步返回的信息
+ *
+ */
+@Service("wechatpayResultService")
+public class WechatpayResultService extends BaseService implements IWechatpayResultService{
+	
+	@SuppressWarnings("unused")
+	private final static Log logger = LogFactory.getLog(WechatpayResultService.class);
+	
+	@Autowired
+	private IWechatpayResultDao iWechatpayResultDao;
+	
+	@Autowired
+	private IOrderPayInfoDao iOrderPayInfoDao;
+	
+	@Resource(name="wechatPayKeysService")
+	private IWechatPayKeysService iWechatPayKeysService;
+	
+	@Resource(name="wechatpayRequestService")
+	private IWechatpayRequestService iWechatpayRequestService;
+	
+	/* (non-Javadoc)保存微信异步返回的信息
+	 * @see com.etaoguan.wea.service.IWechatpayResultService#saveWechatpayResult(com.etaoguan.wea.wechat.vo.WechatpayResult)
+	 */
+	@Override
+	public String saveWechatpayResult(HttpServletRequest request) {
+		WechatpayResult wechatpayResult = new WechatpayResult();
+		String su ="";
+		try {
+			
+			//获取HTTP请求的输入流
+           InputStream  is = request.getInputStream();
+
+           //已HTTP请求输入流建立一个BufferedReader对象
+
+           BufferedReader br = new BufferedReader(new InputStreamReader(is,"UTF-8"));
+
+           //读取HTTP请求内容
+
+           String buffer = null;
+           StringBuffer  sb = new StringBuffer();
+
+           while ((buffer = br.readLine()) != null) {
+
+        	   //Sb就是接收到的xml字符串。
+               sb.append(buffer);
+           }
+
+		XStream xstreamResult=new XStream(new DomDriver());
+		
+		xstreamResult.processAnnotations(ResultCode.class); //如果是用注解的方式，这句不能少
+		ResultCode resultCode=(ResultCode)xstreamResult.fromXML(sb.toString());
+		
+		String returnCode="";
+		double totalFee=0;
+		String notifyData="";
+		String transactionId="";
+		String timeEnd="";
+		
+		returnCode = resultCode.getReturn_code();
+		totalFee = Double.valueOf(resultCode.getTotal_fee());
+		notifyData=sb.toString();
+		transactionId=resultCode.getTransaction_id();
+		timeEnd=resultCode.getTime_end();
+		
+		
+		wechatpayResult.setReturnCode(returnCode);
+		wechatpayResult.setTotalFee(totalFee);
+		wechatpayResult.setNotifyData(notifyData);
+		wechatpayResult.setTransactionId(transactionId);
+		wechatpayResult.setTimeEnd(timeEnd);
+		
+		String outTradeNo = resultCode.getOut_trade_no();
+		wechatpayResult.setOutTradeNo(outTradeNo);
+		
+		String realOutTradeNo = outTradeNo.split("_")[0];
+		
+	int resultId = iWechatpayResultDao.saveWechatpayResult(wechatpayResult);//保存异步返回的数据
+	
+	if (resultId > 0) {
+		
+		String[] attach = resultCode.getAttach().split("_"); 
+		String ownerNum = attach[0];
+		String custNum = attach[1];
+		
+		OrderPayInfo orderPayInfo = new OrderPayInfo();
+		orderPayInfo.setOrderNum(realOutTradeNo);
+		orderPayInfo.setOwnerNum(ownerNum);
+		orderPayInfo.setCustNum(custNum);
+		orderPayInfo.setPayType(1);//微信支付
+		orderPayInfo.setPayTransId(resultId);
+		orderPayInfo.setCreateBy("微支付");
+		
+		iOrderPayInfoDao.saveOrderPayInfoDao(orderPayInfo);
+	}
+		
+		
+		su = "<xml><return_code><![CDATA[SUCCESS]]></return_code><return_msg><![CDATA[OK]]></return_msg></xml>";
+	} catch (Exception e) {
+		e.printStackTrace();
+	}
+	
+		
+		return su;
+	}
+
+
+}

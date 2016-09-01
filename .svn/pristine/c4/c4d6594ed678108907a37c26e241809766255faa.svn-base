@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+
+<sqlMap>
+
+	<typeAlias alias="WechatOrder" type="com.etaoguan.wea.vo.WechatOrder" />
+
+
+	<resultMap id="wechatOrderMap" class="WechatOrder">
+		<result property="id" column="id" />
+		<result property="totalFee" column="total_fee" />
+		<result property="appid" column="appid" />
+		<result property="mchId" column="mch_id" />
+		<result property="deviceInfo" column="device_info" />
+		<result property="nonceStr" column="nonce_str" />
+		<result property="sign" column="sign" />
+		<result property="body" column="body" />
+		<result property="detail" column="detail" />
+		<result property="attach" column="attach" />
+		<result property="outTradeNo" column="out_trade_no" />
+		<result property="feeType" column="fee_type" />
+		<result property="spbillCreateIp" column="spbill_create_ip" />
+		<result property="timeStart" column="time_start" />
+		<result property="timeExpire" column="time_expire" />
+		<result property="goodsTag" column="goods_tag" />
+		<result property="notifyUrl" column="notify_url" />
+		<result property="tradeType" column="trade_type" />
+		<result property="productId" column="product_id" />
+		<result property="openid" column="openid" />
+		<result property="createDate" column="create_date" />
+
+	</resultMap>
+
+	<insert id="createWechatOrder" parameterClass="WechatOrder">
+
+		INSERT INTO
+		`wechat_order` (`appid`, `mch_id`, `device_info`,
+		`nonce_str`, `sign`,
+		`body`, `detail`, `attach`, `out_trade_no`,
+		`fee_type`, `total_fee`,
+		`spbill_create_ip`, `time_start`,
+		`time_expire`, `goods_tag`,
+		`notify_url`, `product_id`, `trade_type`,
+		`openid`, `create_date`)
+		VALUES (#appid#, #mchId#, #deviceInfo#,
+		#nonceStr#, #sign#,#body#,
+		#detail#, #attach#, #outTradeNo#,
+		#feeType#, #totalFee#,
+		#spbillCreateIp#, #timeStart#, #timeExpire#, #goodsTag#,#notifyUrl#,
+		#productId#, #tradeType#, #openid#, now())
+
+	</insert>
+
+</sqlMap>

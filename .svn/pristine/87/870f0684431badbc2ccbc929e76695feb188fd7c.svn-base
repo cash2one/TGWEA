@@ -1,0 +1,59 @@
+package com.etaoguan.wea.client.web.action.owner;
+
+import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
+
+import org.apache.struts2.convention.annotation.Action;
+import org.apache.struts2.convention.annotation.Result;
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Service;
+
+import com.etaoguan.wea.annotation.WeaFunction;
+import com.etaoguan.wea.annotation.WeaModule;
+import com.etaoguan.wea.client.web.action.WOwnerBaseAction;
+import com.etaoguan.wea.client.web.service.IWWechatCodeSuccessService;
+import com.etaoguan.wea.client.web.service.IWWechatOrderService;
+
+@SuppressWarnings("serial")
+@WeaModule(mname="微信支付")
+@Service("wechatPayAction") @Scope("prototype")
+public class WechatPayAction extends WOwnerBaseAction{
+
+	
+	@Resource(name="wwechatOrderService")
+	private IWWechatOrderService iwWechatOrderService;
+	
+	@Resource(name="wwechatCodeSuccessService")
+	private IWWechatCodeSuccessService iwWechatCodeSuccessService;
+	
+	
+	@WeaFunction(fname="保存微信订单",oname=WeaFunction.Operation.CREATE)
+	@Action(value="wAddWechatOrder",results = { @Result(name = "success", type = "dispatcher",location="/index.jsp")})
+	public String addWechatOrder(HttpServletRequest request) {
+		
+//		String orderNum ="OR0000000001";
+//		iwWechatOrderService.addWechatOrder(orderNum);
+		
+		String ip = getIpAddr(request);
+		
+		System.out.println("***********ok*******"+ip);
+		System.out.println("***********ok*******"+ip);
+		
+		return SUCCESS;
+	}
+	
+	public String getIpAddr(HttpServletRequest request) {  
+	    String ip = request.getHeader("x-forwarded-for");  
+	    if(ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {  
+	        ip = request.getHeader("Proxy-Client-IP");  
+	    }  
+	    if(ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {  
+	        ip = request.getHeader("WL-Proxy-Client-IP");  
+	    }  
+	    if(ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {  
+	        ip = request.getRemoteAddr();  
+	    }  
+	    return ip;  
+	}  
+
+}

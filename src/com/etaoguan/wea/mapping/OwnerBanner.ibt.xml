@@ -1,0 +1,205 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+
+<!-- author 刘卿 -->
+<!-- 感谢ibatis的持久层框架 -->
+
+<sqlMap>
+
+	<typeAlias alias="OWNERBANNER" type="com.etaoguan.wea.vo.OwnerBanner"/>
+
+	<resultMap id="ownerBanner" class="OWNERBANNER">
+		<result property="bannerId" column="banner_id"/>
+		<result property="ownerNum" column="owner_num"/>
+		<result property="imgUrl" column="img_url"/>
+		<result property="linkType" column="link_type"/>
+		<result property="linkContent" column="link_content"/>
+		<result property="linkRemark" column="link_remark"/>
+		<result property="sequence" column="sequence"/>
+		<result property="remark" column="remark"/>
+		<result property="createDate" column="create_date"/>
+		<result property="createBy" column="create_by"/>
+		<result property="updateDate" column="update_date"/>
+		<result property="updateBy" column="update_by"/>
+	</resultMap>
+
+	<insert id="createOwnerBanner"  parameterClass="OWNERBANNER">
+		insert into owner_banner 
+		(
+			img_url,
+			link_type,
+			link_content,
+			link_remark,
+			owner_num,
+			sequence,
+			remark,
+			create_date,
+			create_by,
+			update_date,
+			update_by
+		)
+		values(
+			#imgUrl#,
+			#linkType#,		
+			#linkContent#,	
+			#linkRemark#,	
+			#ownerNum#,
+			#sequence#,
+			#remark#
+			<isNotEmpty property="createDate" prepend=",">
+				#createDate#
+			</isNotEmpty>
+			<isEmpty property="createDate" prepend=",">
+				now()
+			</isEmpty>			
+			<isNotEmpty property="createBy" prepend=",">
+				#createBy#
+			</isNotEmpty>
+			<isEmpty property="createBy" prepend=",">
+				''
+			</isEmpty>			
+			<isNotEmpty property="updateDate" prepend=",">
+				#updateDate#
+			</isNotEmpty>
+			<isEmpty property="updateDate" prepend=",">
+				now()
+			</isEmpty>			
+			<isNotEmpty property="updateBy" prepend=",">
+				#updateBy#
+			</isNotEmpty>
+			<isEmpty property="updateBy" prepend=",">
+				''
+			</isEmpty>		
+		
+		)
+
+	</insert>
+
+	<delete id="delOwnerBanner" parameterClass="java.util.HashMap">
+		DELETE 
+		FROM
+		owner_banner where banner_id = #bannerId# 
+
+	</delete>
+	
+	<select id="getOwnerBannerList" parameterClass="java.util.HashMap" resultMap="ownerBanner">
+	
+		SELECT  
+		banner_id,
+		img_url,
+		link_type,
+		link_content,
+		link_remark,
+		owner_num,
+		sequence,
+		remark,
+		create_date,
+		create_by,
+		update_date,
+		update_by  
+		FROM
+		owner_banner where owner_num = #ownerNum# 
+		order by sequence asc
+
+	</select>
+	
+	<select id="getOwnerBannerMaxSequence" parameterClass="java.util.HashMap" resultClass="java.lang.Integer">
+	
+		SELECT
+		IFNULL(max(sequence),1)
+		FROM
+		owner_banner where owner_num = #ownerNum#
+
+	</select>
+
+	<update id="updateOwnerBannerByMap"  parameterClass="java.util.HashMap">
+			update owner_banner set 
+			owner_num = owner_num
+			<isNotEmpty property="imgUrl" prepend=",">
+				img_url = #imgUrl#
+			</isNotEmpty>
+			<isNotEmpty property="linkType" prepend=",">
+				link_type = #linkType#
+			</isNotEmpty>
+			<isNotEmpty property="linkContent" prepend=",">
+				link_content = #linkContent#
+			</isNotEmpty>
+			,link_remark = #linkRemark#
+			<isNotEmpty property="sequence" prepend=",">
+				sequence = #sequence#
+			</isNotEmpty>
+			<isNotEmpty property="remark" prepend=",">
+				remark = #remark#
+			</isNotEmpty>									
+			<isNotEmpty property="updateDate" prepend=",">
+				update_date = #updateDate#
+			</isNotEmpty>
+			<isEmpty property="updateDate" prepend=",">
+				update_date = now()
+			</isEmpty>				
+			<isNotEmpty property="updateBy" prepend=",">
+				update_by = #updateBy#
+			</isNotEmpty>	
+			
+		where
+			banner_id = #bannerId#
+
+	</update>
+	<update id="updateOwnerBanner"  parameterClass="OWNERBANNER">
+			update owner_banner set 
+			owner_num = owner_num
+			<isNotEmpty property="imgUrl" prepend=",">
+				img_url = #imgUrl#
+			</isNotEmpty>
+			<isNotEmpty property="linkType" prepend=",">
+				link_type = #linkType#
+			</isNotEmpty>
+			<isNotEmpty property="linkContent" prepend=",">
+				link_content = #linkContent#
+			</isNotEmpty>
+			,link_remark = #linkRemark#
+			<isNotEmpty property="sequence">
+				<isNotEqual property="sequence" compareValue="0" prepend=",">
+				    sequence = #sequence#
+				</isNotEqual>
+			</isNotEmpty>		
+			<isNotEmpty property="remark" prepend=",">
+				remark = #remark#
+			</isNotEmpty>							
+			<isNotEmpty property="updateDate" prepend=",">
+				update_date = #updateDate#
+			</isNotEmpty>
+			<isEmpty property="updateDate" prepend=",">
+				update_date = now()
+			</isEmpty>				
+			<isNotEmpty property="updateBy" prepend=",">
+				update_by = #updateBy#
+			</isNotEmpty>	
+			
+		where
+			banner_id = #bannerId#
+	</update>
+	
+	<select id="getOwnerBanner" parameterClass="java.util.HashMap"  resultMap="ownerBanner">
+		SELECT
+		banner_id,
+		img_url,
+		link_type,
+		link_content,
+		link_remark,
+		owner_num,
+		sequence,
+		remark,
+		create_date,
+		create_by,
+		update_date,
+		update_by  
+		FROM 
+		owner_banner  
+		where 
+		banner_id = #bannerId#
+		
+	</select>
+	
+
+</sqlMap>

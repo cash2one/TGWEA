@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+
+<!-- author 刘卿 -->
+<!-- 感谢ibatis的持久层框架 -->
+
+<sqlMap>
+
+
+	<typeAlias alias="PROVREGION" type="com.etaoguan.wea.vo.ProvRegion"/>
+	
+	<resultMap id="provRegion" class="PROVREGION">
+		<result property="regionCode" column="region_code"/>
+		<result property="regionName" column="region_name"/>
+		<result property="parentRegionCode" column="parent_region_code"/>
+		<result property="orderIndex" column="order_index"/>
+		<result property="levelFlag" column="level_flag"/>
+	</resultMap>
+
+	<!-- 获取数据库TABLE META信息 -->
+	<select id="getDBTableMetaData" parameterClass="java.util.HashMap"  resultClass="java.lang.String">
+		show TABLES
+	</select>
+	
+	<!-- 获取数据库COLUMN META信息 -->
+	<select id="getDBColumnMetaData" parameterClass="java.util.HashMap"  resultClass="java.lang.String">
+		desc `$table$`
+	</select>
+	
+	<select id="getProvRegions" parameterClass="java.util.HashMap"  resultMap="provRegion">
+		SELECT
+		region_code,
+		region_name,
+		parent_region_code,
+		order_index,
+		level_flag
+		FROM
+		prov_region 
+		where 1=1 
+		<dynamic>
+			<isNotEmpty property="parentRegionCode">
+				 parent_region_code = #parentRegionCode#
+			</isNotEmpty>
+			<isNotEmpty property="levelFlag">
+				 level_flag = #levelFlag#
+			</isNotEmpty>
+		</dynamic>
+		order by order_index ASC 
+
+	</select>
+	
+	
+</sqlMap>

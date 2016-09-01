@@ -1,0 +1,31 @@
+package com.etaoguan.wea.dao.impl;
+
+import javax.annotation.Resource;
+
+import org.springframework.stereotype.Repository;
+
+import com.etaoguan.wea.dao.IWechatCodeSuccessDao;
+import com.etaoguan.wea.vo.WeChatCodeSuccess;
+import com.ibatis.sqlmap.client.SqlMapClient;
+
+/**
+ * @author cunli
+ * 微信订单
+ */
+@Repository
+public class WechatCodeSuccessDao extends SpringBaseDao implements IWechatCodeSuccessDao {
+
+	@Override
+	@Resource(name = "weChatCodeSuccessSqlMapClient")
+	public void setSbiSqlMapClient(SqlMapClient sqlMapClient) {
+		super.setSqlMapClient(sqlMapClient);
+	}
+
+	/* (non-Javadoc)保存微信订单返回的结果
+	 * @see com.etaoguan.wea.dao.IWechatCodeSuccessDao#createCodeSuccess(com.etaoguan.wea.vo.WeChatCodeSuccess)
+	 */
+	public void createCodeSuccess(WeChatCodeSuccess weChatCodeSuccess) {
+		this.getSqlMapClientTemplate().insert("createCodeSuccess", weChatCodeSuccess);
+	}
+
+}

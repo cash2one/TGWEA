@@ -1,0 +1,38 @@
+
+<ion-view title="修改密码">
+    <ion-nav-buttons side="left">
+        <button ng-click="back()" class="button button-clear">
+            <i class="ion-ios-arrow-back"></i>
+            <span id="barItemlText">返 回</span>
+        </button>
+    </ion-nav-buttons>
+
+    <ion-content>
+        <div class="list list-inset">
+            <label class="item item-input iLabel">
+                <i class="icon ion-locked dark placeholder-icon" ng-style="aoldPassStyle" style="font-size: 25px;padding-top:4px;"></i>
+                <input type="password" placeholder="旧密码" style="font-size: 16px;" ng-model="aupdatePass.oldPass" ng-focus="aoldPassFocus()" ng-blur="aoldPassBlur()"/>
+            </label>
+        </div>
+
+        <div class="list list-inset">
+            <label class="item item-input iLabel">
+                <i class="icon ion-ios-locked dark placeholder-icon" ng-style="anewPassStyle" style="font-size: 30px;"></i>
+                <input type="password" placeholder="新密码" style="font-size: 16px;" ng-model="aupdatePass.newPass" ng-focus="anewPassFocus()" ng-blur="anewPassBlur()"/>
+            </label>
+        </div>
+
+        <div class="list list-inset">
+            <label class="item item-input iLabel">
+                <i class="icon ion-ios-locked dark placeholder-icon" ng-style="anewPassCStyle" style="font-size: 30px;"></i>
+                <input type="password" placeholder="新密码确认" style="font-size: 16px;" ng-model="aupdatePass.newPassC" ng-focus="anewPassCFocus()" ng-blur="anewPassCBlur()"/>
+            </label>
+        </div>
+
+        <div class="row padding">
+            <button class="button button-block button-positive" id="sendMessage" ng-click="asendNewPass()">确认修改</button>
+        </div>
+    </ion-content>
+</ion-view>
+
+

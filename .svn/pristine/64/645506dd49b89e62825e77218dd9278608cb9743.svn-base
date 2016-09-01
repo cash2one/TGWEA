@@ -1,0 +1,28 @@
+package com.etaoguan.wea.service.impl;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.etaoguan.wea.dao.IWechatOrderDao;
+import com.etaoguan.wea.service.IWechatOrderService;
+import com.etaoguan.wea.vo.WechatOrder;
+
+/**
+ * @author cunli 微信订单
+ *
+ */
+@Service("wechatOrderService")
+public class WechatOrderService implements IWechatOrderService{
+
+	@Autowired
+	private IWechatOrderDao iWechatOrderDao;
+	
+	/* (non-Javadoc) 创建微信订单
+	 * @see com.etaoguan.wea.service.IWechatOrderService#createWechatOrder(com.etaoguan.wea.vo.WechatOrder)
+	 */
+	public void createWechatOrder(WechatOrder wechatOrder) {
+		iWechatOrderDao.createWechatOrder(wechatOrder);
+	}
+
+
+}

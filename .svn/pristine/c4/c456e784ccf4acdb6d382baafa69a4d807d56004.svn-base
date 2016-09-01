@@ -1,0 +1,97 @@
+package com.etaoguan.wea.client.web.service.impl;
+
+import java.util.HashMap;
+import java.util.Map;
+
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.stereotype.Service;
+
+import com.etaoguan.wea.client.vo.SortParam;
+import com.etaoguan.wea.client.web.service.IWCustService;
+import com.etaoguan.wea.client.web.vo.CustSearch;
+import com.etaoguan.wea.client.web.vo.WPage;
+import com.etaoguan.wea.client.web.vo.WPagingRequest;
+import com.etaoguan.wea.common.DataCriteria;
+import com.etaoguan.wea.common.DataSet;
+import com.etaoguan.wea.common.OffsetRequest;
+import com.etaoguan.wea.common.WeaDataCache;
+import com.etaoguan.wea.constant.WeaConstant;
+import com.etaoguan.wea.service.impl.CustService;
+import com.etaoguan.wea.vo.Customer;
+
+@Service("wcustService")
+public class WCustService extends CustService implements IWCustService{
+
+	@SuppressWarnings("rawtypes")
+	public WPage listSearchCusts(CustSearch custSearch, SortParam sortParam,
+			WPagingRequest wpagingRequest) {
+		OffsetRequest offsetRequest = wpagingRequest.format2OffsetRequest();
+		DataCriteria dataCriteria = new DataCriteria();
+		dataCriteria.setParam("companyName", custSearch.getCompanyName());
+		dataCriteria.setParam("contactPerson", custSearch.getContactPerson());
+		dataCriteria.setParam("ownerNum", custSearch.getOwnerNum());
+		DataSet dataSet = listCusts(dataCriteria, offsetRequest);
+		
+		return new WPage(wpagingRequest,dataSet);
+	}
+	
+	@SuppressWarnings("rawtypes")
+	public WPage listCusts(CustSearch custSearch, SortParam sortParam,
+			WPagingRequest wpagingRequest) {
+		OffsetRequest offsetRequest = wpagingRequest.format2OffsetRequest();
+		DataCriteria dataCriteria = new DataCriteria();
+		dataCriteria.setParam("companyName", custSearch.getCompanyName());
+		dataCriteria.setParam("contactPerson", custSearch.getContactPerson());
+		dataCriteria.setParam("phoneNum", custSearch.getPhoneNum());
+		dataCriteria.setParam("regionCodes", custSearch.getRegionCodes());
+		dataCriteria.setParam("ownerNum", custSearch.getOwnerNum());
+		DataSet dataSet = listCusts(dataCriteria, offsetRequest);
+		
+		return new WPage(wpagingRequest,dataSet);
+	}
+
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	public Map getListCustsSearchInitData(String ownerNum) {
+		Map dataMap = new HashMap();
+		dataMap.put("regionCodes", WeaDataCache.getCache().getProvRegionList());
+		return dataMap;
+	}
+
+	public void updateResetCustPwd(String custNum) {
+		updateCustPwd(custNum,WeaConstant.DEFAULT_CUSTPWD);
+		
+	}
+
+	public void delBatchCust(String[] custNums) {
+		for(String custNum:custNums){
+			updateCust2delStatus(custNum);
+		}
+	}
+
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	public Map getEditCustInitData(String ownerNum, String custNum) {
+		Map dataMap = new HashMap();
+		
+		if (StringUtils.isEmpty(custNum)) {
+			dataMap.put("cust",null);//添加的时候，如果为空就不去查询
+		}else {
+			dataMap.put("cust",getCust(custNum));
+		}
+		dataMap.put("trades",WeaDataCache.getCache().getTradeList());
+		dataMap.put("regionCodes",WeaDataCache.getCache().getProvRegionList());
+		dataMap.put("keyLevels",WeaDataCache.getCache().getCustKeyLevelMap());
+		dataMap.put("creditLevels",WeaDataCache.getCache().getCustCreditLevelMap());
+		return dataMap;
+	}
+
+	public void saveOrUpdateCust(Customer cust) {
+		if(StringUtils.isEmpty(cust.getCustNum())){
+			cust.setPassword(WeaConstant.DEFAULT_CUSTPWD);
+			addCust(cust);
+		}else{
+			updateCust(cust);
+		}
+		
+	}
+
+}

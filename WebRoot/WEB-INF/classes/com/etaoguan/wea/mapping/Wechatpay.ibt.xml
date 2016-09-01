@@ -1,0 +1,201 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+
+
+<sqlMap>
+
+	<typeAlias alias="WechatpayRequest"
+		type="com.etaoguan.wea.wechat.vo.WechatpayRequest" />
+	<typeAlias alias="WechatpayResult" type="com.etaoguan.wea.wechat.vo.WechatpayResult" />
+	<typeAlias alias="WechatPayKeys" type="com.etaoguan.wea.vo.WechatPayKeys" />
+
+	<resultMap id="requestMap" class="WechatpayRequest">
+		<result property="wechatpayId" column="wechatpay_id" />
+		<result property="appid" column="appid" />
+		<result property="mchId" column="mch_id" />
+		<result property="reqData" column="req_data" />
+		<result property="outTradeNo" column="out_trade_no" />
+		<result property="totalFee" column="total_fee" />
+		<result property="spbillCreateIp" column="spbill_create_ip" />
+		<result property="openid" column="openid" />
+		<result property="respDate" column="resp_date" />
+		<result property="respStatus" column="resp_status" />
+		<result property="createDate" column="create_date" />
+		<result property="updateDate" column="update_date" />
+	</resultMap>
+
+
+	<resultMap id="resultMap" class="WechatpayResult">
+		<result property="resultId" column="result_id" />
+		<result property="returnCode" column="return_code" />
+		<result property="notifyData" column="notify_data" />
+		<result property="totalFee" column="total_fee" />
+		<result property="transactionId" column="transaction_id" />
+		<result property="outTradeNo" column="out_trade_no" />
+		<result property="timeEnd" column="time_end" />
+		<result property="createDate" column="create_date" />
+	</resultMap>
+
+	<resultMap id="KeysMap" class="WechatPayKeys">
+		<result property="ownerNum" column="owner_num" />
+		<result property="mchId" column="mch_id" />
+		<result property="payKey" column="pay_key" />
+		<result property="remark" column="remark" />
+		<result property="createDate" column="create_date" />
+		<result property="createBy" column="create_by" />
+		<result property="updateDate" column="update_date" />
+		<result property="updateBy" column="update_by" />
+	</resultMap>
+
+	<resultMap id="KeysMap2" class="WechatPayKeys">
+
+		<result property="ownerNum" column="owner_num" />
+		<result property="mchId" column="mch_id" />
+		<result property="payKey" column="pay_key" />
+		<result property="remark" column="remark" />
+		<result property="createDate" column="create_date" />
+		<result property="createBy" column="create_by" />
+		<result property="updateDate" column="update_date" />
+		<result property="updateBy" column="update_by" />
+
+		<result property="companyName" column="company_name" />
+
+	</resultMap>
+
+
+	<insert id="saveWechatpayRequest" parameterClass="WechatpayRequest">
+
+		INSERT INTO
+		wechatpay_request
+		(
+		wechatpay_request.appid,
+		wechatpay_request.mch_id,
+		wechatpay_request.req_data,
+		wechatpay_request.out_trade_no,
+		wechatpay_request.total_fee,
+		wechatpay_request.spbill_create_ip,
+		wechatpay_request.openid,
+		wechatpay_request.create_date,
+		wechatpay_request.update_date
+		)VALUES(
+		#appid#,
+		#mchId#,
+		#reqData#,
+		#outTradeNo#,
+		#totalFee#,
+		#spbillCreateIp#,
+		#openid#,
+		NOW(),
+		NOW()
+		)
+		
+	</insert>
+
+	<insert id="saveWechatpayResult" parameterClass="WechatpayResult">
+
+		INSERT into
+		wechatpay_result (
+		wechatpay_result.return_code,
+		wechatpay_result.notify_data,
+		wechatpay_result.total_fee,
+		wechatpay_result.transaction_id,
+		wechatpay_result.out_trade_no,
+		wechatpay_result.time_end,
+		wechatpay_result.create_date)VALUES(
+		#returnCode#,
+		#notifyData#,
+		#totalFee#,
+		#transactionId#,
+		#outTradeNo#,
+		#timeEnd#,
+		NOW()
+		)
+		<selectKey resultClass="java.lang.Integer">
+			SELECT @@IDENTITY AS id
+		</selectKey>
+	</insert>
+
+	<insert id="addWechatPayKeys" parameterClass="WechatPayKeys">
+
+		INSERT INTO
+		wechat_pay_keys (
+		wechat_pay_keys.owner_num,
+		wechat_pay_keys.mch_id,
+		wechat_pay_keys.pay_key,
+		wechat_pay_keys.remark,
+		wechat_pay_keys.create_date,
+		wechat_pay_keys.create_by,
+		wechat_pay_keys.update_date,
+		wechat_pay_keys.update_by)VALUES(
+		#ownerNum#,
+		#mchId#,
+		#payKey#,
+		#remark#,
+		NOW(),
+		#createBy#,
+		NOW(),
+		#updateBy#
+		)
+
+	</insert>
+
+	<select id="wechatPayKeysInformation" parameterClass="java.util.HashMap"
+		resultMap="KeysMap">
+		SELECT
+		wechat_pay_keys.owner_num,
+		wechat_pay_keys.mch_id,
+		wechat_pay_keys.pay_key,
+		wechat_pay_keys.remark,
+		wechat_pay_keys.create_date,
+		wechat_pay_keys.create_by,
+		wechat_pay_keys.update_date,
+		wechat_pay_keys.update_by
+		FROM
+		wechat_pay_keys
+		where owner_num = #ownerNum#
+	</select>
+
+	<select id="wechatPayKeysDatSet" parameterClass="java.util.HashMap" resultMap="KeysMap2">
+		
+		SELECT
+		owner.company_name,
+		wechat_pay_keys.owner_num,
+		wechat_pay_keys.mch_id,
+		wechat_pay_keys.pay_key,
+		wechat_pay_keys.remark,
+		wechat_pay_keys.create_date,
+		wechat_pay_keys.create_by,
+		wechat_pay_keys.update_date,
+		wechat_pay_keys.update_by
+		
+		FROM
+		wechat_pay_keys inner JOIN owner ON wechat_pay_keys.owner_num = owner.owner_num
+		where
+		1 = 1 
+		 <isNotEmpty property="companyName" prepend="and">
+			owner.company_name like
+			CONCAT('%',#companyName#, '%')
+		</isNotEmpty>
+		order by create_date desc limit #limit# offset #offset# 
+	</select>
+
+	<delete id="deleteWechatPayKeys" parameterClass="java.util.HashMap">
+		DELETE FROM
+		wechat_pay_keys WHERE owner_num = #ownerNum#
+	</delete>
+
+	<update id="updateWechatPayKeys" parameterClass="java.util.HashMap">
+		UPDATE
+		wechat_pay_keys SET
+		pay_key=#payKey#,mch_id=#mchId#,update_date=now(),update_by=#updateBy#,remark=#remark#
+		WHERE owner_num = #ownerNum#
+	</update>
+
+	<select id="wechatPayKeysCount" parameterClass="java.util.HashMap"
+		resultClass="java.lang.Integer">
+		SELECT count(1) FROM wechat_pay_keys inner JOIN owner ON
+		wechat_pay_keys.owner_num = owner.owner_num
+	</select>
+
+
+</sqlMap>

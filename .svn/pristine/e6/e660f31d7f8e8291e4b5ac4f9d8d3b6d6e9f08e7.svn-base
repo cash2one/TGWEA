@@ -1,0 +1,13 @@
+package com.etaoguan.wea.client.mobile.service;
+
+import java.util.Map;
+
+import com.etaoguan.wea.client.mobile.vo.OrderPay;
+
+public interface IMPaymentService{
+
+	public String processPayOrder(OrderPay orderPay,String domainBaseUrl);
+	
+	@SuppressWarnings("rawtypes")
+	public String processAlipayWapResp(Map requestParams);
+}

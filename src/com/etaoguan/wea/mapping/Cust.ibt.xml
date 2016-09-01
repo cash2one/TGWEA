@@ -1,0 +1,489 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+
+<!-- author 刘卿 -->
+<!-- 感谢ibatis的持久层框架 -->
+
+<sqlMap>
+
+	<typeAlias alias="CUST" type="com.etaoguan.wea.vo.Customer"/>
+
+	<!-- 客户信息SQL映射 -->
+	<resultMap id="cust" class="CUST">
+		<result property="custNum" column="cust_num"/>
+		<result property="custName" column="cust_name"/>
+		<result property="password" column="password"/>
+		<result property="companyName" column="company_name"/>
+		<result property="ownerNum" column="owner_num"/>
+		<result property="tradeId" column="trade_id"/>
+		<result property="contactPerson" column="contact_person"/>
+		<result property="phoneNum" column="phone_number"/>
+		<result property="address" column="address"/>
+		<result property="keyLevel" column="key_level"/>
+		<result property="delFlag" column="del_flag"/>
+		<result property="regionCode" column="region_code"/>
+		<result property="creditLevel" column="credit_level"/>
+		<result property="createFrom" column="create_from"/>
+		<result property="remark" column="remark"/>
+		<result property="loginDate" column="login_date"/>
+		<result property="createDate" column="create_date"/>
+		<result property="createBy" column="create_by"/>
+		<result property="updateDate" column="update_date"/>
+		<result property="updateBy" column="update_by"/>
+	</resultMap>
+	
+
+
+	<!-- 获取客户总数-->
+	<select id="getCustCount" parameterClass="java.util.HashMap" resultClass="java.lang.Integer">
+		SELECT
+		count(1) 
+		FROM
+		customer where 1=1 
+		<dynamic>
+			<isNotEmpty property="ownerNum" prepend="and">
+			    owner_num = #ownerNum#
+			</isNotEmpty>
+			<isNotEmpty property="delFlag" prepend="and">
+			    del_flag  = #delFlag#
+			</isNotEmpty>
+			<isNotEmpty property="phoneNum" prepend="and">
+			    phone_number like CONCAT(#phoneNum#, '%') 
+			</isNotEmpty>
+			<isNotEmpty property="custName" prepend="and">
+			    cust_name like CONCAT('%',#custName#, '%') 
+			</isNotEmpty>
+			<isNotEmpty property="companyName" prepend="and">
+			    company_name like CONCAT('%',#companyName#, '%') 
+			</isNotEmpty>
+			<isNotEmpty property="contactPerson" prepend="and">
+			    contact_person like CONCAT('%',#contactPerson#, '%') 
+			</isNotEmpty>
+			<isNotEmpty property="tradeId" prepend="and">
+			    trade_id = #tradeId# 
+			</isNotEmpty>
+			<isNotEmpty property="regionCodes" prepend="and">
+			    region_code IN 
+			    <iterate property="regionCodes" open="(" close=")" conjunction=","> 
+			    #regionCodes[]#
+			    </iterate>
+			</isNotEmpty>
+		</dynamic>
+
+	</select>
+	
+	<!-- 获取客户分页信息-->
+	<select id="getCustDatSet" parameterClass="java.util.HashMap"  resultMap="cust">
+	
+		SELECT
+		cust_num,
+		cust_name,
+		`password`,
+		owner_num,
+		key_level,
+		del_flag,
+		region_code,
+		credit_level,
+		login_date,
+		create_date,
+		create_by,
+		update_date,
+		update_by,
+		company_name,
+		contact_person,
+		phone_number,
+		address,
+		trade_id,
+		create_from,
+		remark
+		FROM
+		customer where 1=1 
+		<dynamic>
+			<isNotEmpty property="ownerNum" prepend="and">
+			    owner_num = #ownerNum#
+			</isNotEmpty>
+			<isNotEmpty property="delFlag" prepend="and">
+			    del_flag  = #delFlag#
+			</isNotEmpty>
+			<isNotEmpty property="phoneNum" prepend="and">
+			    phone_number like CONCAT('%',#phoneNum#, '%') 
+			</isNotEmpty>
+			<isNotEmpty property="custName" prepend="and">
+			    cust_name like CONCAT('%',#custName#, '%') 
+			</isNotEmpty>
+			<isNotEmpty property="companyName" prepend="and">
+			    company_name like CONCAT('%',#companyName#, '%') 
+			</isNotEmpty>
+			<isNotEmpty property="contactPerson" prepend="and">
+			    contact_person like CONCAT('%',#contactPerson#, '%') 
+			</isNotEmpty>
+			<isNotEmpty property="address" prepend="and">
+			    address like CONCAT('%',#address#, '%') 
+			</isNotEmpty>
+			<isNotEmpty property="tradeId" prepend="and">
+			    trade_id = #tradeId# 
+			</isNotEmpty>
+			<isNotEmpty property="regionCodes" prepend="and">
+			    region_code IN 
+			    <iterate property="regionCodes" open="(" close=")" conjunction=","> 
+			    #regionCodes[]#
+			    </iterate>
+			</isNotEmpty>
+		</dynamic>
+		
+		
+		
+		limit #limit# offset #offset# 
+	</select>
+	
+	<select id="getCusts" parameterClass="java.util.HashMap"  resultMap="cust">
+	
+		SELECT
+		cust_num,
+		cust_name,
+		`password`,
+		owner_num,
+		key_level,
+		del_flag,
+		region_code,
+		credit_level,
+		login_date,
+		create_date,
+		create_by,
+		update_date,
+		update_by,
+		company_name,
+		contact_person,
+		phone_number,
+		address,
+		trade_id,
+		create_from,
+		remark
+		FROM
+		customer where 1=1 
+
+		<dynamic>
+			<isNotEmpty property="ownerNum" prepend="and">
+			    owner_num = #ownerNum#
+			</isNotEmpty>
+			<isNotEmpty property="phoneNum" prepend="and">
+			    phone_number like CONCAT(#phoneNum#, '%') 
+			</isNotEmpty>
+			<isNotEmpty property="custName" prepend="and">
+			    cust_name like CONCAT(#custName#, '%') 
+			</isNotEmpty>
+			<isNotEmpty property="companyName" prepend="and">
+			    company_name like CONCAT(#companyName#, '%') 
+			</isNotEmpty>
+			<isNotEmpty property="contactPerson" prepend="and">
+			    contact_person like CONCAT(#contactPerson#, '%') 
+			</isNotEmpty>
+			<isNotEmpty property="cutNums" prepend="and">
+			    cust_num IN 
+			    <iterate property="cutNums" open="(" close=")" conjunction=","> 
+			    #cutNums[]#
+			    </iterate>
+			</isNotEmpty>
+		</dynamic>
+
+	</select>
+	
+
+	<!-- 保存客户信息 -->
+	<insert id="createCust"  parameterClass="CUST">
+		insert into customer 
+		(
+		   	cust_num,
+			cust_name,
+			`password`,
+			owner_num,
+			key_level,
+			del_flag,
+			region_code,
+			credit_level,
+			company_name,
+			contact_person,
+			phone_number,
+			address,
+			trade_id,
+			create_from,
+			remark,
+			create_date,
+			create_by,
+			update_date,
+			update_by
+		)
+		values(
+			#custNum#,
+			#custName#,		
+			#password#,
+			#ownerNum#		
+			<isNotEmpty property="keyLevel" prepend=",">
+				#keyLevel#
+			</isNotEmpty>
+			<isEmpty property="keyLevel" prepend=",">
+				0
+			</isEmpty>		
+			,0					
+			<isNotEmpty property="regionCode" prepend=",">
+				#regionCode#
+			</isNotEmpty>
+			<isEmpty property="regionCode" prepend=",">
+				'000000'
+			</isEmpty>	
+			<isNotEmpty property="creditLevel" prepend=",">
+				#creditLevel#
+			</isNotEmpty>
+			<isEmpty property="creditLevel" prepend=",">
+				0
+			</isEmpty>			
+			<isNotEmpty property="companyName" prepend=",">
+				#companyName#
+			</isNotEmpty>
+			<isEmpty property="companyName" prepend=",">
+				''
+			</isEmpty>			
+			<isNotEmpty property="contactPerson" prepend=",">
+				#contactPerson#
+			</isNotEmpty>
+			<isEmpty property="contactPerson" prepend=",">
+				''
+			</isEmpty>		
+			<isNotEmpty property="phoneNum" prepend=",">
+				#phoneNum#
+			</isNotEmpty>
+			<isEmpty property="phoneNum" prepend=",">
+				''
+			</isEmpty>		
+			<isNotEmpty property="address" prepend=",">
+				#address#
+			</isNotEmpty>
+			<isEmpty property="address" prepend=",">
+				''
+			</isEmpty>		
+			<isNotEmpty property="tradeId" prepend=",">
+				#tradeId#
+			</isNotEmpty>
+			<isEmpty property="tradeId" prepend=",">
+				''
+			</isEmpty>		
+			<isNotEmpty property="createFrom" prepend=",">
+				#createFrom#
+			</isNotEmpty>
+			<isEmpty property="createFrom" prepend=",">
+				'mobile'
+			</isEmpty>	
+			<isNotEmpty property="remark" prepend=",">
+				#remark#
+			</isNotEmpty>
+			<isEmpty property="remark" prepend=",">
+				''
+			</isEmpty>	
+			<isNotEmpty property="createDate" prepend=",">
+				#createDate#
+			</isNotEmpty>
+			<isEmpty property="createDate" prepend=",">
+				now()
+			</isEmpty>			
+			<isNotEmpty property="createBy" prepend=",">
+				#createBy#
+			</isNotEmpty>
+			<isEmpty property="createBy" prepend=",">
+				''
+			</isEmpty>			
+			<isNotEmpty property="updateDate" prepend=",">
+				#updateDate#
+			</isNotEmpty>
+			<isEmpty property="updateDate" prepend=",">
+				now()
+			</isEmpty>			
+			<isNotEmpty property="updateBy" prepend=",">
+				#updateBy#
+			</isNotEmpty>
+			<isEmpty property="updateBy" prepend=",">
+				''
+			</isEmpty>		
+		)
+
+	</insert>
+	
+	<!-- 修改客户信息 -->
+	<update id="updateCust"  parameterClass="CUST">
+			update customer set 
+			<isNotEmpty property="custName" >
+				cust_name = #custName#
+			</isNotEmpty>
+			<isEmpty property="custName" >
+				cust_name = cust_name
+			</isEmpty>
+			<isNotEmpty property="password" prepend=",">
+				password = #password#
+			</isNotEmpty>
+			<isNotEmpty property="companyName" prepend=",">
+				company_name = #companyName#
+			</isNotEmpty>				
+			<isNotEmpty property="tradeId" prepend=",">
+				trade_id = #tradeId#
+			</isNotEmpty>	
+			<isNotEmpty property="contactPerson" prepend=",">
+				contact_person = #contactPerson#
+			</isNotEmpty>			
+			<isNotEmpty property="phoneNum" prepend=",">
+				phone_number = #phoneNum#
+			</isNotEmpty>			
+			<isNotEmpty property="address" prepend=",">
+				address = #address#
+			</isNotEmpty>
+			<isNotEmpty property="keyLevel" prepend=",">
+				key_level = #keyLevel#
+			</isNotEmpty>	
+			<isNotEmpty property="regionCode" prepend=",">
+				region_code = #regionCode#
+			</isNotEmpty>	
+			<isNotEmpty property="creditLevel" prepend=",">
+				credit_level = #creditLevel#
+			</isNotEmpty>	
+			<isNotEmpty property="remark" prepend=",">
+				remark = #remark#
+			</isNotEmpty>							
+			<isNotEmpty property="updateDate" prepend=",">
+				update_date = #updateDate#
+			</isNotEmpty>
+			<isEmpty property="updateDate" prepend=",">
+				update_date = now()
+			</isEmpty>				
+			<isNotEmpty property="updateBy" prepend=",">
+				update_by = #updateBy#
+			</isNotEmpty>	
+			
+		where
+			cust_num=#custNum#
+
+	</update>
+	
+	<!-- 修改客户信息 -->
+	<update id="updateCustByMap"  parameterClass="java.util.HashMap">
+			update customer set 
+			<isNotEmpty property="custName" >
+				cust_name = #custName#
+			</isNotEmpty>
+			<isEmpty property="custName" >
+				cust_name = cust_name
+			</isEmpty>
+			<isNotEmpty property="password" prepend=",">
+				password = #password#
+			</isNotEmpty>
+			<isNotEmpty property="companyName" prepend=",">
+				company_name = #companyName#
+			</isNotEmpty>				
+			<isNotEmpty property="tradeId" prepend=",">
+				trade_id = #tradeId#
+			</isNotEmpty>	
+			<isNotEmpty property="contactPerson" prepend=",">
+				contact_person = #contactPerson#
+			</isNotEmpty>			
+			<isNotEmpty property="phoneNum" prepend=",">
+				phone_number = #phoneNum#
+			</isNotEmpty>			
+			<isNotEmpty property="address" prepend=",">
+				address = #address#
+			</isNotEmpty>
+			<isNotEmpty property="keyLevel" prepend=",">
+				key_level = #keyLevel#
+			</isNotEmpty>	
+			<isNotEmpty property="regionCode" prepend=",">
+				region_code = #regionCode#
+			</isNotEmpty>	
+			<isNotEmpty property="creditLevel" prepend=",">
+				credit_level = #creditLevel#
+			</isNotEmpty>	
+			<isNotEmpty property="delFlag" prepend=",">
+				del_flag = #delFlag#
+			</isNotEmpty>		
+			<isNotEmpty property="remark" prepend=",">
+				remark = #remark#
+			</isNotEmpty>			
+			<isNotEmpty property="loginDate" prepend=",">
+				login_date = #loginDate#
+			</isNotEmpty>				
+			<isNotEmpty property="updateDate" prepend=",">
+				update_date = #updateDate#
+			</isNotEmpty>
+			<isEmpty property="updateDate" prepend=",">
+				update_date = now()
+			</isEmpty>				
+			<isNotEmpty property="updateBy" prepend=",">
+				update_by = #updateBy#
+			</isNotEmpty>	
+			
+		where
+			cust_num=#custNum#
+
+	</update>
+	
+	<!-- 获取客户信息-->
+	<select id="getCust" parameterClass="java.util.HashMap" resultMap="cust">
+		select    cust_num,
+			cust_name,
+			`password`,
+			owner_num,
+			key_level,
+			del_flag,
+			region_code,
+			credit_level,
+			company_name,
+			contact_person,
+			phone_number,
+			address,
+			trade_id,
+			remark,
+			create_from,
+			login_date,
+			create_date,
+			create_by,
+			update_date,
+			update_by from customer where  1 = 1
+		<dynamic>
+			<isNotEmpty property="ownerNum" prepend="and">
+			    owner_num = #ownerNum#
+			</isNotEmpty>
+			<isNotEmpty property="custNum" prepend="and">
+			    cust_num = #custNum#
+			</isNotEmpty>
+			<isNotEmpty property="custName" prepend="and">
+			    cust_name = #custName#
+			</isNotEmpty>
+			<isNotEmpty property="delFlag" prepend="and">
+			    del_flag = #delFlag#
+			</isNotEmpty>
+		</dynamic>
+	</select>
+	
+	<!-- 获取登录客户信息-->
+	<select id="getLoginCust" parameterClass="java.util.HashMap" resultMap="cust">
+		select    cust_num,
+			cust_name,
+			`password`,
+			owner_num,
+			key_level,
+			del_flag,
+			region_code,
+			credit_level,
+			company_name,
+			contact_person,
+			phone_number,
+			address,
+			trade_id,
+			remark,
+			create_from,
+			login_date,
+			create_date,
+			create_by,
+			update_date,
+			update_by from customer where 
+			cust_name = #custName# and
+			password = #password# and 
+			owner_num = #ownerNum#
+	
+	</select>
+</sqlMap>

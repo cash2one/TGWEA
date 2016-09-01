@@ -1,0 +1,182 @@
+package com.etaoguan.wea.client.web.service.impl;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.stereotype.Service;
+
+import com.etaoguan.wea.client.web.service.IWAdminService;
+import com.etaoguan.wea.client.web.vo.WAdmin;
+import com.etaoguan.wea.client.web.vo.WAdminGroup;
+import com.etaoguan.wea.client.web.vo.WAdminRole;
+import com.etaoguan.wea.common.WeaException;
+import com.etaoguan.wea.service.impl.AdminService;
+import com.etaoguan.wea.vo.AccessOperation;
+import com.etaoguan.wea.vo.Admin;
+import com.etaoguan.wea.vo.AdminGroup;
+import com.etaoguan.wea.vo.AdminRole;
+
+@Service("wadminService")
+public class WAdminService extends AdminService implements IWAdminService{
+
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	public Map getEditAdminInitData(String adminId) {
+		Map dataMap = new HashMap();
+		List<AdminGroup> adminGroups = null;
+		List<AdminGroup> noAdminGroups = new ArrayList<AdminGroup>();
+		List<AdminGroup> groups = getAllGroups();
+		if(StringUtils.isNotEmpty(adminId)){
+			int intAdminId = Integer.parseInt(adminId);
+			Admin admin = getAdmin(intAdminId);
+			adminGroups = getAdminGroups(intAdminId);
+			for(AdminGroup group:groups){
+				boolean exists = false;
+				for(AdminGroup adminGroup:adminGroups){
+					if(group.getGroupId()==adminGroup.getGroupId()){
+						exists = true;
+						break;
+					}
+				}
+				if(!exists){
+					noAdminGroups.add(group);
+				}
+			}
+			dataMap.put("admin",admin);
+
+		}else{
+			noAdminGroups = groups;
+	
+		}
+		dataMap.put("adminGroups",adminGroups);
+		dataMap.put("noAdminGroups",noAdminGroups);
+		return dataMap;
+	}
+
+	public void saveOrUpdateAdmin(WAdmin wAdmin) {
+		if(wAdmin.getGroupIds()==null||wAdmin.getGroupIds().length==0){
+			throw new WeaException("缺少关联组");
+		}
+		if(wAdmin.getAdmin().getAdminId() == 0){
+			int adminId = addAdmin(wAdmin.getAdmin());
+			updateAdminGroupRelations(adminId,wAdmin.getGroupIds());
+		}else{
+			updateAdmin(wAdmin.getAdmin());
+			updateAdminGroupRelations(wAdmin.getAdmin().getAdminId(),wAdmin.getGroupIds());
+		}
+		
+	}
+	
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	public Map getEditGroupInitData(String groupId) {
+		Map dataMap = new HashMap();
+		List<AdminRole> groupRoles = null;
+		List<AdminRole> noGroupRoles = new ArrayList<AdminRole>();
+		List<AdminRole> roles = getAllRoles();
+		if(StringUtils.isNotEmpty(groupId)){
+			int intGroupId = Integer.parseInt(groupId);
+			AdminGroup group = getGroup(intGroupId);
+			groupRoles = getGroupRoles(intGroupId);
+			for(AdminRole role:roles){
+				boolean exists = false;
+				for(AdminRole groupRole:groupRoles){
+					if(role.getRoleId()==groupRole.getRoleId()){
+						exists = true;
+						break;
+					}
+				}
+				if(!exists){
+					noGroupRoles.add(role);
+				}
+			}
+			dataMap.put("group",group);
+
+		}else{
+			noGroupRoles = roles;
+	
+		}
+		dataMap.put("groupRoles",groupRoles);
+		dataMap.put("noGroupRoles",noGroupRoles);
+		return dataMap;
+	}
+
+	public void saveOrUpdateGroup(WAdminGroup wAdminGroup) {
+		if(wAdminGroup.getRoleIds()==null||wAdminGroup.getRoleIds().length==0){
+			throw new WeaException("缺少关联角色");
+		}
+		if(wAdminGroup.getAdminGroup().getGroupId() == 0){
+			int groupId = addGroup(wAdminGroup.getAdminGroup());
+			updateGroupRoleRelations(groupId,wAdminGroup.getRoleIds());
+		}else{
+			updateGroup(wAdminGroup.getAdminGroup());
+			updateGroupRoleRelations(wAdminGroup.getAdminGroup().getGroupId(),wAdminGroup.getRoleIds());
+		}
+		
+	}
+	
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	public Map getEditRoleInitData(String roleId) {
+		Map dataMap = new HashMap();
+		Map operationMap = new HashMap();
+		Map roleOperationMap = new HashMap();
+		List<AccessOperation> accessOperations = getAllAccessOperations();
+		for(AccessOperation accessOperation:accessOperations){
+			List<AccessOperation> moduleOperations = (List<AccessOperation>)operationMap.get(accessOperation.getModuleName());
+			if(moduleOperations == null){
+				moduleOperations = new ArrayList<AccessOperation>();
+				operationMap.put(accessOperation.getModuleName(), moduleOperations);
+			}
+			moduleOperations.add(accessOperation);
+			
+		}
+		if(StringUtils.isNotEmpty(roleId)){
+			int intRoleId = Integer.parseInt(roleId);
+			AdminRole role = getRole(intRoleId);
+			List<AccessOperation> roleAccessOperations = getRoleAccessOperations(intRoleId);
+			for(AccessOperation roleAccessOperation:roleAccessOperations){
+				roleOperationMap.put(roleAccessOperation.getModuleName()+";"+roleAccessOperation.getOperationName(), roleAccessOperation);
+			}
+			dataMap.put("role", role);
+			dataMap.put("roleOperationsMap", roleOperationMap);
+		}
+		dataMap.put("operationsMap", operationMap);
+		return dataMap;
+	}
+
+	public void saveOrUpdateRole(WAdminRole wAdminRole) {
+		if(wAdminRole.getModuleNOperations()==null||wAdminRole.getModuleNOperations().size()==0){
+			throw new WeaException("不包含任何功能权限");
+		}
+		List<AccessOperation> roleOperationList = new ArrayList<AccessOperation>();
+		for(String moduleNOperation:wAdminRole.getModuleNOperations()){
+			String[] moduleNOperationArray = StringUtils.split(moduleNOperation, ";");
+			AccessOperation accessOperation = new AccessOperation();
+			accessOperation.setModuleName(moduleNOperationArray[0]);
+			accessOperation.setOperationName(moduleNOperationArray[1]);
+			roleOperationList.add(accessOperation);
+		}
+		if(wAdminRole.getAdminRole().getRoleId() == 0){
+			int roleId = addRole(wAdminRole.getAdminRole());
+
+			updateRoleOperationRelations(roleId,roleOperationList);
+		}else{
+			updateRole(wAdminRole.getAdminRole());
+			updateRoleOperationRelations(wAdminRole.getAdminRole().getRoleId(),roleOperationList);
+		}
+		
+	}
+
+	public void updateResetAdminPwd(String adminId, String oldPwd, String newPwd) {
+		Admin admin  = getAdmin(Integer.parseInt(adminId));
+		if(admin.getAdminPwd().equals(oldPwd)){
+			updateAdminPwd(admin.getAdminId(), newPwd);
+			admin.setAdminPwd(newPwd);
+		}else{
+			
+			throw new WeaException("旧密码输入错误，修改失败！");
+		}
+	}
+
+}

@@ -1,0 +1,367 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+
+<!-- author 刘卿 -->
+<!-- 感谢ibatis的持久层框架 -->
+
+<sqlMap>
+
+	<typeAlias alias="PRODSTOCK" type="com.etaoguan.wea.vo.ProdStock"/>
+	<typeAlias alias="STOCKTRACE" type="com.etaoguan.wea.vo.StockTrace"/>
+
+	<resultMap id="prodStock" class="PRODSTOCK">
+		<result property="whNum" column="wh_num"/>
+		<result property="ownerNum" column="owner_num"/>
+		<result property="prodNum" column="prod_num"/>
+		<result property="differName" column="differ_name" />
+		<result property="cases" column="cases"/>
+		<result property="pieces" column="pieces"/>
+		<result property="sku" column="sku"/>
+		<result property="createDate" column="create_date"/>
+		<result property="createBy" column="create_by"/>
+		<result property="updateDate" column="update_date"/>
+		<result property="updateBy" column="update_by"/>
+	</resultMap>
+	
+	<resultMap id="compProdStockDataSet" class="PRODSTOCK" extends="prodStock">
+		<result property="whName" column="wh_name"/>
+		<result property="product.prodNum" column="prod_num"/>
+		<result property="product.prodName" column="prod_name"/>
+		<result property="product.unit" column="unit"/>
+	</resultMap>
+	
+	<resultMap id="stockTrace" class="STOCKTRACE">
+		<result property="traceId" column="trace_id"/>
+		<result property="whNum" column="wh_num"/>
+		<result property="whName" column="wh_name"/>
+		<result property="ownerNum" column="owner_num"/>
+		<result property="prodNum" column="prod_num"/>
+		<result property="prodName" column="prod_name"/>
+		<result property="differName" column="differ_name" />
+		<result property="deltaCases" column="delta_cases"/>
+		<result property="deltaPieces" column="delta_pieces"/>
+		<result property="deltaSku" column="delta_sku"/>
+		<result property="referNum" column="refer_num"/>
+		<result property="referModule" column="refer_module"/>
+		<result property="remark" column="remark"/>
+		<result property="createDate" column="create_date"/>
+		<result property="createBy" column="create_by"/>
+		<result property="updateDate" column="update_date"/>
+		<result property="updateBy" column="update_by"/>
+	</resultMap>
+
+	<select id="getProdStockCount" parameterClass="java.util.HashMap" resultClass="java.lang.Integer">
+		SELECT  count(1) FROM 
+		(select 
+			prod_num from product_stock 
+			where owner_num = #ownerNum# 
+		<isNotEmpty property="whNum"  prepend="and">
+			wh_num = #whNum# 
+		</isNotEmpty>
+		) t1,
+		
+		(SELECT
+		prod_num 
+		FROM 
+		product where owner_num = #ownerNum# 
+		<isNotEmpty property="prodName" prepend="and">
+			prod_name like CONCAT('%',#prodName#, '%')  
+		</isNotEmpty> 
+		) t2 
+		where t1.prod_num = t2.prod_num
+	</select>
+
+	<select id="getProdStockDataSet" parameterClass="java.util.HashMap"  resultMap="compProdStockDataSet">
+		SELECT  t1.*,t3.wh_name,t2.prod_name,t2.unit FROM 
+		(select wh_num,
+		owner_num,
+		prod_num,
+		differ_name,
+		cases,
+		pieces,
+		sku,
+		create_date,
+		create_by,
+		update_date,
+		update_by from product_stock where owner_num = #ownerNum# 
+		<isNotEmpty property="whNum"  prepend="and">	
+		wh_num = #whNum#
+		</isNotEmpty>
+		
+		<!-- 页面传递的降序字段 -->
+		<isNotEmpty property="desc">
+		   order by $desc$ desc 
+		</isNotEmpty>
+		<!-- 页面传递的升序字段 -->
+		<isNotEmpty property="asc">
+		   order by  $asc$ asc 
+		</isNotEmpty>
+		
+		limit #limit# offset #offset# 
+		
+		)t1,
+		(SELECT
+		prod_num,
+		prod_name,
+		unit   
+		FROM 
+		product where owner_num = #ownerNum# 
+		<isNotEmpty property="prodName" prepend="and">	
+			prod_name like CONCAT('%',#prodName#, '%')  
+		</isNotEmpty> 
+		)t2, warehouse t3 
+		where t1.prod_num = t2.prod_num and t1.wh_num = t3.wh_num 
+		<!-- 页面传递的降序字段 -->
+		<isNotEmpty property="desc">
+		   order by $desc$ desc 
+		</isNotEmpty>
+		<!-- 页面传递的升序字段 -->
+		<isNotEmpty property="asc">
+		   order by  $asc$ asc 
+		</isNotEmpty>
+	</select>
+	
+
+	<insert id="createProdStock" parameterClass="PRODSTOCK">
+		insert into product_stock 
+		(
+		wh_num,
+		owner_num,
+		prod_num,
+		differ_name,
+		cases,
+		pieces,
+		sku,
+		create_date,
+		create_by,
+		update_date,
+		update_by 
+		)
+		values(
+			#whNum#,
+			#ownerNum#,		
+			#prodNum#,
+			#differName#,
+			#cases#,
+			#pieces#,
+			#sku#	
+			<isNotEmpty property="createDate" prepend=",">
+				#createDate#
+			</isNotEmpty>
+			<isEmpty property="createDate" prepend=",">
+				now()
+			</isEmpty>			
+			<isNotEmpty property="createBy" prepend=",">
+				#createBy#
+			</isNotEmpty>
+			<isEmpty property="createBy" prepend=",">
+				''
+			</isEmpty>			
+			<isNotEmpty property="updateDate" prepend=",">
+				#updateDate#
+			</isNotEmpty>
+			<isEmpty property="updateDate" prepend=",">
+				now()
+			</isEmpty>			
+			<isNotEmpty property="updateBy" prepend=",">
+				#updateBy#
+			</isNotEmpty>
+			<isEmpty property="updateBy" prepend=",">
+				''
+			</isEmpty>		
+		)
+
+	</insert>
+	
+	<insert id="createStockTrace"  parameterClass="STOCKTRACE">
+		insert into stock_trace 
+		(
+			wh_num,
+			wh_name,
+			owner_num,
+			prod_num,
+			prod_name,
+			differ_name,
+			delta_cases,
+			delta_pieces,
+			delta_sku,
+			refer_num,
+			refer_module,
+			remark,
+			create_date,
+			create_by,
+			update_date,
+			update_by
+		)
+		values(
+			#whNum#,
+			#whName#,
+			#ownerNum#,		
+			#prodNum#,
+			#prodName#,
+			#differName#,
+			#deltaCases#,
+			#deltaPieces#,
+			#deltaSku#
+			<isNotEmpty property="referNum" prepend=",">
+				#referNum#
+			</isNotEmpty>
+			<isEmpty property="referNum" prepend=",">
+				''
+			</isEmpty>	
+			<isNotEmpty property="referModule" prepend=",">
+				#referModule#
+			</isNotEmpty>
+			<isEmpty property="referModule" prepend=",">
+				''
+			</isEmpty>	
+			<isNotEmpty property="remark" prepend=",">
+				#remark#
+			</isNotEmpty>
+			<isEmpty property="remark" prepend=",">
+				''
+			</isEmpty>	
+			<isNotEmpty property="createDate" prepend=",">
+				#createDate#
+			</isNotEmpty>
+			<isEmpty property="createDate" prepend=",">
+				now()
+			</isEmpty>			
+			<isNotEmpty property="createBy" prepend=",">
+				#createBy#
+			</isNotEmpty>
+			<isEmpty property="createBy" prepend=",">
+				''
+			</isEmpty>			
+			<isNotEmpty property="updateDate" prepend=",">
+				#updateDate#
+			</isNotEmpty>
+			<isEmpty property="updateDate" prepend=",">
+				now()
+			</isEmpty>			
+			<isNotEmpty property="updateBy" prepend=",">
+				#updateBy#
+			</isNotEmpty>
+			<isEmpty property="updateBy" prepend=",">
+				''
+			</isEmpty>		
+		)
+
+	</insert>
+
+	<select id="getProdStock" parameterClass="java.util.HashMap" resultMap="prodStock">
+	
+		SELECT wh_num,
+		owner_num,
+		prod_num,
+		differ_name,
+		cases,
+		pieces,
+		sku,
+		create_date,
+		create_by,
+		update_date,
+		update_by 
+		FROM product_stock  
+		where owner_num = #ownerNum# and prod_num = #prodNum# and wh_num =#whNum#
+
+	</select>
+	
+	<select id="getProdStockList" parameterClass="java.util.HashMap" resultMap="prodStock">
+	
+		SELECT wh_num,
+		owner_num,
+		prod_num,
+		differ_name,
+		cases,
+		pieces,
+		sku,
+		create_date,
+		create_by,
+		update_date,
+		update_by 
+		FROM product_stock  
+		where owner_num = #ownerNum# 
+		<dynamic>
+			<isNotEmpty property="whNum" prepend="and">
+			    wh_num = #whNum#
+			</isNotEmpty>
+			<isNotEmpty property="prodNums" prepend="and">
+			    prod_num IN 
+			    <iterate property="prodNums" open="(" close=")" conjunction=","> 
+			    #prodNums[]#
+			    </iterate>
+			</isNotEmpty>
+			<isNotEmpty property="differName" prepend="and">
+			    differ_name = #differName#
+			</isNotEmpty>
+		</dynamic>
+
+	</select>
+
+	
+	<update id="updateProdStock"  parameterClass="PRODSTOCK">
+			update product_stock set 
+			cases = #cases#,
+			pieces = #pieces#,
+			sku = #sku#
+			<isEmpty property="updateDate" prepend=",">
+				update_date = now()
+			</isEmpty>			
+			<isNotEmpty property="updateBy" prepend=",">
+				update_by = #updateBy#
+			</isNotEmpty>
+			<isEmpty property="updateBy" prepend=",">
+				update_by = ''
+			</isEmpty>	
+			where owner_num = #ownerNum# and prod_num = #prodNum# and wh_num =#whNum# and differ_name = #differName#
+	</update>
+	
+	<select id="getStockTraceCount" parameterClass="java.util.HashMap" resultClass="java.lang.Integer">
+		SELECT  count(1) FROM 
+		stock_trace 
+		where owner_num = #ownerNum# 
+		<isNotEmpty property="whNum" prepend="and">
+			wh_num = #whNum# 
+		</isNotEmpty>
+		<isNotEmpty property="prodName" prepend="and">
+			prod_name like CONCAT('%',#prodName#, '%')
+		</isNotEmpty> 
+	</select>
+	
+	<select id="getStockTraceDataSet" parameterClass="java.util.HashMap" resultMap="stockTrace">
+		SELECT trace_id,
+		wh_num,
+		wh_name,
+		owner_num,
+		prod_num,
+		prod_name,
+		differ_name,
+		delta_cases,
+		delta_pieces,
+		delta_sku,
+		refer_num,
+		refer_module,
+		remark,
+		create_date,
+		create_by,
+		update_date,
+		update_by FROM 
+		stock_trace 
+		where owner_num = #ownerNum# 
+		<isNotEmpty property="whNum" prepend="and">
+			wh_num = #whNum# 
+		</isNotEmpty>
+		<isNotEmpty property="prodName" prepend="and">
+			prod_name like CONCAT('%',#prodName#, '%')
+		</isNotEmpty> 
+		
+		<isNull property="asc">
+			<isNull property="desc">order by create_date desc
+			</isNull>
+		</isNull>
+		
+		limit #limit# offset #offset#
+	</select>
+	
+</sqlMap>

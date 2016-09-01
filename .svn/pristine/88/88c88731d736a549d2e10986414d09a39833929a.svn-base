@@ -1,0 +1,43 @@
+<div class="modal register" ng-controller="registerCtrl">
+    <ion-header-bar class="bar bar-header ibarColor">
+        <button class="button button-clear ion-ios-arrow-back" ng-click="iregister.hide()">
+        </button>
+        <h1 class="title">用户注册</h1>
+    </ion-header-bar>
+    <ion-content>
+        <div class="list list-inset">
+            <label class="item item-input iLabel">
+                <i class="ion-android-phone-portrait placeholder-icon" ng-style="registerPhone" style="margin-top:4px; margin-left: 6px;font-size: 27px;"></i>
+                <input type="text" placeholder="手机号码"  style="margin-left: 4px;font-size: 16px;" ng-model="register.rPhone" ng-focus="rphoneFocus()" ng-blur="rphoneBlur()" />
+            </label>
+        </div>
+
+        <div class="list list-inset" style="max-height:47px;">
+            <label class="item item-input iLabel" style="max-width:60%;">
+                <i class="ion-android-phone-portrait placeholder-icon" ng-style="registerVerifi" style="margin-left: 6px;margin-top:4px; font-size: 27px;"></i>
+                <input type="text" id="verifiCode"  placeholder="验证码" ng-model="register.rverifi" ng-focus="rverifiFocus()" ng-blur="rverifiBlur()"/>
+            </label>
+            <button class="button button-block button-light" id="getVerifiCode" ng-click="getVerfiCode()" ng-if="verifiShow === true">获取验证码</button>
+            <div id="getVerifiCode_display" nf-if="verifiShow === false"><span ng-bind="iTimer"></span>秒后重发</div>
+        </div>
+
+        <div class="list list-inset">
+            <label class="item item-input iLabel">
+                <i class="ion-android-lock dark placeholder-icon" ng-style="registerPass" style="margin-left: 4px;margin-top:4px; font-size: 27px;"></i>
+                <input type="password" placeholder="密 码" style="margin-left: 4px;font-size: 16px;" ng-model="register.rPass" ng-focus="rpassFocus()" ng-blur="rpassBlur()"/>
+            </label>
+        </div>
+
+        <div class="list list-inset">
+            <label class="item item-input iLabel">
+                <i class="ion-android-lock placeholder-icon" ng-style="registerPassC" style="margin-top:2px; margin-left: 4px;"></i>
+                <input type="password" placeholder="密码确认" style="margin-left: 4px;font-size: 16px;" ng-model="register.rPassC" ng-focus="rpasscFocus()" ng-blur="rpasscBlur()"/>
+            </label>
+        </div>
+
+
+        <div class="row padding">
+            <button class="button button-block button-positive" id="sendMessage" ng-click="registerSend()">提交注册信息</button>
+        </div>
+    </ion-content>
+</div>

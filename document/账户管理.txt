@@ -1,0 +1,41 @@
+
+
+账户管理————>查看管理员
+
+点击“查看管理员”转到 owner/wListOwnerAdmin.action ————> /owner/account/list_admins.jsp
+
+到list_admins.jsp 后，页面执行 function f_showWarehousesData() 显示数据
+
+function f_showWarehousesData() 到/owner/wListAdminData.action 获取数据
+
+wListAdminData.action 根据ownerNum获取管理员列表————>进入OwnerAdmin.ibt.xml执行id="getOwnerAdmins"
+
+
+点击"删除"执行f_deleteOwneradmin(rowid)
+
+获取rowid,根据rowid获取这条数据的对象，然后根据对象获取管理面姓名，如果管理员姓名无效，就直接删除这行。
+如果管理员姓名有效，先询问是否删除，点击确定删除后进行删除这条数据（这个管理员）。
+
+删除这条数据时进入/owner/wDelOwneradmin.action同时把管理员id传过去。
+wDelOwneradmin.action 获取传过来的管理员id,根据这个id删除这条数据。
+进入OwnerAdmin.ibt.xml执行id="deleteOwnerAdmin"
+
+
+点击“添加管理员图标”，执行function f_addOwneradmin()， function f_addOwneradmin() 调用这个框架的方法进入添加状态。
+
+
+点击“保存数据图标”，执行function f_updateWarehouse(rowid)，用这个框架自己的方法获取当前输入端管理员的名字，如果获取到的管理员的名字无效，就提示‘请输入管理员用户名’，并且不保存。
+如果获取的当前输入的管理员的名字有效，就进入 /owner/wSaveOwneradmin.action，同时把获取到的管理员的名字传过去。
+wSaveOwneradmin.action 获取ownerNum,根据ownerNum和adminName查询当前输入的管理员的名字和数据库里的是否有重复，如果有重复就在前台提示”请不要添加重复的用户名！“.
+如果没有重复就把当前这个管理员添加到数据库，同时设置默认密码为888888
+
+
+点击“删除图标”，执行function f_cancelUpdateWarehouse(rowid)，根据rowid关闭当前行。根据rowid获取当前对象，根据当前对象获取当前输入的管理员的名字，如果名字无效就删除当前行。
+
+
+
+
+
+
+
+

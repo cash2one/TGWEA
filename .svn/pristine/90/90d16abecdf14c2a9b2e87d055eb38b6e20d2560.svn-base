@@ -1,0 +1,26 @@
+package com.etaoguan.wea.vo;
+
+public class AdminGroupRef  extends BaseVo{
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	private int groupId;
+	private int adminId;
+	
+	public int getGroupId() {
+		return groupId;
+	}
+	public void setGroupId(int groupId) {
+		this.groupId = groupId;
+	}
+	public int getAdminId() {
+		return adminId;
+	}
+	public void setAdminId(int adminId) {
+		this.adminId = adminId;
+	}
+	
+	
+}

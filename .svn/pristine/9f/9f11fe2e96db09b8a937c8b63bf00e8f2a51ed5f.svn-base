@@ -1,0 +1,42 @@
+package com.etaoguan.wea.client.mobile.action.common;
+
+import java.io.IOException;
+import java.util.Map;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.apache.struts2.convention.annotation.Action;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Service;
+
+import com.etaoguan.wea.annotation.WeaModule;
+import com.etaoguan.wea.client.mobile.action.MCommonBaseAction;
+import com.etaoguan.wea.client.mobile.service.IMPaymentService;
+
+
+@SuppressWarnings("serial")
+@WeaModule(mname="1688数据同步管理")
+@Service("mpaymentCallbackAction") @Scope("prototype")
+public class MPaymentCallbackAction extends MCommonBaseAction{
+	
+	@SuppressWarnings("unused")
+	private final static Log logger = LogFactory.getLog(MPaymentCallbackAction.class);
+
+	@Autowired
+	private IMPaymentService imPaymentService;
+
+	@SuppressWarnings("rawtypes")
+	@Action(value="alipayWapCallback")
+	public String alipayWapCallback() throws IOException {
+		
+		Map requestParams = getRequest().getParameterMap();
+		logger.info("=========alipayWap Callback=========");
+		imPaymentService.processAlipayWapResp(requestParams);
+		
+		writeResponse("success");
+		
+		return null;
+	}
+
+}

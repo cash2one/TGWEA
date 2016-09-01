@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+
+<!-- author 刘卿 -->
+<!-- 感谢ibatis的持久层框架 -->
+
+<sqlMap>
+
+	<typeAlias alias="OWNERADMIN" type="com.etaoguan.wea.vo.OwnerAdmin" />
+
+	<resultMap id="ownerAdmin" class="OWNERADMIN">
+		<result property="adminId" column="admin_id" />
+		<result property="ownerNum" column="owner_num" />
+		<result property="adminName" column="admin_name" />
+		<result property="adminPwd" column="admin_pwd" />
+		<result property="reserveFlag" column="reserve_flag" />
+		<result property="loginDate" column="login_date" />
+		<result property="createDate" column="create_date" />
+		<result property="createBy" column="create_by" />
+		<result property="updateDate" column="update_date" />
+		<result property="updateBy" column="update_by" />
+	</resultMap>
+	
+	<select id="duplicateCheck" parameterClass="java.util.HashMap" resultClass="java.lang.Integer">
+	select count(1) from owner_admin where owner_num = #ownerNum# and admin_name = #adminName#
+	</select>
+
+	<!-- 删除管理员 -->
+	<delete id="deleteOwnerAdmin" parameterClass="java.util.HashMap">
+		DELETE from owner_admin WHERE admin_id = #adminId#
+	</delete>
+	
+	<insert id="createOwnerAdmin" parameterClass="OWNERADMIN">
+		insert into owner_admin
+		(
+		admin_name,
+		admin_pwd,
+		owner_num,
+		reserve_flag,
+		create_date,
+		create_by,
+		update_date,
+		update_by
+		)
+		values(
+		#adminName#,
+		#adminPwd#,
+		#ownerNum#,
+		#reserveFlag#
+		<isNotEmpty property="createDate" prepend=",">
+			#createDate#
+		</isNotEmpty>
+		<isEmpty property="createDate" prepend=",">
+			now()
+		</isEmpty>
+		<isNotEmpty property="createBy" prepend=",">
+			#createBy#
+		</isNotEmpty>
+		<isEmpty property="createBy" prepend=",">
+			''
+		</isEmpty>
+		<isNotEmpty property="updateDate" prepend=",">
+			#updateDate#
+		</isNotEmpty>
+		<isEmpty property="updateDate" prepend=",">
+			now()
+		</isEmpty>
+		<isNotEmpty property="updateBy" prepend=",">
+			#updateBy#
+		</isNotEmpty>
+		<isEmpty property="updateBy" prepend=",">
+			''
+		</isEmpty>
+		)
+
+	</insert>
+
+	<update id="updateOwnerAdminByMap" parameterClass="java.util.HashMap">
+		update owner_admin set
+		<isNotEmpty property="adminName">
+			admin_name = #adminName#
+		</isNotEmpty>
+		<isEmpty property="adminName">
+			admin_name = admin_name
+		</isEmpty>
+		<isNotEmpty property="adminPwd" prepend=",">
+			admin_pwd = #adminPwd#
+		</isNotEmpty>
+		<isNotEmpty property="loginDate" prepend=",">
+			login_date = #loginDate#
+		</isNotEmpty>
+		<isNotEmpty property="updateDate" prepend=",">
+			update_date = #updateDate#
+		</isNotEmpty>
+		<isEmpty property="updateDate" prepend=",">
+			update_date = now()
+		</isEmpty>
+		<isNotEmpty property="updateBy" prepend=",">
+			update_by = #updateBy#
+		</isNotEmpty>
+
+		where
+		admin_id=#adminId#
+
+	</update>
+
+
+	<select id="getOwnerAdmin" parameterClass="java.util.HashMap"
+		resultMap="ownerAdmin">
+		select admin_id,
+		admin_name,
+		admin_pwd,
+		owner_num,
+		reserve_flag,
+		login_date,
+		create_date,
+		create_by,
+		update_date,
+		update_by
+		from owner_admin where admin_id = #adminId#
+
+	</select>
+
+	<select id="getOwnerAdmins" parameterClass="java.util.HashMap"
+		resultMap="ownerAdmin">
+		select admin_id,
+		admin_name,
+		admin_pwd,
+		owner_num,
+		reserve_flag,
+		login_date,
+		create_date,
+		create_by,
+		update_date,
+		update_by from
+		owner_admin where owner_num = #ownerNum#
+		<isNotEmpty property="reserveFlag" prepend="and">
+			reserve_flag =
+			#reserveFlag#
+		</isNotEmpty>
+
+	</select>
+
+	<select id="getLoginOwnerAdmin" parameterClass="java.util.HashMap"
+		resultMap="ownerAdmin">
+		select
+		admin_id,
+		admin_name,
+		admin_pwd,
+		owner_num,
+		login_date,
+		reserve_flag,
+		create_date,
+		create_by,
+		update_date,
+		update_by from owner_admin where
+		admin_name = #adminName#
+		and admin_pwd = #adminPwd# 
+		and owner_num = #ownerNum#
+
+	</select>
+
+</sqlMap>

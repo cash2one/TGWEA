@@ -1,0 +1,79 @@
+@charset "utf-8";
+
+.floatleft {
+	float: left;
+}
+
+.bcolor {
+	background-color: #e6a96a;
+}
+
+.borderradius {
+	border-radius: 0.3rem;
+	-webkit-border-radius: 0.3rem;
+	-moz-border-radius: 0.3rem;
+}
+
+.both {
+	clear: both
+}
+
+.adminico {
+	margin-left: 28rem;
+	padding: 0.5rem;
+	width: 1.5rem;
+	margin-bottom: 1.5rem;
+}
+
+li {
+	text-align: right;
+}
+
+.prompt {
+	font-size: 12px;
+	color: #fa6900;
+}
+
+#beautiful {
+	margin: 3rem auto auto auto;
+	padding-top: 2rem;
+	padding-bottom: 5rem;
+	padding-left: 5rem;
+	filter: progid:DXImageTransform.Microsoft.gradient(startcolorstr=#eeeeee,
+		endcolorstr=#ffffff, gradientType=0);
+	background: -moz-linear-gradient(top, #eeeeee, #ffffff);
+	background: -webkit-gradient(linear, 0 0, 0 bottom, from(#eeeeee),
+		to(#ffffff));
+	background: -o-linear-gradient(top, #eeeeee, #ffffff);
+	box-shadow: 0px -5px 7px #999999;
+	border-radius: 1rem;
+	width: 45rem;
+}
+
+#etitle {
+	font-size: 2rem;
+	color: #db4a39;
+	text-align: center;
+}
+
+#whereimg {
+	float: left;
+	margin-left: 2rem;
+}
+
+#whatfont {
+	float: left;
+	font-size: 2rem;
+	margin-left: 6rem;
+	margin-top: 3rem;
+	color: #db4a39;
+	
+	letter-spacing: 1rem;
+	font-weight: bold;
+	text-shadow: 0px 0px 0 rgb(225, 225, 225), 1px 1px 0 rgb(211, 211, 211),
+		2px 2px 0 rgb(196, 196, 196), 3px 3px 0 rgb(181, 181, 181), 4px 4px 0
+		rgb(166, 166, 166), 5px 5px 0 rgb(152, 152, 152), 6px 6px 0
+		rgb(137, 137, 137), 7px 7px 0 rgb(122, 122, 122), 8px 8px 7px
+		rgba(0, 0, 0, 0.45), 8px 8px 1px rgba(0, 0, 0, 0.5), 0px 0px 7px
+		rgba(0, 0, 0, .2);
+}

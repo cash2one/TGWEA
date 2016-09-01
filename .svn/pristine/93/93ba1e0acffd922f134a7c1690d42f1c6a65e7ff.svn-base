@@ -1,0 +1,135 @@
+package com.etaoguan.wea.service.impl;
+
+import java.util.List;
+
+import javax.annotation.Resource;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.etaoguan.wea.common.DataCriteria;
+import com.etaoguan.wea.common.DataSet;
+import com.etaoguan.wea.common.OffsetRequest;
+import com.etaoguan.wea.dao.IProdPriceDao;
+import com.etaoguan.wea.service.IProdPriceService;
+import com.etaoguan.wea.service.IProductService;
+import com.etaoguan.wea.vo.CustProdPrice;
+import com.etaoguan.wea.vo.ProdPrice;
+
+@Service("prodPriceService")
+public class ProdPriceService  extends BaseService implements IProdPriceService {
+
+	@Autowired
+	private IProdPriceDao iProdPriceDao;
+	
+	@Resource(name="productService")
+	private IProductService iProductService;
+	
+	public void delCustProdPrice(String custNum, String prodNum) {
+		DataCriteria dataCriteria = new DataCriteria();
+		dataCriteria.setParam("custNum",custNum);
+		dataCriteria.setParam("prodNum",prodNum);
+		iProdPriceDao.delCustProdPrice(dataCriteria);
+
+	}
+
+	public void delProdPrice(String prodNum) {
+		DataCriteria dataCriteria = new DataCriteria();
+		dataCriteria.setParam("prodNum",prodNum);
+		iProdPriceDao.delProdPrice(dataCriteria);
+		iProductService.updateProdStdPrice(prodNum, 0);
+
+	}
+
+	public boolean existsCustProdPrice(String custNum, String prodNum) {
+		DataCriteria dataCriteria = new DataCriteria();
+		dataCriteria.setParam("custNum",custNum);
+		dataCriteria.setParam("prodNum",prodNum);
+		if(iProdPriceDao.getCustProdPrice(dataCriteria)==null){
+			return false;
+		}
+		return true;
+	}
+
+	public boolean existsProdPrice(String prodNum) {
+		DataCriteria dataCriteria = new DataCriteria();
+		dataCriteria.setParam("prodNum",prodNum);
+		if(iProdPriceDao.getProdPrice(dataCriteria)==null){
+			return false;
+		}
+		return true;
+	}
+
+	public CustProdPrice getCustFinalProdPrice(String custNum, String prodNum) {
+		DataCriteria dataCriteria = new DataCriteria();
+		dataCriteria.setParam("prodNum",prodNum);
+		dataCriteria.setParam("custNum",custNum);
+		return iProdPriceDao.getCustFinalProdPrice(dataCriteria);
+	}
+
+	public List<CustProdPrice> getCustFinalProdPriceList(String custNum) {
+		DataCriteria dataCriteria = new DataCriteria();
+		dataCriteria.setParam("custNum",custNum);
+		return iProdPriceDao.getCustFinalProdPriceList(dataCriteria);
+	}
+
+	@SuppressWarnings("rawtypes")
+	public DataSet listCustProdPrices(DataCriteria dataCriteria,
+			OffsetRequest offsetRequest) {
+		return iProdPriceDao.getCustProdPrices(dataCriteria, offsetRequest);
+	}
+
+	@SuppressWarnings("rawtypes")
+	public DataSet listProdPrices(DataCriteria dataCriteria,
+			OffsetRequest offsetRequest) {
+		return iProdPriceDao.getProdPrices(dataCriteria, offsetRequest);
+	}
+	
+	public void saveCustProdPrice(CustProdPrice custProdPrice) {
+		custProdPrice.setCreateBy(getCurrentOperator());
+		custProdPrice.setUpdateBy(getCurrentOperator());
+		iProdPriceDao.saveCustProdPrice(custProdPrice);
+		
+	}
+
+	public void saveProdPrice(ProdPrice prodPrice) {
+		prodPrice.setCreateBy(getCurrentOperator());
+		prodPrice.setUpdateBy(getCurrentOperator());
+		iProdPriceDao.saveProdPrice(prodPrice);	
+		iProductService.updateProdStdPrice(prodPrice.getProdNum(),prodPrice.getProdPrice());
+	}
+
+	public void updateCustProdPrice(CustProdPrice custProdPrice) {
+		custProdPrice.setUpdateBy(getCurrentOperator());
+		iProdPriceDao.updateCustProdPrice(custProdPrice);
+		
+	}
+
+	public void updateProdPrice(String prodNum,double prodPrice) {
+		DataCriteria dataCriteria = new DataCriteria();
+		dataCriteria.setParam("prodNum",prodNum);
+		dataCriteria.setParam("prodPrice",prodPrice);
+		dataCriteria.setParam("updateBy",getCurrentOperator());
+		iProdPriceDao.updateProdPrice(dataCriteria);
+		iProductService.updateProdStdPrice(prodNum,prodPrice);
+	}
+
+	public void delCustProdPrice(String prodNum) {
+		DataCriteria dataCriteria = new DataCriteria();
+		dataCriteria.setParam("prodNum",prodNum);
+		iProdPriceDao.delCustProdPrice(dataCriteria);
+
+	}
+
+	public void updateCustProdPrice(String prodNum, String custNum,
+			double prodPrice) {
+		DataCriteria dataCriteria = new DataCriteria();
+		dataCriteria.setParam("prodNum",prodNum);
+		dataCriteria.setParam("custNum",custNum);
+		dataCriteria.setParam("prodPrice",prodPrice);
+		dataCriteria.setParam("updateBy",getCurrentOperator());
+		iProdPriceDao.updateCustProdPrice(dataCriteria);
+		
+	}
+
+}

@@ -1,0 +1,5 @@
+package com.etaoguan.wea.vo;
+
+public class E688Product extends BaseVo{
+
+}

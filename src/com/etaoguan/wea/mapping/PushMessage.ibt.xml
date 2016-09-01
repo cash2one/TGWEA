@@ -1,0 +1,924 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+
+<!-- author 刘卿 -->
+<!-- 感谢ibatis的持久层框架 -->
+
+<sqlMap>
+
+	<typeAlias alias="JPUSHKEYS" type="com.etaoguan.wea.vo.JpushKeys"/>
+	<typeAlias alias="PUSHGROUP" type="com.etaoguan.wea.vo.PushGroup"/>
+	<typeAlias alias="PUSHGROUPCUSTREF" type="com.etaoguan.wea.vo.PushGroupCustRef"/>
+	<typeAlias alias="PUSHMESSAGE" type="com.etaoguan.wea.vo.PushMessage"/>
+	<typeAlias alias="PUSHMESSAGEEXTRA" type="com.etaoguan.wea.vo.PushMessageExtra"/>
+	<typeAlias alias="PUSHMESSAGERESULT" type="com.etaoguan.wea.vo.PushMessageResult"/>
+
+
+	<resultMap id="jpushKeys" class="JPUSHKEYS">
+		<result property="ownerSystem" column="owner_system"/>
+		<result property="ownerNum" column="owner_num"/>
+		<result property="appPackage" column="app_package"/>
+		<result property="appKey" column="app_key"/>
+		<result property="masterSecret" column="master_secret"/>
+		<result property="remark" column="remark"/>
+		<result property="createDate" column="create_date"/>
+		<result property="createBy" column="create_by"/>
+		<result property="updateDate" column="update_date"/>
+		<result property="updateBy" column="update_by"/>
+	</resultMap>
+	
+	<resultMap id="compJpushKeysDataSet" extends = "jpushKeys" class="JPUSHKEYS">
+		<result property="owner.companyName" column="company_name"/>
+	</resultMap>
+	
+	<resultMap id="pushGroup" class="PUSHGROUP">
+		<result property="groupNum" column="group_num"/>
+		<result property="ownerNum" column="owner_num"/>
+		<result property="groupName" column="group_name"/>
+		<result property="remark" column="remark"/>
+		<result property="createDate" column="create_date"/>
+		<result property="createBy" column="create_by"/>
+		<result property="updateDate" column="update_date"/>
+		<result property="updateBy" column="update_by"/>
+	</resultMap>
+	
+	<resultMap id="pushGroupCustRef" class="PUSHGROUPCUSTREF">
+		<result property="groupNum" column="group_num"/>
+		<result property="custNum" column="cust_num"/>
+		<result property="createDate" column="create_date"/>
+		<result property="createBy" column="create_by"/>
+		<result property="updateDate" column="update_date"/>
+		<result property="updateBy" column="update_by"/>
+	</resultMap>
+	
+	
+	<resultMap id="compPushGroupCustRef" class="PUSHGROUPCUSTREF">
+		<result property="cust.custNum" column="cust_num"/>
+		<result property="cust.companyName" column="company_name"/>
+	</resultMap>
+	
+	<resultMap id="pushMessageExtra" class="PUSHMESSAGEEXTRA">
+		<result property="messageId" column="message_id"/>
+		<result property="extraName" column="extra_name"/>
+		<result property="extraValue" column="extra_value"/>
+	</resultMap>
+	
+	<resultMap id="pushMessage" class="PUSHMESSAGE">
+		<result property="messageId" column="message_id"/>
+		<result property="ownerSystem" column="owner_system"/>
+		<result property="ownerNum" column="owner_num"/>
+		<result property="targetType" column="target_type"/>
+		<result property="targetId" column="target_id"/>
+		<result property="targetDesc" column="target_desc"/>
+		<result property="messageType" column="message_type"/>
+		<result property="title" column="title"/>
+		<result property="content" column="content"/>
+		<result property="sendTime" column="send_time"/>
+		<result property="sendTimeType" column="send_time_type"/>
+		<result property="processStatus" column="process_status"/>
+		<result property="remark" column="remark"/>
+		<result property="createDate" column="create_date"/>
+		<result property="createBy" column="create_by"/>
+		<result property="updateDate" column="update_date"/>
+		<result property="updateBy" column="update_by"/>
+	</resultMap>
+	
+	<resultMap id="pushMessageResult" class="PUSHMESSAGERESULT">
+		<result property="resultId" column="result_id"/>
+		<result property="errorCode" column="error_code"/>
+		<result property="errorMessage" column="error_message"/>
+		<result property="jpushMessageId" column="jpush_message_id"/>
+		<result property="messageId" column="message_id"/>
+		<result property="resultStatus" column="result_status"/>
+		<result property="createDate" column="create_date"/>
+		<result property="createBy" column="create_by"/>
+		<result property="updateDate" column="update_date"/>
+		<result property="updateBy" column="update_by"/>
+	</resultMap>
+	
+
+	<resultMap id="compPushMessage" extends = "pushMessage" class="PUSHMESSAGE">
+		<result property="pushMessageExtras" column="message_id"  select="selectPushMessageExtras"/>
+	</resultMap>
+	
+	<resultMap id="compPushMessage1" extends = "compPushMessage" class="PUSHMESSAGE">
+		<result property="jpushKeys.masterSecret" column="master_secret"/>
+		<result property="jpushKeys.appKey" column="app_key"/>
+	</resultMap>	
+	
+
+	<!-- 获取推送消息总数-->
+	<select id="getPushMessageCount" parameterClass="java.util.HashMap" resultClass="java.lang.Integer">
+		SELECT
+		count(1) 
+		FROM
+		push_message where 1=1 
+		<dynamic>
+			<isNotEmpty property="ownerNum" prepend="and">
+			    owner_num = #ownerNum#
+			</isNotEmpty>
+			<isNotEmpty property="custNum" prepend="and">
+				cust_num = #custNum# 
+			</isNotEmpty>	
+			<isNotEmpty property="processStatus">
+				<isNotEqual property="processStatus" compareValue="-1" prepend="and">
+				    process_status = #processStatus#
+				</isNotEqual>
+			</isNotEmpty>
+			<isNotEmpty property="sendTimeFrom" prepend="and">
+				<isNotEmpty property="sendTimeTo">
+			    	send_time between #sendTimeFrom# and #sendTimeTo#
+			    </isNotEmpty>
+			    <isEmpty property="sendTimeTo">
+			    	send_time &gt;= #sendTimeFrom#
+			    </isEmpty>
+			</isNotEmpty>
+			<isEmpty property="sendTimeFrom" prepend="and">
+				<isNotEmpty property="sendTimeTo">
+			    	send_time &lt;= #sendTimeTo#
+			    </isNotEmpty>
+			</isEmpty>
+		</dynamic>
+
+	</select>
+	
+	<!-- 获取推送消息分页信息-->
+	<select id="getPushMessageDataSet" parameterClass="java.util.HashMap"  resultMap="pushMessage">
+		SELECT 
+		message_id,
+		owner_system,
+		owner_num,
+		target_type,
+		target_id,
+		target_desc,
+		message_type,
+		title,
+		content,
+		send_time,
+		send_time_type,
+		process_status,
+		remark,
+		create_date,
+		create_by,
+		update_date,
+		update_by 
+		FROM
+		push_message where 1=1 
+		<dynamic>
+			<isNotEmpty property="ownerNum" prepend="and">
+			    owner_num = #ownerNum#
+			</isNotEmpty>
+			<isNotEmpty property="custNum" prepend="and">
+				cust_num = #custNum# 
+			</isNotEmpty>	
+			<isNotEmpty property="processStatus">
+				<isNotEqual property="processStatus" compareValue="-1" prepend="and">
+				    process_status = #processStatus#
+				</isNotEqual>
+			</isNotEmpty>
+			<isNotEmpty property="sendTimeFrom" prepend="and">
+				<isNotEmpty property="sendTimeTo">
+			    	send_time between #sendTimeFrom# and #sendTimeTo#
+			    </isNotEmpty>
+			    <isEmpty property="sendTimeTo">
+			    	send_time &gt;= #sendTimeFrom#
+			    </isEmpty>
+			</isNotEmpty>
+			<isEmpty property="sendTimeFrom" prepend="and">
+				<isNotEmpty property="sendTimeTo">
+			    	send_time &lt;= #sendTimeTo#
+			    </isNotEmpty>
+			</isEmpty>
+		</dynamic>
+
+		<!-- 页面传递的降序字段 -->
+		<isNotEmpty property="desc">
+		   order by $desc$ desc 
+		</isNotEmpty>
+		<!-- 页面传递的升序字段 -->
+		<isNotEmpty property="asc">
+		   order by  $asc$ asc 
+		</isNotEmpty>
+		<isNull property="asc">
+			<isNull property="desc">order by update_date desc
+			</isNull>
+		</isNull>
+		
+		limit #limit# offset #offset# 
+	</select>
+	
+	<select id="getPushMessageResults" parameterClass="java.util.HashMap"  resultMap="pushMessageResult">
+		SELECT 
+		result_id,
+		error_code,
+		error_message,
+		jpush_message_id,
+		result_status,
+		message_id,
+		create_date,
+		create_by,
+		update_date,
+		update_by 
+		FROM 
+		push_message_result where message_id = #messageId#
+	</select>
+	
+	<insert id="createPushMessageResult"  parameterClass="PUSHMESSAGERESULT">
+		insert into push_message_result 
+		(
+		error_code,
+		error_message,
+		result_status,
+		jpush_message_id,
+		message_id,
+		create_date,
+		create_by,
+		update_date,
+		update_by
+		)
+		values(
+			#errorCode#,
+			#errorMessage#,
+			#resultStatus#,		
+			#jpushMessageId#,
+			#messageId#
+			<isNotEmpty property="createDate" prepend=",">
+				#createDate#
+			</isNotEmpty>
+			<isEmpty property="createDate" prepend=",">
+				now()
+			</isEmpty>			
+			<isNotEmpty property="createBy" prepend=",">
+				#createBy#
+			</isNotEmpty>
+			<isEmpty property="createBy" prepend=",">
+				''
+			</isEmpty>			
+			<isNotEmpty property="updateDate" prepend=",">
+				#updateDate#
+			</isNotEmpty>
+			<isEmpty property="updateDate" prepend=",">
+				now()
+			</isEmpty>			
+			<isNotEmpty property="updateBy" prepend=",">
+				#updateBy#
+			</isNotEmpty>
+			<isEmpty property="updateBy" prepend=",">
+				''
+			</isEmpty>		
+		)
+
+	</insert>
+	
+	<insert id="createPushMessage"  parameterClass="PUSHMESSAGE">
+		insert into push_message 
+		(
+		owner_system,
+		owner_num,
+		target_type,
+		target_id,
+		target_desc,
+		message_type,
+		title,
+		content,
+		send_time,
+		send_time_type,
+		process_status,
+		remark,
+		create_date,
+		create_by,
+		update_date,
+		update_by 
+		)
+		values(
+			'wea',
+			#ownerNum#,		
+			#targetType#,
+			#targetId#,
+			#targetDesc#,
+			#messageType#,
+			#title#,
+			#content#
+			<isEqual property="sendTimeType" compareValue="0"
+				prepend=",">
+				now()
+			</isEqual>
+			<isNotEqual property="sendTimeType" compareValue="0"
+				prepend=",">
+				#sendTime#
+			</isNotEqual>
+			,#sendTimeType#,
+			0
+			<isNotEmpty property="remark" prepend=",">
+				#remark#
+			</isNotEmpty>
+			<isEmpty property="remark" prepend=",">
+				''
+			</isEmpty>		
+			<isNotEmpty property="createDate" prepend=",">
+				#createDate#
+			</isNotEmpty>
+			<isEmpty property="createDate" prepend=",">
+				now()
+			</isEmpty>			
+			<isNotEmpty property="createBy" prepend=",">
+				#createBy#
+			</isNotEmpty>
+			<isEmpty property="createBy" prepend=",">
+				''
+			</isEmpty>			
+			<isNotEmpty property="updateDate" prepend=",">
+				#updateDate#
+			</isNotEmpty>
+			<isEmpty property="updateDate" prepend=",">
+				now()
+			</isEmpty>			
+			<isNotEmpty property="updateBy" prepend=",">
+				#updateBy#
+			</isNotEmpty>
+			<isEmpty property="updateBy" prepend=",">
+				''
+			</isEmpty>		
+		)
+
+		<selectKey resultClass="java.lang.Long">
+		   SELECT @@IDENTITY AS id
+		</selectKey>
+	</insert>
+	
+	<insert id="createPushMessageExtra"  parameterClass="PUSHMESSAGEEXTRA">
+		insert into push_message_extras 
+		(
+		message_id,
+		extra_name,
+		extra_value
+		)
+		values(
+			#messageId#,		
+			#extraName#,
+			#extraValue#
+		)
+
+	</insert>
+	
+	<select id="getPushMessage" parameterClass="java.util.HashMap"  resultMap="compPushMessage">
+		SELECT 
+		message_id,
+		owner_system,
+		owner_num,
+		target_type,
+		target_id,
+		target_desc,
+		message_type,
+		title,
+		content,
+		send_time,
+		send_time_type,
+		process_status,
+		remark,
+		create_date,
+		create_by,
+		update_date,
+		update_by 
+		FROM 
+		push_message where message_id = #messageId#
+	</select>
+	
+	<select id="getPreSendPushMessages" parameterClass="java.util.HashMap"  resultMap="compPushMessage1">
+		SELECT t1.*,
+		t2.master_secret,
+		t2.app_key 
+		FROM 
+		(SELECT 
+		message_id,
+		owner_system,
+		owner_num,
+		case when target_type=0 then 1 else target_type end target_type,
+		case when target_type=0 then owner_num else target_id end target_id,
+		target_desc,
+		message_type,
+		title,
+		content,
+		send_time,
+		send_time_type,
+		process_status,
+		remark,
+		create_date,
+		create_by,
+		update_date,
+		update_by 
+		FROM 
+		push_message where process_status = 0 and send_time &lt;= now()
+		<isNotEmpty property="ownerNum" prepend="and"> 
+			owner_num = #ownerNum#
+		</isNotEmpty>
+		) t1, push_jpush_keys t2 
+		where t1.owner_num = t2.owner_num and t2.owner_system='wea'
+		
+
+	</select>
+	
+	<update id="updatePushMessageProcessStatus"  parameterClass="java.util.HashMap">
+			update push_message set 
+			
+			process_status = #processStatus#
+			<isNotEmpty property="remark" prepend=",">
+				remark = #remark#
+			</isNotEmpty>
+			<isNotEmpty property="updateDate" prepend=",">
+				update_date = #updateDate#
+			</isNotEmpty>
+			<isEmpty property="updateDate" prepend=",">
+				update_date = now()
+			</isEmpty>				
+			<isNotEmpty property="updateBy" prepend=",">
+				update_by = #updateBy#
+			</isNotEmpty> 
+			where 1=1 
+			<isNotEmpty property="messageIds" prepend="and">
+			    message_id IN 
+			    <iterate property="messageIds" open="(" close=")" conjunction=","> 
+			    #messageIds[]#
+			    </iterate>
+			</isNotEmpty>
+			<isNotEmpty property="messageId" prepend="and">
+			    message_id = #messageId#
+			</isNotEmpty>
+			
+	</update>
+	
+	<statement id="deletePushMessage" parameterClass="java.util.HashMap">
+		DELETE 
+		FROM
+		push_message where message_id = #messageId#;
+		DELETE 
+		FROM
+		push_message_extras where message_id = #messageId#;
+		
+
+	</statement>
+	
+	<update id="updatePushMessage"  parameterClass="PUSHMESSAGE">
+			update push_message set 
+			
+			target_type = #targetType#,
+			target_id = #targetId#,
+			target_desc = #targetDesc#,
+			message_type = #messageType#,
+			title = #title#,
+			content = #content#,
+			send_time_type = #sendTimeType#
+			<isEqual property="sendTimeType" compareValue="0"
+				prepend=",">
+				send_time=now()
+			</isEqual>
+			<isNotEqual property="sendTimeType" compareValue="0"
+				prepend=",">
+				send_time = #sendTime#
+			</isNotEqual>
+			,remark = #remark#
+			<isNotEmpty property="updateDate" prepend=",">
+				update_date = #updateDate#
+			</isNotEmpty>
+			<isEmpty property="updateDate" prepend=",">
+				update_date = now()
+			</isEmpty>				
+			<isNotEmpty property="updateBy" prepend=",">
+				update_by = #updateBy#
+			</isNotEmpty> 
+			<isEmpty property="updateBy" prepend=",">
+				update_by = ''
+			</isEmpty>
+			
+			where message_id = #messageId#
+			
+	</update>
+	
+	<update id="updatePushMessageByMap"  parameterClass="java.util.HashMap">
+			update push_message set 
+			
+			owner_system = owner_system
+			<isNotEmpty property="targetType" prepend=",">
+				target_type = #targetType#
+			</isNotEmpty>
+			<isNotEmpty property="targetId" prepend=",">
+				target_id = #targetId#
+			</isNotEmpty>
+			<isNotEmpty property="targetDesc" prepend=",">
+				target_desc = #targetDesc#
+			</isNotEmpty>
+			<isNotEmpty property="messageType" prepend=",">
+				message_type = #messageType#
+			</isNotEmpty>
+			<isNotEmpty property="title" prepend=",">
+				title = #title#
+			</isNotEmpty>
+			<isNotEmpty property="content" prepend=",">
+				content = #content#
+			</isNotEmpty>
+			<isNotEmpty property="sendTime" prepend=",">
+				send_time = #sendTime#
+			</isNotEmpty>
+			<isNotEmpty property="sendTimeType" prepend=",">
+				send_time_type = #sendTimeType#
+			</isNotEmpty>
+			<isNotEmpty property="remark" prepend=",">
+				remark = #remark#
+			</isNotEmpty>
+			<isNotEmpty property="updateDate" prepend=",">
+				update_date = #updateDate#
+			</isNotEmpty>
+			<isEmpty property="updateDate" prepend=",">
+				update_date = now()
+			</isEmpty>				
+			<isNotEmpty property="updateBy" prepend=",">
+				update_by = #updateBy#
+			</isNotEmpty> 
+			where message_id = #messageId#
+			
+	</update>
+	
+	<select id="selectPushMessageExtras" resultMap="pushMessageExtra">
+    	select * from push_message_extras where message_id=#message_id#
+    </select>
+
+	<select id="getJpushKeysCount" parameterClass="java.util.HashMap" resultClass="java.lang.Integer">
+		SELECT
+		count(1) 
+		FROM
+		push_jpush_keys where 1=1 
+		<dynamic>
+			<isNotEmpty property="ownerNum" prepend="and">
+			    owner_num = #ownerNum#
+			</isNotEmpty>
+		</dynamic>
+
+	</select>
+	
+	<select id="getJpushKeysDataSet" parameterClass="java.util.HashMap" resultMap="compJpushKeysDataSet">
+		
+		SELECT t1.*,
+		t2.company_name 
+		FROM (SELECT 
+		owner_system,
+		owner_num,
+		app_package,
+		app_key,
+		master_secret,
+		remark,
+		create_date,
+		create_by,
+		update_date,
+		update_by
+		FROM
+		push_jpush_keys where 1=1 
+		<dynamic>
+			<isNotEmpty property="ownerNum" prepend="and">
+			    owner_num = #ownerNum#
+			</isNotEmpty>
+		</dynamic>
+		order by create_date asc 
+		
+		limit #limit# offset #offset# 
+		) t1 , owner t2 
+		where t1.owner_num = t2.owner_num
+	</select>
+	
+	<select id="getJpushKeys" parameterClass="java.util.HashMap" resultMap="jpushKeys">
+		
+		SELECT 
+		owner_system,
+		owner_num,
+		app_package,
+		app_key,
+		master_secret,
+		remark,
+		create_date,
+		create_by,
+		update_date,
+		update_by
+		FROM
+		push_jpush_keys where owner_system='wea' and owner_num = #ownerNum#
+			
+	</select>
+	
+	<insert id="createJpushKeys"  parameterClass="JPUSHKEYS">
+		insert into push_jpush_keys 
+		(
+		owner_system,
+		owner_num,
+		app_package,
+		app_key,
+		master_secret,
+		remark,
+		create_date,
+		create_by,
+		update_date,
+		update_by
+		)
+		values(
+			'wea',		
+			#ownerNum#,
+			#appPackage#,
+			#appKey#,
+			#masterSecret#,
+			#remark#
+			<isNotEmpty property="createDate" prepend=",">
+				#createDate#
+			</isNotEmpty>
+			<isEmpty property="createDate" prepend=",">
+				now()
+			</isEmpty>			
+			<isNotEmpty property="createBy" prepend=",">
+				#createBy#
+			</isNotEmpty>
+			<isEmpty property="createBy" prepend=",">
+				''
+			</isEmpty>			
+			<isNotEmpty property="updateDate" prepend=",">
+				#updateDate#
+			</isNotEmpty>
+			<isEmpty property="updateDate" prepend=",">
+				now()
+			</isEmpty>			
+			<isNotEmpty property="updateBy" prepend=",">
+				#updateBy#
+			</isNotEmpty>
+			<isEmpty property="updateBy" prepend=",">
+				''
+			</isEmpty>		
+			
+		)
+
+	</insert>
+	
+	<delete id="deleteJpushKeys" parameterClass="java.util.HashMap">
+		DELETE 
+		FROM
+		push_jpush_keys where owner_system ='wea' and owner_num = #ownerNum# 
+
+	</delete>
+	
+	<update id="updateJpushKeys"  parameterClass="JPUSHKEYS">
+			update push_jpush_keys set 
+			
+			app_package = #appPackage#,
+			app_key = #appKey#,
+			master_secret = #masterSecret#,
+			remark = #remark#
+			<isNotEmpty property="updateDate" prepend=",">
+				update_date = #updateDate#
+			</isNotEmpty>
+			<isEmpty property="updateDate" prepend=",">
+				update_date = now()
+			</isEmpty>				
+			<isNotEmpty property="updateBy" prepend=",">
+				update_by = #updateBy#
+			</isNotEmpty> 
+			<isEmpty property="updateBy" prepend=",">
+				update_by = ''
+			</isEmpty>
+			
+			where owner_system ='wea' and owner_num = #ownerNum# 
+			
+	</update>
+	
+	<update id="updateJpushKeysByMap"  parameterClass="java.util.HashMap">
+			update push_jpush_keys set 
+			
+			owner_system = owner_system
+			<isNotEmpty property="appPackage" prepend=",">
+				app_package = #appPackage#
+			</isNotEmpty>
+			<isNotEmpty property="appKey" prepend=",">
+				app_key = #appKey#
+			</isNotEmpty>
+			<isNotEmpty property="masterSecret" prepend=",">
+				master_secret = #masterSecret#
+			</isNotEmpty>
+			<isNotEmpty property="remark" prepend=",">
+				remark = #remark#
+			</isNotEmpty>
+			<isNotEmpty property="updateDate" prepend=",">
+				update_date = #updateDate#
+			</isNotEmpty>
+			<isEmpty property="updateDate" prepend=",">
+				update_date = now()
+			</isEmpty>				
+			<isNotEmpty property="updateBy" prepend=",">
+				update_by = #updateBy#
+			</isNotEmpty> 
+			where owner_system ='wea' and owner_num = #ownerNum# 
+			
+	</update>
+	
+	<select id="getPushGroups" parameterClass="java.util.HashMap" resultMap="pushGroup">
+		<isEmpty property="custNum" >
+	    	select group_num,
+			owner_num,
+			group_name,
+			remark,
+			create_date,
+			create_by,
+			update_date,
+			update_by from push_group 
+			where owner_num = #ownerNum# 
+			order by create_date desc
+		</isEmpty>
+		<isNotEmpty property="custNum" >
+	    	select t1.group_num,
+			t1.owner_num,
+			t1.group_name,
+			t1.remark,
+			t1.create_date,
+			t1.create_by,
+			t1.update_date,
+			t1.update_by from push_group t1 
+			where exists(SELECT 1 FROM 
+	    	(select group_num 
+			from push_groupcust_ref  
+			where cust_num = #custNum#) t2 
+			where t1.group_num = t2.group_num 
+			)
+			order by t1.create_date desc
+		</isNotEmpty>
+    </select>
+    
+    <select id="getPushGroup" parameterClass="java.util.HashMap" resultMap="pushGroup">
+	    	select group_num,
+			owner_num,
+			group_name,
+			remark,
+			create_date,
+			create_by,
+			update_date,
+			update_by from push_group 
+			where group_num = #groupNum#
+
+	</select>
+    
+    <insert id="createPushGroup"  parameterClass="PUSHGROUP">
+		insert into push_group 
+		(
+		group_num,
+		owner_num,
+		group_name,
+		remark,
+		create_date,
+		create_by,
+		update_date,
+		update_by
+		)
+		values(	
+			#groupNum#,
+			#ownerNum#,
+			#groupName#,
+			#remark#
+			<isNotEmpty property="createDate" prepend=",">
+				#createDate#
+			</isNotEmpty>
+			<isEmpty property="createDate" prepend=",">
+				now()
+			</isEmpty>			
+			<isNotEmpty property="createBy" prepend=",">
+				#createBy#
+			</isNotEmpty>
+			<isEmpty property="createBy" prepend=",">
+				''
+			</isEmpty>			
+			<isNotEmpty property="updateDate" prepend=",">
+				#updateDate#
+			</isNotEmpty>
+			<isEmpty property="updateDate" prepend=",">
+				now()
+			</isEmpty>			
+			<isNotEmpty property="updateBy" prepend=",">
+				#updateBy#
+			</isNotEmpty>
+			<isEmpty property="updateBy" prepend=",">
+				''
+			</isEmpty>		
+			
+		)
+
+	</insert>
+	
+	<statement id="deletePushGroup" parameterClass="java.util.HashMap">
+		DELETE 
+		FROM
+		push_group where group_num =#groupNum#;
+		DELETE 
+		FROM
+		push_groupcust_ref where group_num =#groupNum#;
+
+	</statement>
+	
+	<update id="updatePushGroup"  parameterClass="PUSHGROUP">
+			update push_group set 
+			group_name = #groupName#,
+			remark = #remark#
+			<isNotEmpty property="updateDate" prepend=",">
+				update_date = #updateDate#
+			</isNotEmpty>
+			<isEmpty property="updateDate" prepend=",">
+				update_date = now()
+			</isEmpty>				
+			<isNotEmpty property="updateBy" prepend=",">
+				update_by = #updateBy#
+			</isNotEmpty> 
+			<isEmpty property="updateBy" prepend=",">
+				update_by = ''
+			</isEmpty>
+			
+			where group_num = #groupNum# 
+			
+	</update>
+		
+	<delete id="deletePushGroupCustRef" parameterClass="java.util.HashMap">
+
+		DELETE 
+		FROM
+		push_groupcust_ref where group_num = #groupNum# 
+		<isNotEmpty property="custNum" prepend="and">
+			cust_num = #custNum#
+		</isNotEmpty>
+
+	</delete>
+	<select id="getPushGroupCustRefs" parameterClass="java.util.HashMap" resultMap="compPushGroupCustRef">
+	    	select t1.*,t2.company_name from 
+	    	(select cust_num,
+			group_num,
+			create_date,
+			create_by,
+			update_date,
+			update_by from push_groupcust_ref 
+			where group_num = #groupNum#) t1, customer t2 
+			where t1.cust_num = t2.cust_num
+
+	</select>
+	<insert id="createPushGroupCustRef"  parameterClass="PUSHGROUPCUSTREF">
+		insert into push_groupcust_ref 
+		(
+		cust_num,
+		group_num,
+		create_date,
+		create_by,
+		update_date,
+		update_by
+		)
+		values(	
+			#custNum#,
+			#groupNum#
+			<isNotEmpty property="createDate" prepend=",">
+				#createDate#
+			</isNotEmpty>
+			<isEmpty property="createDate" prepend=",">
+				now()
+			</isEmpty>			
+			<isNotEmpty property="createBy" prepend=",">
+				#createBy#
+			</isNotEmpty>
+			<isEmpty property="createBy" prepend=",">
+				''
+			</isEmpty>			
+			<isNotEmpty property="updateDate" prepend=",">
+				#updateDate#
+			</isNotEmpty>
+			<isEmpty property="updateDate" prepend=",">
+				now()
+			</isEmpty>			
+			<isNotEmpty property="updateBy" prepend=",">
+				#updateBy#
+			</isNotEmpty>
+			<isEmpty property="updateBy" prepend=",">
+				''
+			</isEmpty>		
+			
+		)
+
+	</insert>
+	
+	<!-- 获取一定日期范围推送消息总数-->
+	<select id="getPushMessageDateRangeCount" parameterClass="java.util.HashMap" resultClass="java.lang.Integer">
+		SELECT
+		count(1) 
+		FROM
+		push_message where owner_num = #ownerNum#
+		<dynamic>
+			<isNotEmpty property="createDateFrom" prepend="and">
+				<isNotEmpty property="createDateTo">
+			    	create_date between #createDateFrom# and #createDateTo#
+			    </isNotEmpty>
+			    <isEmpty property="createDateTo">
+			    	create_date &gt;= #createDateFrom#
+			    </isEmpty>
+			</isNotEmpty>
+			<isEmpty property="createDateFrom" prepend="and">
+			    <isNotEmpty property="createDateTo">
+			    	create_date &lt;= #createDateFrom#
+			    </isNotEmpty>
+			</isEmpty>
+		</dynamic>
+
+	</select>
+</sqlMap>

@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:jee="http://www.springframework.org/schema/jee"
+	xmlns:tx="http://www.springframework.org/schema/tx" xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:aop="http://www.springframework.org/schema/aop"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-2.5.xsd http://www.springframework.org/schema/jee http://www.springframework.org/schema/jee/spring-jee-2.5.xsd http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.5.xsd http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-2.5.xsd"
+	default-lazy-init="true">
+	<description>Spring公共配置文件 </description>
+		
+<bean id="propertyConfigurer" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+        <property name="locations">
+            <list>
+                <value>classpath:server.properties</value>
+            </list>
+        </property>
+    </bean>
+    
+  <bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close">
+        <property name="driverClassName">
+            <value>com.mysql.jdbc.Driver</value>
+        </property>
+        <property name="url">
+               <value>${database_url}</value>           
+        </property>
+        <property name="username">
+             <value>${database_username}</value>       
+        </property>
+        <property name="password">
+            <value>${database_password}</value>          
+        </property>
+        <property name="initialSize">
+            <value>10</value>
+        </property>
+        <!-- The maximum number of active connections that can be allocated from this pool at the same time, or zero for no limit.  -->
+        <property name="maxActive">
+            <value>100</value>
+        </property>
+
+        <!-- The maximum number of milliseconds that the pool will wait (when there are no available connections) for a connection to be returned before throwing an exception, or -1 to wait indefinitely.  -->
+        <property name="maxWait">
+            <value>120000</value>
+        </property>
+
+        <!-- The maximum number of active connections that can remain idle in the pool, without extra ones being released, or zero for no limit.  -->
+        <property name="maxIdle">
+            <value>10</value>
+        </property>
+
+        <!-- The minimum number of active connections that can remain idle in the pool, without extra ones being created, or zero to create none.   -->
+        <property name="minIdle">
+            <value>10</value>
+        </property>
+
+        <!-- Enable prepared statement pooling for this pool.   -->
+        <property name="poolPreparedStatements">
+            <value>true</value>
+        </property>
+
+        <!-- The maximum number of open statements that can be allocated from the statement pool at the same time, or zero for no limit.   -->
+        <property name="maxOpenPreparedStatements">
+            <value>10000</value>
+        </property>
+        <property name="validationQuery">
+            <value>select 1</value> 
+            <!-- <value>select now()</value> -->
+        </property>
+        <property name="testOnBorrow">
+            <value>true</value>
+        </property>
+        <property name="testOnReturn">
+            <value>false</value>
+        </property>
+        <property name="defaultAutoCommit" value="false"/>
+    </bean>
+    
+	<!-- 事务管理 -->
+	<bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+    	<property name="dataSource" ref="dataSource"/>
+    </bean>
+    <!-- 事务拦截 -->
+	<bean id="transactionInterceptor"
+		class="org.springframework.transaction.interceptor.TransactionInterceptor">
+		<property name="transactionManager" ref="transactionManager" />
+		<property name="transactionAttributes">
+			<props>
+				<prop key="get*">PROPAGATION_SUPPORTS</prop>
+				<prop key="load*">PROPAGATION_SUPPORTS</prop>
+				<prop key="persist*">PROPAGATION_REQUIRED,-Exception</prop>
+				<prop key="remove*">PROPAGATION_REQUIRED,-Exception</prop>
+				<prop key="add*">PROPAGATION_REQUIRED,-Exception</prop>
+				<prop key="sync*">PROPAGATION_REQUIRED,-Exception</prop>
+				<prop key="proc*">PROPAGATION_REQUIRED,-Exception</prop>
+				<prop key="find*">PROPAGATION_SUPPORTS</prop>
+				<prop key="update*">PROPAGATION_REQUIRED,-Exception</prop>
+				<prop key="save*">PROPAGATION_REQUIRED,-Exception</prop>
+				<prop key="del*">PROPAGATION_REQUIRED,-Exception</prop>
+			</props>
+		</property>
+	</bean>
+	<!-- 事务管理是由spring来管理   <模板 >自动代理配置，事务和业务并行，支持嵌套事务-->
+	<bean class="org.springframework.aop.framework.autoproxy.BeanNameAutoProxyCreator">
+		<property name="beanNames">
+		    <!-- 所有名字以Dao,Service结尾的bean,将由该"bean后处理器"为其创建事务代理-->
+			<value>*Service</value>
+		</property>
+		<property name="interceptorNames">
+			<list>
+				<value>transactionInterceptor</value>
+			</list>
+		</property>
+	</bean>
+	
+	<!--验证码-->
+	<bean id="captchaProducer" class="com.google.code.kaptcha.impl.DefaultKaptcha">
+		<property name="config">
+			<bean class="com.google.code.kaptcha.util.Config">
+				<constructor-arg type="java.util.Properties">
+					<value>
+						kaptcha.border=yes
+						kaptcha.textproducer.char.string=ABCDEFGHJKMNPQRSTUVWXY3456789abcdefghjkmnpqrstuvwxy
+						kaptcha.textproducer.font.names=Arial
+						kaptcha.session.key=code
+						kaptcha.textproducer.char.length=4
+						kaptcha.image.width=150
+                        kaptcha.image.height=45
+                        kaptcha.textproducer.font.color=black
+					</value>
+				</constructor-arg>
+			</bean>
+		</property>
+	</bean>
+	
+	<!-- 使用annotation定义事务 -->
+	<tx:annotation-driven transaction-manager="transactionManager" proxy-target-class="true"/>
+ 
+ 
+    <import resource="spring/applicationContext-ibatis.xml" />
+<!--    <import resource="spring/appContext-quartz.xml" />  --> 
+    
+    <!-- Activates scanning of @Repository and @Service -->
+    <context:component-scan base-package="com.etaoguan.wea"/>
+    
+   	<!-- Activates scanning of @Autowired -->
+    <context:annotation-config/>
+
+   <aop:aspectj-autoproxy proxy-target-class="true" />
+    
+</beans>

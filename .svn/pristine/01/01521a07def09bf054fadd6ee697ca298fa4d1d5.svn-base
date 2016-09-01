@@ -1,0 +1,53 @@
+package com.etaoguan.wea.client.mobile.action.cust;
+
+import javax.annotation.Resource;
+
+import org.apache.struts2.convention.annotation.Action;
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Service;
+
+import com.etaoguan.wea.annotation.WeaFunction;
+import com.etaoguan.wea.annotation.WeaModule;
+import com.etaoguan.wea.client.mobile.action.MOwnerBaseAction;
+import com.etaoguan.wea.client.mobile.service.IMPaymentService;
+import com.etaoguan.wea.client.mobile.vo.OrderPay;
+
+
+@WeaModule(mname="支付管理")
+@Service("custMPaymentAction") @Scope("prototype")
+public class MPaymentAction extends MOwnerBaseAction{
+
+	private static final long serialVersionUID = 854960251297615394L;
+
+	private OrderPay orderPay;
+	
+	@Resource(name="malipayWapPaymentService")
+	private IMPaymentService imPaymentService;
+	
+//	@WeaFunction(fname="客户订单支付(移动端)",oname=WeaFunction.Operation.UPDATE)
+	@Action(value="mPayOrder")
+	public String payOrder() throws Exception {
+
+		orderPay.setOwnerNum("1688b2b-1912298818");
+		orderPay.setCustNum("CT0000000017");
+//		orderPay.setOwnerNum(ownerNum);
+//		orderPay.setCustNum(getCurrentCust().getCustNum());
+		String xml =imPaymentService.processPayOrder(orderPay,getDomainBaseUrl());
+		
+		
+		writeResponse(xml);
+		
+		return null;
+		
+	}
+
+	public OrderPay getOrderPay() {
+		return orderPay;
+	}
+
+	public void setOrderPay(OrderPay orderPay) {
+		this.orderPay = orderPay;
+	}
+
+
+}

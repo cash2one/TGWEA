@@ -1,0 +1,174 @@
+package com.etaoguan.wea.client.web.service.impl;
+
+import java.util.Collection;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.etaoguan.wea.client.web.service.IWWechatCallbackService;
+import com.etaoguan.wea.client.web.service.IWWechatMassMsgRequestService;
+import com.etaoguan.wea.client.web.service.IWWechatMessageService;
+import com.etaoguan.wea.constant.WeaConstant;
+import com.etaoguan.wea.vo.WechatMessage;
+import com.etaoguan.wea.vo.WechatMessageData;
+import com.etaoguan.wea.wechat.util.WeChatUtil;
+import com.etaoguan.wea.wechat.vo.EventReceivedMsg;
+import com.etaoguan.wea.wechat.vo.MassJobFinishReceivedMsg;
+import com.etaoguan.wea.wechat.vo.MsgMetaData;
+import com.etaoguan.wea.wechat.vo.NewsSendMsg;
+import com.etaoguan.wea.wechat.vo.ReceivedMsg;
+import com.etaoguan.wea.wechat.vo.TextReceivedMsg;
+import com.etaoguan.wea.wechat.vo.TextSendMsg;
+import com.etaoguan.wea.wechat.vo.TransCustSvrSendMsg;
+import com.etaoguan.wea.wechat.vo.WechatMassMsgRequest;
+
+
+@Service("wwechatCallbackService")
+public class WWechatCallbackService implements IWWechatCallbackService{
+	
+	private final static Log logger = LogFactory.getLog(WWechatCallbackService.class);
+	
+	@Autowired
+	private IWWechatMessageService iwWechatMessageService;
+	@Autowired
+	private IWWechatMassMsgRequestService iwWechatMassMsgRequestService;
+	
+	public String buildWechatSendMsg(String ownerNum,String domainUrl,String wxMsgXml) throws Exception{
+
+//		logger.debug("*********callback wechatmessage********");
+//		logger.debug(wxMsgXml);
+		
+		 MsgMetaData msgMetaData = WeChatUtil.getReceivedMsgType(wxMsgXml);
+		 
+		 
+		 
+        //响应用户的点击事件
+        if(WeaConstant.WECHAT_MSGTYPE_EVENT.equalsIgnoreCase(msgMetaData.getMsgType())){//是管理员自定义的响应事件
+        	 EventReceivedMsg eventReceivedMsg= WeChatUtil.parseWeChatEventReceivedMsg(wxMsgXml);
+        	 String eventKey = eventReceivedMsg.getEventKey();
+        	 String event = eventReceivedMsg.getEvent();
+        	 logger.info("推送事件的Event值为"+event);
+        	 logger.info("推送事件的EventKey值为"+eventKey);
+        	 if ("VIEW".equals(event)) {
+				return "";
+			}
+        	 
+        	 WechatMessage wechatMessage = null;
+        	 if("subscribe".equalsIgnoreCase(event)){
+        		 /*根据用户发送的内容给用户回应信息。*/
+        		 wechatMessage = iwWechatMessageService.getWechatMessage(ownerNum,WeaConstant.WECHAT_SUBSCRIBE_INDEX);
+        	 }else if("MASSSENDJOBFINISH".equalsIgnoreCase(event)){// 保存群发结果
+             	
+        		 MassJobFinishReceivedMsg massJobFinishReceivedMsg= (MassJobFinishReceivedMsg)WeChatUtil.parseWeChatReceivedMsg(wxMsgXml);
+        		 WechatMassMsgRequest wechatMassMsgRequest = new WechatMassMsgRequest(); 
+        			wechatMassMsgRequest.setWechatMsgId(Long.parseLong(massJobFinishReceivedMsg.getMsgID()));
+        			wechatMassMsgRequest.setResponseStatus(Integer.parseInt(massJobFinishReceivedMsg.getStatus()));
+        			wechatMassMsgRequest.setResponseErrorCount(Integer.parseInt(massJobFinishReceivedMsg.getErrorCount()));
+        			wechatMassMsgRequest.setResponseBy("tengxun");
+        			
+        			/*保存微信服务器返回的群发结果（第二次）*/
+        			iwWechatMassMsgRequestService.updateWWechatMassMsgRequest(wechatMassMsgRequest);
+             }else{
+        		 try{
+        			 long messageId = Long.parseLong(eventKey);
+        			 wechatMessage = iwWechatMessageService.getWechatMessage(messageId);
+        		 }catch(Exception ex){
+        			 logger.error("Exception Event :"+event);
+        			 logger.error("Exception EventKey :"+eventKey);
+        		 }
+        	 }
+    		 
+    		 return genWechatSendMsgText(eventReceivedMsg,wechatMessage,domainUrl);
+
+        }else if(WeaConstant.WECHAT_MSGTYPE_TEXT.equalsIgnoreCase(msgMetaData.getMsgType())){//是文本信息
+        	
+        	/*获取客户回复的内容，如果不是管理员自定义的响应事件*/
+	   		 TextReceivedMsg textReceivedMsg = (TextReceivedMsg)WeChatUtil.parseWeChatReceivedMsg(wxMsgXml);
+			 
+	   		 WechatMessage wechatMessage = null;
+			 if(iwWechatMessageService.isManyCustomerMsg(ownerNum,textReceivedMsg.getContent().trim())){
+				 wechatMessage = new WechatMessage();
+				 wechatMessage.setMessageType(99);//不是管理员自定义的响应事件，就把信息转发给客服
+			 }else{
+				 /*是管理员自定义的响应事件就根据ownerNum和客户发送的内容给客户回复相应信息。*/
+				 wechatMessage = iwWechatMessageService.getWechatMessage(ownerNum,textReceivedMsg.getContent().trim());
+				 
+			 }
+			 return genWechatSendMsgText(textReceivedMsg,wechatMessage,domainUrl);
+        }else{//不是管理员自定义的响应事件，也不是文本信息,就把信息转发给客服
+        	ReceivedMsg receivedMsg = WeChatUtil.parseWeChatReceivedMsg(wxMsgXml);
+        	WechatMessage wechatMessage = new WechatMessage();
+			wechatMessage.setMessageType(99); //信息转发给客服
+        	return genWechatSendMsgText(receivedMsg,wechatMessage,domainUrl);
+        }
+
+        
+
+	}
+	
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	private String genWechatSendMsgText(ReceivedMsg receivedMsg,WechatMessage wechatMessage,String domainUrl)throws Exception{
+		String responseMsg = "";
+
+		List<WechatMessageData> wechatMessageDatas = wechatMessage.getWechatMessageDatas();
+		 if(wechatMessage.getMessageType()==0){
+			 TextSendMsg textSendMsg = new TextSendMsg();
+			 textSendMsg.setMsgType(WeaConstant.WECHAT_MSGTYPE_TEXT);
+			 textSendMsg.setFuncFlag("0");
+			 textSendMsg.setCreateTime(new Long(new Date().getTime()).toString());
+			 textSendMsg.setContent(wechatMessageDatas.get(0).getDataValue());
+			 textSendMsg.setToUserName(receivedMsg.getFromUserName());
+			 textSendMsg.setFromUserName(receivedMsg.getToUserName());
+			 responseMsg = WeChatUtil.buildWeChatSendMsg(textSendMsg);
+		 }else if(wechatMessage.getMessageType()==1){
+			 Map<Integer ,Map<String,String>> itemMap = new HashMap<Integer,Map<String,String>>();
+			 for(WechatMessageData wechatMessageData:wechatMessageDatas){
+				Map<String,String> itemDataMap = itemMap.get(wechatMessageData.getItemNum());
+				if(itemDataMap==null){
+					itemDataMap = new HashMap<String,String>();
+					itemMap.put(wechatMessageData.getItemNum(), itemDataMap);
+				}
+				itemDataMap.put(wechatMessageData.getDataName(), wechatMessageData.getDataValue());
+			 }
+			 Collection<Map<String,String>> itemDatas = new TreeMap(itemMap).values();
+			 NewsSendMsg newsSendMsg = new NewsSendMsg();
+			 newsSendMsg.setArticleCount(String.valueOf(itemDatas.size()));
+			 for(Map<String,String> itemData:itemDatas){
+				 NewsSendMsg.Item item = (NewsSendMsg.Item)Class.forName("com.etaoguan.wea.wechat.vo.NewsSendMsg$Item").newInstance();
+				 item.setTitle(itemData.get("title"));
+				 item.setDescription(itemData.get("description"));
+				 item.setUrl(itemData.get("linkUrl"));
+				 String imgUrl = itemData.get("imgUrl");
+				 if(imgUrl.toLowerCase().indexOf("http")!=-1){
+					 item.setPicUrl(imgUrl);
+				 }else{
+					 item.setPicUrl("D:/TGImg/img.zhizhangtong.com/"+imgUrl);
+				 }
+				 
+				 newsSendMsg.addArticle(item);
+			 }
+			 newsSendMsg.setMsgType(WeaConstant.WECHAT_MSGTYPE_NEWS);
+			 newsSendMsg.setFuncFlag("0");
+			 newsSendMsg.setCreateTime(new Long(new Date().getTime()).toString());
+			 newsSendMsg.setToUserName(receivedMsg.getFromUserName());
+			 newsSendMsg.setFromUserName(receivedMsg.getToUserName());
+			 responseMsg = WeChatUtil.buildWeChatSendMsg(newsSendMsg);
+		 }else if(wechatMessage.getMessageType()==99){
+			 TransCustSvrSendMsg transCustSvrSendMsg = new TransCustSvrSendMsg();
+			 transCustSvrSendMsg.setMsgType(WeaConstant.WECHAT_MSGTYPE_TRANSFER_CUSTOMER_SERVICE);
+			 transCustSvrSendMsg.setCreateTime(new Long(new Date().getTime()).toString());
+			 transCustSvrSendMsg.setToUserName(receivedMsg.getFromUserName());
+			 transCustSvrSendMsg.setFromUserName(receivedMsg.getToUserName());
+			 responseMsg = WeChatUtil.buildWeChatSendMsg(transCustSvrSendMsg);
+		 }
+		 return responseMsg;
+	}
+
+}

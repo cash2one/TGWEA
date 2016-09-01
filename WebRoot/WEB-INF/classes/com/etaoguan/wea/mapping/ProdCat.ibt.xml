@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+
+<!-- author 刘卿 -->
+<!-- 感谢ibatis的持久层框架 -->
+
+<sqlMap>
+
+	<typeAlias alias="PRODCAT" type="com.etaoguan.wea.vo.ProdCat"/>
+
+	<resultMap id="prodCat" class="PRODCAT">
+		<result property="prodCatId" column="cat_id"/>
+		<result property="ownerNum" column="owner_num"/>
+		<result property="prodCatName" column="cat_name"/>
+		<result property="parentProdCatId" column="parent_cat_id"/>
+		<result property="externalSysCode" column="external_syscode"/>
+	</resultMap>
+
+
+	
+	<insert id="createProdCat" parameterClass="PRODCAT">
+		insert into product_category 
+		(
+		cat_id,
+		cat_name,
+		owner_num,
+		parent_cat_id,
+		external_syscode
+		)
+		values(
+			#prodCatId#,
+			#prodCatName#,
+			#ownerNum#,		
+			#parentProdCatId#,
+			'wea'
+		)
+
+	</insert>
+
+	<select id="getProdCatById" parameterClass="java.util.HashMap" resultMap="prodCat">
+	
+		SELECT cat_id,
+		cat_name,
+		owner_num,
+		parent_cat_id,
+		external_syscode 
+		FROM product_category  
+		where cat_id = #prodCatId#
+
+	</select>
+	
+	<select id="getProdCatList" parameterClass="java.util.HashMap" resultMap="prodCat">
+	
+		SELECT cat_id,
+		cat_name,
+		owner_num,
+		parent_cat_id,
+		external_syscode 
+		FROM product_category  
+		where 1=1 
+		<dynamic>
+			<isNotEmpty property="ownerNum" prepend="and">
+			    owner_num = #ownerNum# 
+			</isNotEmpty>
+			<isNotEmpty property="parentProdCatId" prepend="and">
+			    parent_cat_id = #parentProdCatId# 
+			</isNotEmpty>
+			<isNotEmpty property="prodCatIds" prepend="and">
+			    cat_id IN 
+			    <iterate property="prodCatIds" open="(" close=")" conjunction=","> 
+			    #prodCatIds[]#
+			    </iterate>
+			</isNotEmpty>
+		</dynamic>
+
+	</select>
+
+	<select id="getProdCatIdList" parameterClass="java.util.HashMap" resultClass="java.lang.Integer">
+	
+		SELECT cat_id 
+		FROM product_category  
+		where 1=1 
+		<dynamic>
+			<isNotEmpty property="ownerNum" prepend="and">
+			    owner_num = #ownerNum# 
+			</isNotEmpty>
+			<isNotEmpty property="parentProdCatId" prepend="and">
+			    parent_cat_id = #parentProdCatId# 
+			</isNotEmpty>
+		</dynamic>
+
+	</select>
+	<select id="getProdCatCount" parameterClass="java.util.HashMap" resultClass="java.lang.Integer">
+	
+		SELECT count(1) 
+		FROM product_category  
+		where 1=1 
+		<dynamic>
+			<isNotEmpty property="ownerNum" prepend="and">
+			    owner_num = #ownerNum# 
+			</isNotEmpty>
+			<isNotEmpty property="parentProdCatId" prepend="and">
+			    parent_cat_id = #parentProdCatId# 
+			</isNotEmpty>
+			<isNotEmpty property="externalSysCode" prepend="and">
+			    external_syscode = #externalSysCode# 
+			</isNotEmpty>
+			
+		</dynamic>
+
+	</select>
+	
+	
+	<update id="updateProdCat"  parameterClass="PRODCAT">
+			update product_category set 
+			<isNotEmpty property="prodCatName">
+				cat_name = #prodCatName#
+			</isNotEmpty> 
+			<isEmpty property="prodCatName">
+				cat_name = cat_name
+			</isEmpty> 
+			<isNotEmpty property="parentProdCatId" prepend=",">
+				parent_cat_id = #parentProdCatId#
+			</isNotEmpty> 
+			where cat_id = #prodCatId#
+	</update>
+	
+	
+	<delete id="deleteProdCat"  parameterClass="java.util.HashMap">
+			delete from product_category 
+			where owner_num = #ownerNum# 
+			<dynamic>
+				<isNotEmpty property="prodCatId" prepend="and">
+				    cat_id = #prodCatId# 
+				</isNotEmpty>
+				<isNotEmpty property="parentProdCatId" prepend="and">
+				    parent_cat_id = #parentProdCatId# 
+				</isNotEmpty>
+				<isNotEmpty property="externalSysCode" prepend="and">
+			    	external_syscode = #externalSysCode# 
+				</isNotEmpty>
+			</dynamic>
+	</delete>
+</sqlMap>

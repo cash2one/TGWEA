@@ -1,0 +1,50 @@
+<ion-view title="{{resTitle}}">
+    <ion-nav-buttons side="left">
+        <button ng-click="back(-1)" class="button button-clear button-light ion-ios7-arrow-back barIcon"></button>
+    </ion-nav-buttons>
+
+    <ion-nav-buttons side="right">
+        <button class="button button-clear button-light icon-large" ng-class="showType === false ? 'ion-images' : 'ion-navicon' " ng-click="changeStyle()"></button>
+    </ion-nav-buttons>
+    <ion-content>
+        <div  ng-hide="bodyHide" style="height: 100%;width:100%;background-color: #f9f9f9;position: fixed;top: 0; z-index: 9999999;"></div>
+        <div id="mainContent">
+        <div class="list margin-bottom-none" ng-if="showType === false">
+            <div class="item item-thumbnail-left floorMain" ng-click="resItemClick($index)" ng-repeat="resList in proResList">
+                <img id="prListImg" _lazysrc="{{resList.proListImg}}" onerror=this.src=errImg>
+                <p class="proName" ng-bind="resList.proName"></p>
+                <p class="margin-bottom-none"><span class="proModel" ng-bind="resList.proModel"></span></p>
+                <p><span class="proPrice" ng-bind="resList.proPrice"></span></p>
+            </div>
+        </div>
+        </div>
+
+        <div class="row" ng-if="showType === true">
+            <div class="col col-50">
+                <div class="iProList floorMain" ng-repeat="proLeftDatas in proDatas.proLeftInfos">
+                    <a href='javascript:void(0)' ng-click="proLeftClick($index)">
+                        <img src="img/nopic.jpg" _lazysrc="{{proLeftDatas.proListImg}}"  onerror=this.src=errImg>
+                    </a>
+                    <h2 ng-bind="proLeftDatas.proPrice" class="proPrice margin-top-none margin-bottom-none"></h2>
+                    <h2 class='proName_style1 margin-bottom-none margin-top-none' ng-bind="proLeftDatas.proName"></h2>
+                </div>
+            </div>
+
+            <div class="col col-50">
+                <div class="iProList floorMain" ng-repeat="proRightDatas in proDatas.proRightInfos">
+                    <a href='javascript:void(0)' ng-click="proRightClick($index)">
+                        <img src="img/nopic.jpg" _lazysrc="{{proRightDatas.proListImg}}" onerror=this.src=errImg>
+                    </a>
+                    <h2 ng-bind="proRightDatas.proPrice" class="proPrice margin-top-none margin-bottom-none"></h2>
+                    <h2 class="proName_style1 margin-bottom-none margin-top-none" ng-bind="proRightDatas.proName"></h2>
+                </div>
+            </div>
+        </div>
+
+
+
+
+        <ion-infinite-scroll icon="icon-spinner icon-spin" distance="0px" on-infinite="proResLoadMore()" ng-hide="loadingHide"></ion-infinite-scroll>
+        <h2 class="noMore margin-top-none" ng-hide="noMoreHide">已经到底啦</h2>
+    </ion-content>
+</ion-view>

@@ -1,0 +1,64 @@
+package com.etaoguan.wea.service.impl;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.etaoguan.wea.common.DataCriteria;
+import com.etaoguan.wea.common.DataSet;
+import com.etaoguan.wea.common.OffsetRequest;
+import com.etaoguan.wea.dao.IWechatMassMessageDao;
+import com.etaoguan.wea.service.IWechatMassMessageService;
+import com.etaoguan.wea.wechat.vo.WechatMassMessage;
+
+/**
+ * @author cunli
+ * 微信群发消息
+ */
+@Service("wechatMassMessageService")
+public class WechatMassMessageService extends BaseService implements IWechatMassMessageService{
+
+	@Autowired
+	private IWechatMassMessageDao iWechatMassMessageDao;
+	
+	
+	@Override
+	public int addWechatMassMessage(WechatMassMessage wechatMassMessage) {
+		return iWechatMassMessageDao.addWechatMassMessage(wechatMassMessage);
+	}
+	@Override
+	@SuppressWarnings("rawtypes")
+	public DataSet listWechatMassMessage(DataCriteria dataCriteria,
+			OffsetRequest offsetRequest) {
+		return iWechatMassMessageDao.getWechatMassMessage(dataCriteria, offsetRequest);
+	}
+	/* (non-Javadoc)save massMessageId to database
+	 * @see com.etaoguan.wea.service.IWechatMassMessageService#updateWechatMassMessage(int)
+	 */
+	@Override
+	public void updateWechatMassMessage(int massMessageId,String content) {
+		DataCriteria dataCriteria = new DataCriteria();
+		dataCriteria.setParam("massMessageId", massMessageId);
+		dataCriteria.setParam("content", content);
+		iWechatMassMessageDao.updateWechatMassMessage(dataCriteria);
+		
+	}
+	/* (non-Javadoc)根据Id获取要发送所需要的mediaId
+	 * @see com.etaoguan.wea.service.IWechatMassMessageService#getMassMessageById(int)
+	 */
+	@Override
+	public WechatMassMessage getMassMessageById(long massMessageId) {
+		DataCriteria dataCriteria = new DataCriteria();
+		dataCriteria.setParam("massMessageId", massMessageId);
+		return iWechatMassMessageDao.getMassMessageById(dataCriteria);
+	}
+	/* (non-Javadoc) 删除群发消息
+	 * @see com.etaoguan.wea.service.IWechatMassMessageService#deleteWechatMassMessage(long)
+	 */
+	@Override
+	public void deleteWechatMassMessage(long massMessageId) {
+		DataCriteria dataCriteria = new DataCriteria();
+		dataCriteria.setParam("massMessageId", massMessageId);
+		iWechatMassMessageDao.deleteWechatMassMessage(dataCriteria);
+	}
+
+}

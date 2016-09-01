@@ -1,0 +1,80 @@
+﻿@charset "utf-8";
+/* CSS Document */
+
+h1, h2, h3, h4, h5, h6, .h1, .h2, .h3, .h4, .h5, .h6{
+	font-family:"微软雅黑";
+	}
+	
+body{
+	font-family:"微软雅黑";
+
+	}
+a{
+	text-transform:none;text-decoration:none;}
+html{
+	font-family:"微软雅黑";
+	font-family:"长城新艺体";
+	}
+
+@font-face { 
+  font-family: "微软雅黑"; 
+  src:"../fonts/微软雅黑.TTF";
+} 
+p{
+	margin:0px;}
+ul, ol {
+    list-style: none outside none;
+	padding:0px;}
+img {
+    max-width: 100%;
+    height: auto;
+    width: auto; /* ie8 */
+}
+.content img{
+	max-width: 100%;
+    height: auto;
+    width: auto; /* ie8 */
+	}
+body{
+	width:100%;
+	background-color:#fff;
+	color:#605f5f;
+	}
+
+
+.container-fluid{
+	padding:0px 0px; 
+	margin:0px;
+	}
+a{
+	color:#FFF;
+	}
+	
+/* 页面开始 */	
+.top1{ background:url(../img/bg1.png) no-repeat; background-size:100% 100%; height:586px;}
+.logo img{ margin:30px;}
+
+.top2{ text-align:right;}
+.top2 h3{margin:200px 100px 0px 0px; font-size:4em; letter-spacing:0.1em; color:#FFF; font-weight:bold;}
+.top2 h4{margin:20px 100px 0px 0px;font-size:2.6em;color:#e8b50e; font-weight:bold;text-shadow: 1px 1px rgba(255, 255, 255,0.6),2px 2px rgba(255, 255, 255,0.5),3px 3px rgba(255, 255, 255,0.4);letter-spacing:0.1em;}
+
+.top3{ margin:30px 0px 0px 0px;text-align:right; padding-right:40px;}
+.top3 input{ padding:8px 20px;border-radius:6px; width:300px;}
+.login{ padding:8px 20px;border-radius:6px; margin-top:-2px;}
+	
+
+.hts{ color:#f76057;}
+.cont1{ padding:0px 180px; text-align:center;background:url(../img/bg2.png) no-repeat; background-size:100% 100%; height:465px;}
+.cont1 h3,.cont3 h3{font-size:2.6em; margin-top:140px;}
+.cont2 h3{font-size:2.6em; margin-top:200px;}
+.cont2 p,.cont3 p{ font-size:1.2em;}
+
+.cont2{ padding:0px 180px;background:url(../img/bg3.png) no-repeat; background-size:100% 100%;height:620px;}
+.cont3{ padding:0px 180px; text-align:center;background:url(../img/bg4.png) no-repeat; background-size:100% 100%;height:560px;}
+.cont4{ padding:0px 180px 100px 180px; text-align:center;}
+.cont4 h3{ font-size:2.8em; padding:40px 0px;}
+
+
+
+.footer{ background-color:#7c7d7d; padding:20px 0px; color:#CCC;}
+	

@@ -1,0 +1,54 @@
+package com.etaoguan.wea.dao.impl;
+
+import java.util.List;
+
+import javax.annotation.Resource;
+
+import org.springframework.stereotype.Repository;
+
+import com.etaoguan.wea.common.DataCriteria;
+import com.etaoguan.wea.dao.IWareHouseDao;
+import com.etaoguan.wea.vo.WareHouse;
+import com.ibatis.sqlmap.client.SqlMapClient;
+
+@Repository
+public class WareHouseDao extends SpringBaseDao implements IWareHouseDao{
+
+	@Override
+	@Resource(name="wareHouseSqlMapClient")
+	public void setSbiSqlMapClient(SqlMapClient sqlMapClient){
+		
+		super.setSqlMapClient(sqlMapClient);
+	}
+	
+	@Override
+	public void addWareHouse(WareHouse wareHouse) {
+		this.getSqlMapClientTemplate().insert("createWareHouse", wareHouse);
+		
+	}
+
+	@Override
+	public void delWareHouse(DataCriteria dataCriteria) {
+		this.getSqlMapClientTemplate().delete("deleteWareHouse", dataCriteria.getParams());
+		
+	}
+
+	@Override
+	@SuppressWarnings("unchecked")
+	public List<WareHouse> getAllWarehouses(DataCriteria dataCriteria) {
+		
+		return this.getSqlMapClientTemplate().queryForList("getWareHouseList", dataCriteria.getParams());
+	}
+
+	@Override
+	public void updateWareHouse(WareHouse wareHouse) {
+		
+		this.getSqlMapClientTemplate().update("updateWareHouse", wareHouse);
+	}
+
+	@Override
+	public WareHouse getWarehouse(DataCriteria dataCriteria) {
+		return (WareHouse)this.getSqlMapClientTemplate().queryForObject("getWareHouse", dataCriteria.getParams());
+	}
+
+}

@@ -1,0 +1,106 @@
+package com.etaoguan.wea.dao.impl;
+
+import java.util.List;
+import java.util.Map;
+
+import javax.annotation.Resource;
+
+import org.springframework.stereotype.Repository;
+
+import com.etaoguan.wea.common.DataCriteria;
+import com.etaoguan.wea.common.DataSet;
+import com.etaoguan.wea.common.OffsetRequest;
+import com.etaoguan.wea.dao.ICashInvDao;
+import com.etaoguan.wea.vo.CashInvoice;
+import com.etaoguan.wea.vo.CashInvoiceItem;
+import com.ibatis.sqlmap.client.SqlMapClient;
+
+@Repository
+public class CashInvDao extends SpringBaseDao implements ICashInvDao{
+
+	@Override
+	@Resource(name="cashInvSqlMapClient")
+	public void setSbiSqlMapClient(SqlMapClient sqlMapClient){
+		
+		super.setSqlMapClient(sqlMapClient);
+	}
+	
+	@Override
+	public void addCashInv(CashInvoice cashInv) {
+		this.getSqlMapClientTemplate().insert("createCashInv", cashInv);
+		
+	}
+
+	@Override
+	public void delCashInv(DataCriteria dataCriteria) {
+		this.getSqlMapClientTemplate().delete("deleteCashInv", dataCriteria.getParams());
+		
+	}
+
+	@Override
+	public int getCashInvCount(DataCriteria dataCriteria) {
+		return (Integer) this.getSqlMapClientTemplate().queryForObject("getCashInvCount", dataCriteria.getParams());
+	}
+
+	@Override
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	public DataSet getCashInvDataSet(DataCriteria dataCriteria,
+			OffsetRequest offsetRequest) {
+		Map params = dataCriteria.getParams();
+		
+		Integer count=(Integer) this.getSqlMapClientTemplate().queryForObject("getCashInvCount", params);
+		
+		params.put("limit", offsetRequest.getPerUnitNum());
+		params.put("offset", offsetRequest.getOffset());
+		List<CashInvoice> cashInvList = this.getSqlMapClientTemplate().queryForList("getCashInvDatSet", params);
+		
+		DataSet<CashInvoice> dataSet = new DataSet<CashInvoice>();
+		dataSet.setTotalRecNum(count);
+		dataSet.setDataList(cashInvList);
+		return dataSet;
+	}
+
+	@Override
+	public void updateCashInv(CashInvoice cashInv) {
+		this.getSqlMapClientTemplate().update("updateCashInv", cashInv);
+		
+	}
+
+	@Override
+	public void updateCashInv(DataCriteria dataCriteria) {
+		this.getSqlMapClientTemplate().update("updateCashInvByMap", dataCriteria.getParams());
+		
+	}
+
+	@Override
+	public CashInvoice getCashInv(DataCriteria dataCriteria) {
+
+		return (CashInvoice)this.getSqlMapClientTemplate().queryForObject("getCashInv", dataCriteria.getParams());
+	}
+
+	@Override
+	public void addCashInvItem(CashInvoiceItem cashInvItem) {
+		this.getSqlMapClientTemplate().insert("createCashInvItem", cashInvItem);
+		
+	}
+
+	@Override
+	public void delCashInvItem(DataCriteria dataCriteria) {
+		this.getSqlMapClientTemplate().delete("deleteCashInvItem", dataCriteria.getParams());
+		
+	}
+
+	@Override
+	@SuppressWarnings("unchecked")
+	public List<CashInvoiceItem> getCashInvItems(DataCriteria dataCriteria) {
+
+		return this.getSqlMapClientTemplate().queryForList("getCashInvItems", dataCriteria.getParams());
+	}
+
+	@Override
+	public void reCalcCashPriceTotal(DataCriteria dataCriteria) {
+		this.getSqlMapClientTemplate().update("reCalcCashPriceTotal", dataCriteria.getParams());
+		
+	}
+
+}

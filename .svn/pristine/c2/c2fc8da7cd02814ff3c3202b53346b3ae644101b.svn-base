@@ -1,0 +1,82 @@
+package com.etaoguan.wea.client.mobile.service.impl;
+
+import javax.annotation.Resource;
+
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.stereotype.Service;
+
+import com.etaoguan.wea.client.mobile.service.IMProductService;
+import com.etaoguan.wea.client.mobile.vo.MPage;
+import com.etaoguan.wea.client.mobile.vo.MPagingRequest;
+import com.etaoguan.wea.client.mobile.vo.ProdSearch;
+import com.etaoguan.wea.client.vo.SortParam;
+import com.etaoguan.wea.client.web.service.IWGroupOfCustService;
+import com.etaoguan.wea.common.DataCriteria;
+import com.etaoguan.wea.common.DataSet;
+import com.etaoguan.wea.common.OffsetRequest;
+import com.etaoguan.wea.service.impl.ProductService;
+import com.etaoguan.wea.vo.GroupOfCust;
+
+@Service("mproductService")
+public class MProductService extends ProductService implements IMProductService{
+	
+	@Resource(name="wGroupOfCustService")
+	private  IWGroupOfCustService iwGroupOfCustService;
+	
+	@SuppressWarnings("rawtypes")
+	public MPage listProducts(ProdSearch productSearch,
+			SortParam sortParam, MPagingRequest mpagingRequest) {
+		OffsetRequest offsetRequest = mpagingRequest.format2OffsetRequest();
+		DataCriteria dataCriteria = DataCriteria.parseObjProp2Params(productSearch);
+		if(StringUtils.isNotEmpty(productSearch.getProdCatId())){
+			String[] prodCatIds = new String[1];
+			prodCatIds[0] = productSearch.getProdCatId();
+			dataCriteria.setParam("prodCatIds", prodCatIds);
+			dataCriteria.setParam("isPublic", productSearch.getIsPublic());
+		}
+		if(sortParam!=null&&StringUtils.isNotEmpty(sortParam.getSortBy())){
+			switch(sortParam.getSortBy()){
+				case "stdPrice":
+					sortParam.setSortBy("std_price");
+					break;
+				default:
+					sortParam = null;
+					break;
+			}		
+				
+			dataCriteria.extractSortParam(sortParam);
+			
+		}
+		
+		DataSet dataSet = listProducts(dataCriteria, offsetRequest);
+		return new MPage(mpagingRequest,dataSet);
+	}
+	
+	/* (non-Javadoc)根据用户id获取产品信息
+	 * @see com.etaoguan.wea.client.mobile.service.IMProductService#listProductsbyid(com.etaoguan.wea.client.mobile.vo.ProdSearch, com.etaoguan.wea.client.vo.SortParam, com.etaoguan.wea.client.mobile.vo.MPagingRequest)
+	 */
+	@SuppressWarnings("rawtypes")
+	public MPage listProductsbyid(ProdSearch productSearch,
+			SortParam sortParam, MPagingRequest mpagingRequest) {
+		OffsetRequest offsetRequest = mpagingRequest.format2OffsetRequest();
+		DataCriteria dataCriteria = DataCriteria.parseObjProp2Params(productSearch);
+		
+		/*现用custNum找到组名，然后继续下面的，就对了*/
+		String custId = productSearch.getCustNum();
+		GroupOfCust groupOfCust = iwGroupOfCustService.nameOfGroup(custId);
+		String	groupName = "";
+		if (groupOfCust != null) {
+				groupName = groupOfCust.getGroupName();
+		}
+		
+		dataCriteria.setParam("custNum",groupName);
+		dataCriteria.extractSortParam(sortParam);
+		DataSet dataSet = listProductsbyid(dataCriteria, offsetRequest);
+		return new MPage(mpagingRequest,dataSet);
+	}
+
+
+
+
+
+}

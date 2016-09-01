@@ -1,0 +1,219 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:jee="http://www.springframework.org/schema/jee"
+	xmlns:tx="http://www.springframework.org/schema/tx" xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:aop="http://www.springframework.org/schema/aop"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-2.5.xsd http://www.springframework.org/schema/jee http://www.springframework.org/schema/jee/spring-jee-2.5.xsd http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.5.xsd http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-2.5.xsd"
+	>
+	
+	
+	<bean id="orderPayInfoSqlMapClient"
+		   class="org.springframework.orm.ibatis.SqlMapClientFactoryBean">
+		  <property name="configLocation" value="classpath:spring/sqlmapconfig-Payment.xml" />
+		  <property name="dataSource" ref="dataSource"/>
+	</bean>
+	
+	<bean id="alipayWapPayResultSqlMapClient"
+		   class="org.springframework.orm.ibatis.SqlMapClientFactoryBean">
+		  <property name="configLocation" value="classpath:spring/sqlmapconfig-Payment.xml" />
+		  <property name="dataSource" ref="dataSource"/>
+	</bean>
+	
+	<bean id="alipayWapRequestSqlMapClient"
+		   class="org.springframework.orm.ibatis.SqlMapClientFactoryBean">
+		  <property name="configLocation" value="classpath:spring/sqlmapconfig-Payment.xml" />
+		  <property name="dataSource" ref="dataSource"/>
+	</bean>
+	
+	<bean id="alipayKeysSqlMapClient"
+		   class="org.springframework.orm.ibatis.SqlMapClientFactoryBean">
+		  <property name="configLocation" value="classpath:spring/sqlmapconfig-Payment.xml" />
+		  <property name="dataSource" ref="dataSource"/>
+	</bean>
+	
+	<bean id="weChatCodeSuccessSqlMapClient"
+		   class="org.springframework.orm.ibatis.SqlMapClientFactoryBean">
+		  <property name="configLocation" value="classpath:spring/sqlmapconfig-WeChatCodeSuccess.xml" />
+		  <property name="dataSource" ref="dataSource"/>
+	</bean>
+	
+	<bean id="wechatOrderSqlMapClient"
+		   class="org.springframework.orm.ibatis.SqlMapClientFactoryBean">
+		  <property name="configLocation" value="classpath:spring/sqlmapconfig-WechatOrder.xml" />
+		  <property name="dataSource" ref="dataSource"/>
+	</bean>
+	
+	<bean id="specialProdSqlMapClient"
+		   class="org.springframework.orm.ibatis.SqlMapClientFactoryBean">
+		  <property name="configLocation" value="classpath:spring/sqlmapconfig-SpecialProdCustRef.xml" />
+		  <property name="dataSource" ref="dataSource"/>
+	</bean>
+	
+	<bean id="groupOfCustSqlMapClient"
+		   class="org.springframework.orm.ibatis.SqlMapClientFactoryBean">
+		  <property name="configLocation" value="classpath:spring/sqlmapconfig-GroupOfCust.xml" />
+		  <property name="dataSource" ref="dataSource"/>
+	</bean>
+    
+    <bean id="dailyReportSqlMapClient"
+		   class="org.springframework.orm.ibatis.SqlMapClientFactoryBean">
+		  <property name="configLocation" value="classpath:spring/sqlmapconfig-DailyReport.xml" />
+		  <property name="dataSource" ref="dataSource"/>
+	</bean>
+	
+    <bean id="ownerSqlMapClient"
+		   class="org.springframework.orm.ibatis.SqlMapClientFactoryBean">
+		  <property name="configLocation" value="classpath:spring/sqlmapconfig-Owner.xml" />
+		  <property name="dataSource" ref="dataSource"/>
+	</bean>
+
+    <bean id="custSqlMapClient"
+		   class="org.springframework.orm.ibatis.SqlMapClientFactoryBean">
+		  <property name="configLocation" value="classpath:spring/sqlmapconfig-Cust.xml" />
+		  <property name="dataSource" ref="dataSource"/>
+	</bean>
+	
+    <bean id="cashInvSqlMapClient"
+		   class="org.springframework.orm.ibatis.SqlMapClientFactoryBean">
+		  <property name="configLocation" value="classpath:spring/sqlmapconfig-CashInv.xml" />
+		  <property name="dataSource" ref="dataSource"/>
+	</bean>
+	
+	<bean id="deliverInvSqlMapClient"
+		   class="org.springframework.orm.ibatis.SqlMapClientFactoryBean">
+		  <property name="configLocation" value="classpath:spring/sqlmapconfig-DeliverInv.xml" />
+		  <property name="dataSource" ref="dataSource"/>
+	</bean>
+	
+	<bean id="returnedInvSqlMapClient"
+		   class="org.springframework.orm.ibatis.SqlMapClientFactoryBean">
+		  <property name="configLocation" value="classpath:spring/sqlmapconfig-ReturnedInv.xml" />
+		  <property name="dataSource" ref="dataSource"/>
+	</bean>
+	
+	<bean id="guestBookSqlMapClient"
+		   class="org.springframework.orm.ibatis.SqlMapClientFactoryBean">
+		  <property name="configLocation" value="classpath:spring/sqlmapconfig-GuestBook.xml" />
+		  <property name="dataSource" ref="dataSource"/>
+	</bean>
+	
+	<bean id="orderSqlMapClient"
+		   class="org.springframework.orm.ibatis.SqlMapClientFactoryBean">
+		  <property name="configLocation" value="classpath:spring/sqlmapconfig-Order.xml" />
+		  <property name="dataSource" ref="dataSource"/>
+	</bean>
+	<bean id="prodSqlMapClient"
+		   class="org.springframework.orm.ibatis.SqlMapClientFactoryBean">
+		  <property name="configLocation" value="classpath:spring/sqlmapconfig-Prod.xml" />
+		  <property name="dataSource" ref="dataSource"/>
+	</bean>
+	
+	<bean id="prodStockSqlMapClient"
+		   class="org.springframework.orm.ibatis.SqlMapClientFactoryBean">
+		  <property name="configLocation" value="classpath:spring/sqlmapconfig-ProdStock.xml" />
+		  <property name="dataSource" ref="dataSource"/>
+	</bean>
+
+	<bean id="wareHouseSqlMapClient"
+		   class="org.springframework.orm.ibatis.SqlMapClientFactoryBean">
+		  <property name="configLocation" value="classpath:spring/sqlmapconfig-WareHouse.xml" />
+		  <property name="dataSource" ref="dataSource"/>
+	</bean>
+
+	<bean id="adminSqlMapClient"
+		   class="org.springframework.orm.ibatis.SqlMapClientFactoryBean">
+		  <property name="configLocation" value="classpath:spring/sqlmapconfig-Admin.xml" />
+		  <property name="dataSource" ref="dataSource"/>
+	</bean>
+	
+	<bean id="accessAuthSqlMapClient"
+		   class="org.springframework.orm.ibatis.SqlMapClientFactoryBean">
+		  <property name="configLocation" value="classpath:spring/sqlmapconfig-AccessAuth.xml" />
+		  <property name="dataSource" ref="dataSource"/>
+	</bean>
+	
+	<bean id="basicBataSqlMapClient"
+		   class="org.springframework.orm.ibatis.SqlMapClientFactoryBean">
+		  <property name="configLocation" value="classpath:spring/sqlmapconfig-BasicData.xml" />
+		  <property name="dataSource" ref="dataSource"/>
+	</bean>
+	
+	<bean id="logSqlMapClient"
+		   class="org.springframework.orm.ibatis.SqlMapClientFactoryBean">
+		  <property name="configLocation" value="classpath:spring/sqlmapconfig-Log.xml" />
+		  <property name="dataSource" ref="dataSource"/>
+	</bean>
+	
+	<bean id="e688SqlMapClient"
+		   class="org.springframework.orm.ibatis.SqlMapClientFactoryBean">
+		  <property name="configLocation" value="classpath:spring/sqlmapconfig-E688.xml" />
+		  <property name="dataSource" ref="dataSource"/>
+	</bean>
+	
+	<bean id="pushMessageSqlMapClient"
+		   class="org.springframework.orm.ibatis.SqlMapClientFactoryBean">
+		  <property name="configLocation" value="classpath:spring/sqlmapconfig-PushMessage.xml" />
+		  <property name="dataSource" ref="dataSource"/>
+	</bean>
+	
+	<bean id="settingSqlMapClient"
+		   class="org.springframework.orm.ibatis.SqlMapClientFactoryBean">
+		  <property name="configLocation" value="classpath:spring/sqlmapconfig-Setting.xml" />
+		  <property name="dataSource" ref="dataSource"/>
+	</bean>
+
+	<bean id="wechatSqlMapClient"
+		   class="org.springframework.orm.ibatis.SqlMapClientFactoryBean">
+		  <property name="configLocation" value="classpath:spring/sqlmapconfig-Wechat.xml" />
+		  <property name="dataSource" ref="dataSource"/>
+	</bean>
+	
+	<bean id="androidversionSqlMapClient"
+		   class="org.springframework.orm.ibatis.SqlMapClientFactoryBean">
+		  <property name="configLocation" value="classpath:spring/sqlmapconfig-androidversion.xml" />
+		  <property name="dataSource" ref="dataSource"/>
+	</bean>
+	
+	<bean id="appleversionSqlMapClient"
+		   class="org.springframework.orm.ibatis.SqlMapClientFactoryBean">
+		  <property name="configLocation" value="classpath:spring/sqlmapconfig-appleversion.xml" />
+		  <property name="dataSource" ref="dataSource"/>
+	</bean>
+	
+	<bean id="prodGpsSqlMapClient"
+		   class="org.springframework.orm.ibatis.SqlMapClientFactoryBean">
+		  <property name="configLocation" value="classpath:spring/sqlmapconfig-productGps.xml" />
+		  <property name="dataSource" ref="dataSource"/>
+	</bean>
+	
+	<bean id="wechatMassMessageSqlMapClient"
+		   class="org.springframework.orm.ibatis.SqlMapClientFactoryBean">
+		  <property name="configLocation" value="classpath:spring/sqlmapconfig-WechatMassMessage.xml" />
+		  <property name="dataSource" ref="dataSource"/>
+	</bean>
+	
+	<bean id="wechatPictureTextSqlMapClient"
+		   class="org.springframework.orm.ibatis.SqlMapClientFactoryBean">
+		  <property name="configLocation" value="classpath:spring/sqlmapconfig-WechatPictureText.xml" />
+		  <property name="dataSource" ref="dataSource"/>
+	</bean>
+	
+	<bean id="wechatmmrSqlMapClient"
+		   class="org.springframework.orm.ibatis.SqlMapClientFactoryBean">
+		  <property name="configLocation" value="classpath:spring/sqlmapconfig-WechatMassMsgRequest.xml" />
+		  <property name="dataSource" ref="dataSource"/>
+	</bean>
+	
+	<bean id="authoritySqlMapClient"
+		   class="org.springframework.orm.ibatis.SqlMapClientFactoryBean">
+		  <property name="configLocation" value="classpath:spring/sqlmapconfig-Authority.xml" />
+		  <property name="dataSource" ref="dataSource"/>
+	</bean>
+	
+	<bean id="fileCacheSqlMapClient"
+		   class="org.springframework.orm.ibatis.SqlMapClientFactoryBean">
+		  <property name="configLocation" value="classpath:spring/sqlmapconfig-FileCache.xml" />
+		  <property name="dataSource" ref="dataSource"/>
+	</bean>
+	
+   </beans>

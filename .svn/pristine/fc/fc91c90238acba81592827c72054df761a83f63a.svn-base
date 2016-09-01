@@ -1,0 +1,147 @@
+package com.etaoguan.wea.service.impl;
+
+import java.util.List;
+
+import javax.annotation.Resource;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.etaoguan.wea.common.DataCriteria;
+import com.etaoguan.wea.common.DataSet;
+import com.etaoguan.wea.common.OffsetRequest;
+import com.etaoguan.wea.common.WeaException;
+import com.etaoguan.wea.dao.ICashInvDao;
+import com.etaoguan.wea.service.ICashInvService;
+import com.etaoguan.wea.service.IKeyGenService;
+import com.etaoguan.wea.service.IOrderService;
+import com.etaoguan.wea.vo.CashInvoice;
+import com.etaoguan.wea.vo.CashInvoiceItem;
+
+@Service("cashInvService")
+public class CashInvService extends BaseService implements ICashInvService {
+	
+	@Autowired
+	private ICashInvDao iCashInvDao;
+
+	@Resource(name="cashKeyGenService") 
+	protected IKeyGenService  iKeyGenService;
+	
+	
+	@Resource(name="orderService")
+	private IOrderService iOrderService;
+	
+	@Override
+	public void addCashInv(CashInvoice cashInv) {
+		
+		if(cashInv.getCashInvItemList()==null||cashInv.getCashInvItemList().size()==0){
+			throw new WeaException("无效的收款信息");
+		}
+		String cashNum = iKeyGenService.saveNGetKey();
+		cashInv.setCashNum(cashNum);
+		cashInv.setCreateBy(getCurrentOperator());
+		cashInv.setUpdateBy(getCurrentOperator());
+		iCashInvDao.addCashInv(cashInv);
+		for(CashInvoiceItem cashInvItem:cashInv.getCashInvItemList()){
+			cashInvItem.setCashNum(cashNum);
+			iCashInvDao.addCashInvItem(cashInvItem);
+		}
+		DataCriteria dataCriteria = new DataCriteria();
+		dataCriteria.setParam("cashNum",cashNum);
+		iCashInvDao.reCalcCashPriceTotal(dataCriteria);
+		
+		iOrderService.updateOrder2Cashed(cashInv.getReferOrderNum(), cashInv.getCashType());
+	}
+
+	@Override
+	public void delCashInv(String cashNum) {
+		CashInvoice cashInv =getCashInvHeader(cashNum);
+		DataCriteria dataCriteria = new DataCriteria();
+		dataCriteria.setParam("cashNum",cashNum);
+		iCashInvDao.delCashInv(dataCriteria);		
+		
+		iOrderService.updateOrder2Uncashed(cashInv.getReferOrderNum());
+	}
+
+	@Override
+	public boolean existsCashInv(String orderNum) {
+		DataCriteria dataCriteria = new DataCriteria();
+		dataCriteria.setParam("referOrderNum", orderNum);
+		if(iCashInvDao.getCashInv(dataCriteria)==null){
+			return false;
+		}
+		return true;
+	}
+
+	@Override
+	@SuppressWarnings("rawtypes")
+	public DataSet listCashInvs(DataCriteria dataCriteria,
+			OffsetRequest offsetRequest) {
+		return iCashInvDao.getCashInvDataSet(dataCriteria, offsetRequest);
+	}
+
+	@Override
+	public void updateCashInv(CashInvoice cashInv) {
+		
+		if(cashInv.getCashInvItemList()==null||cashInv.getCashInvItemList().size()==0){
+			throw new WeaException("无效的收款信息");
+		}
+		cashInv.setUpdateBy(getCurrentOperator());
+		iCashInvDao.updateCashInv(cashInv);
+		DataCriteria dataCriteria = new DataCriteria();
+		dataCriteria.setParam("cashNum",cashInv.getCashNum());
+		iCashInvDao.delCashInvItem(dataCriteria);
+
+		for(CashInvoiceItem cashInvItem:cashInv.getCashInvItemList()){
+			cashInvItem.setCashNum(cashInv.getCashNum());
+			iCashInvDao.addCashInvItem(cashInvItem);
+		}
+
+		iCashInvDao.reCalcCashPriceTotal(dataCriteria);
+		iOrderService.updateOrder2Cashed(cashInv.getReferOrderNum(), cashInv.getCashType());
+	}
+
+	@Override
+	public void updateCashInvCashType(String cashNum, int cashType) {
+		DataCriteria dataCriteria = new DataCriteria();
+		dataCriteria.setParam("cashNum",cashNum);
+		dataCriteria.setParam("cashType",cashType);
+		iCashInvDao.updateCashInv(dataCriteria);
+		
+	}
+
+	@Override
+	public CashInvoice getCashInv(String cashNum) {
+		DataCriteria dataCriteria = new DataCriteria();
+		dataCriteria.setParam("cashNum",cashNum);
+		CashInvoice cashInv =iCashInvDao.getCashInv(dataCriteria);
+		List<CashInvoiceItem> cashInvItemList = iCashInvDao.getCashInvItems(dataCriteria);
+		cashInv.setCashInvItemList(cashInvItemList);
+		return cashInv;
+	}
+
+	@Override
+	public List<CashInvoiceItem> getCashInvItems(String cashNum) {
+		DataCriteria dataCriteria = new DataCriteria();
+		dataCriteria.setParam("cashNum",cashNum);
+		return iCashInvDao.getCashInvItems(dataCriteria);
+	}
+
+	@Override
+	public CashInvoice getCashInvHeader(String cashNum) {
+		DataCriteria dataCriteria = new DataCriteria();
+		dataCriteria.setParam("cashNum",cashNum);
+		return iCashInvDao.getCashInv(dataCriteria);
+	}
+
+	@Override
+	public CashInvoice getCashInvByOrderNum(String referOrderNum) {
+		DataCriteria dataCriteria = new DataCriteria();
+		dataCriteria.setParam("referOrderNum",referOrderNum);
+		CashInvoice cashInv =iCashInvDao.getCashInv(dataCriteria);
+		List<CashInvoiceItem> cashInvItemList = getCashInvItems(cashInv.getCashNum());
+		cashInv.setCashInvItemList(cashInvItemList);
+		return cashInv;
+	}
+
+}

@@ -1,0 +1,158 @@
+package com.etaoguan.wea.client.web.service.impl;
+
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Map;
+
+import javax.annotation.Resource;
+
+import org.springframework.stereotype.Service;
+
+import com.etaoguan.wea.client.web.service.IWOrderService;
+import com.etaoguan.wea.client.web.service.IWWechatCodeSuccessService;
+import com.etaoguan.wea.client.web.service.IWWechatOrderService;
+import com.etaoguan.wea.service.impl.WechatOrderService;
+import com.etaoguan.wea.vo.Order;
+import com.etaoguan.wea.vo.WeChatCodeSuccess;
+import com.etaoguan.wea.vo.WechatOrder;
+import com.etaoguan.wea.wechat.util.WechatPictureTextUtil;
+
+/** 
+ * @author cunli 微信订单
+ *
+ */
+@Service("wwechatOrderService")
+public class WWechatOrderService extends WechatOrderService implements IWWechatOrderService{
+
+	@Resource(name="worderService")
+	private IWOrderService iwOrderService;
+	
+	@Resource(name="wwechatCodeSuccessService")
+	private IWWechatCodeSuccessService iwWechatCodeSuccessService;
+	
+	SimpleDateFormat f = new SimpleDateFormat("yyyyMMddHHmmss");
+	String strTime = f.format(new Date());
+	
+	/* (non-Javadoc)
+	 * @see com.etaoguan.wea.client.web.service.IWWechatOrderService#addWechatOrder(com.etaoguan.wea.vo.WechatOrder)
+	 */
+	/* (non-Javadoc)创建微信订单
+	 * @see com.etaoguan.wea.client.web.service.IWWechatOrderService#addWechatOrder(com.etaoguan.wea.vo.WechatOrder)
+	 */
+	@SuppressWarnings("unused")
+	public void addWechatOrder(String orderNum) {
+		
+		/*根据订单编号查询这个订单的信息，创建微信订单并保存到数据库wechat_order表中，然后发送这个给微信*/
+		
+		Order order = iwOrderService.getOrder(orderNum);
+		String v1 = String.valueOf(order.getRealPriceTotal() * 100);//以分计算
+		int totalFee = Integer.parseInt(v1.substring(0,v1.indexOf(".")));
+		String body = "ownerNum="+order.getOwnerNum()+"_custName="+order.getCustName();
+		
+		String outTradeNo = strTime + String.valueOf(Math.random()).substring(2,10);
+		
+		WechatOrder wechatOrder = new WechatOrder();
+		wechatOrder.setAppid("gh_00b0f5eaccab");//***************未设置
+		wechatOrder.setOpenid("openid100");//***************未设置
+		wechatOrder.setMchId("mchId100");//***************未设置
+		wechatOrder.setProductId(outTradeNo);
+		wechatOrder.setTradeType("JSAPI");
+		wechatOrder.setGoodsTag("");
+		wechatOrder.setTimeExpire(strTime);
+		wechatOrder.setTimeStart(strTime);
+		wechatOrder.setFeeType("CNY");
+		wechatOrder.setOutTradeNo(outTradeNo);
+		wechatOrder.setAttach("");
+		wechatOrder.setSign("sign100");
+		wechatOrder.setNonceStr(outTradeNo);
+		wechatOrder.setDeviceInfo("");
+		wechatOrder.setTotalFee(totalFee);//以分计算
+		wechatOrder.setBody(body);
+		wechatOrder.setDetail("");
+		wechatOrder.setSpbillCreateIp("用户ip");//***************未设置
+		wechatOrder.setNotifyUrl("http://www.baidu.com/");//通知地址   接收微信支付异步通知回调地址      //***************未设置
+		createWechatOrder(wechatOrder);
+		
+		
+		StringBuffer stringBuffer = new StringBuffer();
+		
+		stringBuffer.append("<xml><appid>");
+		stringBuffer.append("wx2421b1c4370ec43b");
+		stringBuffer.append("支付测试");
+		stringBuffer.append("</attach><body>");
+		stringBuffer.append("JSAPI支付测试");
+		stringBuffer.append("</body><mch_id>");
+		stringBuffer.append("10000100");
+		stringBuffer.append("</mch_id><nonce_str>");
+		stringBuffer.append("1add1a30ac87aa2db72f57a2375d8fec");
+		stringBuffer.append("</nonce_str><notify_url>");
+		stringBuffer.append("http://wxpay.weixin.qq.com/pub_v2/pay/notify.v2.php");
+		stringBuffer.append("</notify_url><openid>");
+		stringBuffer.append("oUpF8uMuAJO_M2pxb1Q9zNjWeS6o");
+		stringBuffer.append("</openid><out_trade_no>");
+		stringBuffer.append("1415659990");
+		stringBuffer.append("</out_trade_no><spbill_create_ip>");
+		stringBuffer.append("14.23.150.211");
+		stringBuffer.append("</spbill_create_ip><total_fee>");
+		stringBuffer.append("1");
+		stringBuffer.append("</total_fee><trade_type>");
+		stringBuffer.append("JSAPI");
+		stringBuffer.append("</trade_type><sign>");
+		stringBuffer.append("0CB01533B8C1EF103065174F50BCA001");
+		stringBuffer.append("</sign></xml>");
+		
+		String content = stringBuffer.toString();
+		
+		
+		String urlStr="https://api.mch.weixin.qq.com/pay/unifiedorder";
+		Map<String, Object> map = WechatPictureTextUtil.SendURLPost(content,urlStr);
+		
+		String return_code  = map.get("return_code").toString();
+		String appid  = "";
+		String mchId  = "";
+		String deviceInfo  = "";
+		String nonceStr  = "";
+		String sign  = "";
+		String resultCode  = "";
+		String errCode  = "";
+		String errCodeDes  = "";
+		String return_msg   = "";
+		String tradeType  = "";
+		String prepayId  = "";
+		String codeUrl  = "";
+		if (return_code.equals("SUCCESS")) {
+			
+			appid  = map.get("appid").toString();
+			mchId  = map.get("mchId").toString();
+			deviceInfo  = map.get("deviceInfo").toString();
+			nonceStr  = map.get("nonceStr").toString();
+			sign  = map.get("sign").toString();
+			resultCode  = map.get("resultCode").toString();
+			errCode  = map.get("errCode").toString();
+			errCodeDes  = map.get("errCodeDes").toString();
+			if (resultCode.equals("SUCCESS")) {
+				tradeType  = map.get("tradeType").toString();
+				prepayId  = map.get("prepayId").toString();
+				codeUrl  = map.get("codeUrl").toString();
+				
+			}
+			
+		}else {
+			return_msg = map.get("return_msg").toString();
+			
+			
+		}
+		WeChatCodeSuccess weChatCodeSuccess = new WeChatCodeSuccess();
+		weChatCodeSuccess.setAppid(appid);
+		weChatCodeSuccess.setCodeUrl(codeUrl);
+		
+		//这里设置继续参数...........................
+		
+		iwWechatCodeSuccessService.addWechatCodeSuccess(weChatCodeSuccess);
+		
+		
+		
+	}
+
+	
+}

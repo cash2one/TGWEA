@@ -1,0 +1,368 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+
+<!-- author 刘卿 -->
+<!-- 感谢ibatis的持久层框架 -->
+
+<sqlMap>
+
+	<typeAlias alias="ORIGORDER" type="com.etaoguan.wea.vo.OrigOrder" />
+	<typeAlias alias="ORIGORDERITEM" type="com.etaoguan.wea.vo.OrigOrderItem" />
+	<typeAlias alias="Product" type="com.etaoguan.wea.vo.Product" />
+
+	<!-- 原始订单信息SQL映射 -->
+	<resultMap id="origOrder" class="ORIGORDER">
+		<result property="origOrderNum" column="orig_order_num" />
+		<result property="custNum" column="cust_num" />
+		<result property="ownerNum" column="owner_num" />
+		<result property="priceTotal" column="price_total" />
+		<result property="deliverAddr" column="deliver_addr" />
+		<result property="createDate" column="create_date" />
+		<result property="createBy" column="create_by" />
+		<result property="updateDate" column="update_date" />
+		<result property="updateBy" column="update_by" />
+	</resultMap>
+
+	<resultMap id="compOrigOrder" class="ORIGORDER" extends="origOrder">
+		<result property="customer.custName" column="cust_name" />
+		<result property="customer.companyName" column="company_name" />
+		<result property="customer.contactPerson" column="contact_person" />
+		<result property="customer.phoneNum" column="phone_number" />
+	</resultMap>
+
+	<resultMap id="compOrigOrder" class="ORIGORDER" extends="origOrder">
+		<result property="customer.custName" column="cust_name" />
+		<result property="customer.companyName" column="company_name" />
+		<result property="customer.contactPerson" column="contact_person" />
+		<result property="customer.phoneNum" column="phone_number" />
+	</resultMap>
+
+	<resultMap id="compOrigOrderDataSet" class="ORIGORDER"
+		extends="compOrigOrder">
+		<result property="haveReferOrder" column="have_refer_order" />
+	</resultMap>
+
+	<!-- 未审核订单产品列表 -->
+	<resultMap id="compOrigOrderWithItemDataSet" class="ORIGORDER"
+		extends="compOrigOrder">
+		<result property="origOrderItemList" column="orig_order_num"
+			select="getUnauditedOrderItems" />
+	</resultMap>
+
+	<!-- 原始订单明细信息SQL映射 -->
+	<resultMap id="origOrderItem" class="ORIGORDERITEM">
+		<result property="origOrderNum" column="orig_order_num" />
+		<result property="prodNum" column="prod_num" />
+		<result property="prodName" column="prod_name" />
+		<result property="differName" column="differ_name" />
+		<result property="unit" column="unit" />
+		<result property="prodPrice" column="std_price" />
+		<result property="prodPriceTotal" column="price_total" />
+		<result property="cases" column="cases" />
+		<result property="pieces" column="pieces" />
+	</resultMap>
+	<resultMap id="compOrigOrderItem" class="ORIGORDERITEM"
+		extends="origOrderItem">
+		<result property="whereimg" column="whereimg" />
+	</resultMap>
+
+
+	<!-- 获取未审核订单数 -->
+	<select id="getUnauditedOrderCount" parameterClass="java.util.HashMap"
+		resultClass="java.lang.Integer">
+		SELECT count(1) FROM 
+		(SELECT
+		orig_order_num
+		FROM
+		original_order where owner_num = #ownerNum#  
+		<dynamic>
+			<isNotEmpty property="custNum" prepend="and">
+				cust_num = #custNum#
+			</isNotEmpty>
+		</dynamic>
+		) t1 left  outer join `order` t2 
+		on t1.orig_order_num = t2.original_order_num 
+		where t2.order_num is null
+		
+	</select>
+
+	<!-- 原始订单列表(移动端) -->
+	<select id="getUnauditedOrders" parameterClass="java.util.HashMap"
+		resultMap="compOrigOrderWithItemDataSet">
+		SELECT t3.*,t4.cust_name,
+		t4.company_name,
+		t4.contact_person,
+		t4.phone_number FROM
+		(SELECT t1.*,
+		t2.order_num
+		FROM
+		(SELECT
+		orig_order_num,
+		cust_num,
+		price_total,
+		deliver_addr,
+		owner_num,
+		create_date,
+		create_by,
+		update_date,
+		update_by
+		FROM
+		original_order where owner_num = #ownerNum#
+
+		<dynamic>
+			<isNotEmpty property="custNum" prepend="and">
+				cust_num = #custNum#
+			</isNotEmpty>
+			<isNull property="asc">
+				<isNull property="desc">order by create_date desc
+				</isNull>
+			</isNull>
+		</dynamic>
+
+		) t1 left outer join `order` t2
+		on t1.orig_order_num = t2.original_order_num
+		where t2.order_num is null
+		limit #limit# offset #offset# 
+		) t3, 
+		customer t4 where t3.cust_num =
+		t4.cust_num
+	</select>
+
+
+
+	<!-- 获取原始订单总数 -->
+	<select id="getOrigOrderCount" parameterClass="java.util.HashMap"
+		resultClass="java.lang.Integer">
+		SELECT
+		count(1)
+		FROM
+		original_order where 1=1
+		<dynamic>
+			<isNotEmpty property="ownerNum" prepend="and">
+				owner_num = #ownerNum#
+			</isNotEmpty>
+			<isNotEmpty property="custNum" prepend="and">
+				cust_num = #custNum#
+			</isNotEmpty>
+		</dynamic>
+
+	</select>
+
+	<!-- 获取原始订单分页信息 -->
+	<select id="getOrigOrderDatSet" parameterClass="java.util.HashMap"
+		resultMap="compOrigOrderDataSet">
+		SELECT t3.*,IF(t4.order_num is null,0,1) have_refer_order FROM
+		(SELECT t1.*,
+		t2.cust_name,
+		t2.company_name,
+		t2.contact_person,
+		t2.phone_number
+		FROM
+		(SELECT
+		orig_order_num,
+		cust_num,
+		price_total,
+		owner_num,
+		deliver_addr,
+		create_date,
+		create_by,
+		update_date,
+		update_by
+		FROM
+		original_order where 1=1
+
+		<dynamic>
+			<isNotEmpty property="ownerNum" prepend="and">
+				owner_num = #ownerNum#
+			</isNotEmpty>
+			<isNotEmpty property="custNum" prepend="and">
+				cust_num = #custNum#
+			</isNotEmpty>
+			<isNull property="asc">
+				<isNull property="desc">order by create_date desc
+				</isNull>
+			</isNull>
+		</dynamic>
+
+
+		limit #limit# offset #offset#) t1,
+		customer t2 where t1.cust_num =
+		t2.cust_num ) t3 left outer join `order` t4
+		on t3.orig_order_num = t4.original_order_num
+	</select>
+
+	<select id="getOrigOrderItemList" parameterClass="java.util.HashMap"
+		resultMap="origOrderItem">
+
+		SELECT
+		orig_order_num,
+		prod_num,
+		prod_name,
+		differ_name,
+		unit,
+		std_price,
+		price_total,
+		cases,
+		pieces
+		FROM
+		original_order_item where orig_order_num = #origOrderNum#
+
+	</select>
+
+	<!-- 保存原始订单信息 -->
+	<insert id="createOrigOrder" parameterClass="ORIGORDER">
+		insert into original_order
+		(
+		orig_order_num,
+		cust_num,
+		price_total,
+		deliver_addr,
+		owner_num,
+		create_date,
+		create_by,
+		update_date,
+		update_by
+
+		)
+		values(
+		#origOrderNum#,
+		#custNum#,
+		#priceTotal#
+		<isNotEmpty property="deliverAddr" prepend=",">
+			#deliverAddr#
+		</isNotEmpty>
+		<isEmpty property="deliverAddr" prepend=",">
+			''
+		</isEmpty>
+		,#ownerNum#
+		<isNotEmpty property="createDate" prepend=",">
+			#createDate#
+		</isNotEmpty>
+		<isEmpty property="createDate" prepend=",">
+			now()
+		</isEmpty>
+		<isNotEmpty property="createBy" prepend=",">
+			#createBy#
+		</isNotEmpty>
+		<isEmpty property="createBy" prepend=",">
+			''
+		</isEmpty>
+		<isNotEmpty property="updateDate" prepend=",">
+			#updateDate#
+		</isNotEmpty>
+		<isEmpty property="updateDate" prepend=",">
+			now()
+		</isEmpty>
+		<isNotEmpty property="updateBy" prepend=",">
+			#updateBy#
+		</isNotEmpty>
+		<isEmpty property="updateBy" prepend=",">
+			''
+		</isEmpty>
+		)
+
+	</insert>
+
+	<!-- 保存原始订单明细信息 -->
+	<insert id="createOrigOrderItem" parameterClass="ORIGORDERITEM">
+		insert into
+		original_order_item
+		(
+		orig_order_num,
+		prod_num,
+		prod_name,
+		differ_name,
+		unit,
+		std_price,
+		price_total,
+		cases,
+		pieces
+		)
+		values(
+		#origOrderNum#,
+		#prodNum#,
+		#prodName#,
+		#differName#,
+		#unit#,
+		#prodPrice#,
+		#prodPriceTotal#,
+		#cases#,
+		#pieces#
+		)
+
+	</insert>
+
+	<!-- 删除原始订单信息 -->
+	<statement id="deleteOrigOrder" parameterClass="java.util.HashMap">
+		DELETE
+		FROM
+		original_order where orig_order_num = #origOrderNum#;
+		DELETE
+		FROM
+		original_order_item where orig_order_num = #origOrderNum#;
+
+	</statement>
+
+	<statement id="reCalcOrigOrderPriceTotal" parameterClass="java.util.HashMap">
+		UPDATE original_order_item
+		SET price_total = std_price*cases
+		where orig_order_num = #origOrderNum#;
+
+		UPDATE original_order
+		SET price_total = (SELECT SUM(price_total) price_total FROM
+		original_order_item WHERE orig_order_num = #origOrderNum#)
+		where orig_order_num = #origOrderNum#;
+
+	</statement>
+
+	<select id="getOrigOrder" parameterClass="java.util.HashMap"
+		resultMap="compOrigOrder">
+		SELECT t1.*,
+		t2.cust_name,
+		t2.company_name,
+		t2.contact_person,
+		t2.phone_number
+		FROM
+		(
+		SELECT
+		orig_order_num,
+		cust_num,
+		price_total,
+		owner_num,
+		deliver_addr,
+		create_date,
+		create_by,
+		update_date,
+		update_by
+		FROM
+		original_order
+		where orig_order_num = #origOrderNum#) t1,
+		customer t2
+		where t1.cust_num = t2.cust_num
+
+	</select>
+
+	<update id="updateOrigOrderItemUnitPrice" parameterClass="java.util.HashMap">
+		update original_order_item INNER JOIN
+		(select t1.prod_num,t1.std_price from product t1,
+		(select owner_num from original_order where orig_order_num = #origOrderNum#)
+		t2
+		where t1.owner_num=t2.owner_num) t3
+		ON original_order_item.prod_num=t3.prod_num
+		set original_order_item.std_price = t3.std_price
+		where original_order_item.orig_order_num = #origOrderNum#
+
+	</update>
+
+	<!-- 未审核订单的产品列表 （图片）-->
+	<select id="getUnauditedOrderItems" resultMap="compOrigOrderItem">
+	
+		SELECT
+		ori.orig_order_num,ori.prod_num,ori.differ_name,ori.prod_name,ori.unit,ori.std_price,ori.std_price,ori.price_total,
+		ori.cases,ori.pieces,pro.prod_num,pro.first_prodimg as whereimg
+		FROM (select * from original_order_item where orig_order_num = #orig_order_num#) ori,
+		product pro
+		where ori.prod_num = pro.prod_num 
+	</select>
+
+</sqlMap>

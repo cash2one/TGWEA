@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+
+<!-- author 刘卿 -->
+<!-- 感谢ibatis的持久层框架 -->
+
+<sqlMap>
+
+	<typeAlias alias="FILECACHEDELTA" type="com.etaoguan.wea.vo.FileCacheDelta"/>
+
+	<resultMap id="fileCacheDelta" class="FILECACHEDELTA">
+		<result property="fileCacheType" column="file_cache_type"/>
+		<result property="lastCacheDate" column="last_cache_date"/>
+	</resultMap>
+
+	
+	<select id="getFileCacheDelta" parameterClass="java.util.HashMap"  resultMap="fileCacheDelta">
+		select file_cache_type,
+		last_cache_date 
+		from file_cache_delta 
+		where file_cache_type = #fileCacheType#
+	
+	</select>
+	
+	<insert id="createFileCacheDelta" parameterClass="FILECACHEDELTA">
+		insert into file_cache_delta 
+		(
+		file_cache_type,
+		last_cache_date
+		)
+		values(
+		#fileCacheType#,
+		now()
+		)
+	</insert>
+
+
+	<update id="updateFileCacheDelta">
+		update file_cache_delta set 
+			last_cache_date = now()
+			
+		where
+			file_cache_type = #fileCacheType#
+	</update>
+</sqlMap>

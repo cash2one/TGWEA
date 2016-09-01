@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project-module
+  type="WEB"
+  name="TGWEA"
+  id="myeclipse.1365659121139"
+  context-root="/WEA"
+  j2ee-spec="5.0"
+  archive="TGWEA.war">
+  <attributes>
+    <attribute name="webrootdir" value="/WebRoot" />
+  </attributes>
+</project-module>
+

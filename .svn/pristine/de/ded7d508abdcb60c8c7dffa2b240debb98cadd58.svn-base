@@ -1,0 +1,51 @@
+package com.etaoguan.wea.vo;
+
+/**
+ * @author cunli 微信支付用到的key
+ * 
+ */
+@SuppressWarnings("serial")
+public class WechatPayKeys extends BaseVo {
+	private String ownerNum;
+	/**
+	 * 微信分配的公众账号ID
+	 */
+	private String appid;
+	/**
+	 * 微信支付分配的商户号
+	 */
+	private String mchId;
+	private String companyName;
+
+	public String getCompanyName() {
+		return companyName;
+	}
+
+	public void setCompanyName(String companyName) {
+		this.companyName = companyName;
+	}
+
+	public String getOwnerNum() {
+		return ownerNum;
+	}
+
+	public void setOwnerNum(String ownerNum) {
+		this.ownerNum = ownerNum;
+	}
+
+	public String getAppid() {
+		return appid;
+	}
+
+	public void setAppid(String appid) {
+		this.appid = appid;
+	}
+
+	public String getMchId() {
+		return mchId;
+	}
+
+	public void setMchId(String mchId) {
+		this.mchId = mchId;
+	}
+}

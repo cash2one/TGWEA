@@ -1,0 +1,49 @@
+package com.etaoguan.wea.dao.impl;
+
+import javax.annotation.Resource;
+
+import org.springframework.stereotype.Repository;
+
+import com.etaoguan.wea.common.DataCriteria;
+import com.etaoguan.wea.dao.IWechatMassMsgRequestDao;
+import com.etaoguan.wea.wechat.vo.WechatMassMsgRequest;
+import com.ibatis.sqlmap.client.SqlMapClient;
+
+@Repository
+public class WechatMassMsgRequestDao extends SpringBaseDao implements IWechatMassMsgRequestDao{
+
+	@Override
+	@Resource(name="wechatmmrSqlMapClient")
+	public void setSbiSqlMapClient(SqlMapClient sqlMapClient){
+		
+		super.setSqlMapClient(sqlMapClient);
+	}
+	
+	
+	/* (non-Javadoc)保存群发结果（第一次）
+	 * @see com.etaoguan.wea.dao.IWechatMassMsgRequestDao#addWechatMassMsgRequest(com.etaoguan.wea.wechat.vo.WechatMassMsgRequest)
+	 */
+	public void addWechatMassMsgRequest(
+			WechatMassMsgRequest wechatMassMsgRequest) {
+		this.getSqlMapClientTemplate().insert("createWechatMassMsgRequest", wechatMassMsgRequest);
+		
+	}
+
+
+	/* (non-Javadoc)保存微信服务器返回的群发结果（第二次）
+	 * @see com.etaoguan.wea.dao.IWechatMassMsgRequestDao#updateWechatMassMsgRequest(com.etaoguan.wea.wechat.vo.WechatMassMsgRequest)
+	 */
+	public void updateWechatMassMsgRequest(
+			WechatMassMsgRequest wechatMassMsgRequest) {
+		this.getSqlMapClientTemplate().update("updateWechatMassMsgRequest", wechatMassMsgRequest);
+	}
+
+
+	public void deleteWechatMassMsgRequest(DataCriteria dataCriteria) {
+		this.getSqlMapClientTemplate().delete("deleteWechatMassMsgRequest", dataCriteria.getParams());
+		
+	}
+
+
+
+}

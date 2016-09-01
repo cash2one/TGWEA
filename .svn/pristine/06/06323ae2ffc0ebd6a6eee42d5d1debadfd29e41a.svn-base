@@ -1,0 +1,31 @@
+package com.etaoguan.wea.client.mobile.service.impl;
+
+import javax.servlet.http.HttpServletRequest;
+
+import org.springframework.stereotype.Service;
+
+import com.etaoguan.wea.client.mobile.service.IMPaymentInfoService;
+import com.etaoguan.wea.service.impl.PaymentInfoService;
+
+@Service("mpaymentInfoService")
+public class MPaymentInfoService extends PaymentInfoService implements IMPaymentInfoService{
+	
+
+	/* (non-Javadoc)创建微信订单
+	 * @see com.etaoguan.wea.client.mobile.service.IMPaymentInfoService#addMWechatOrder(java.lang.String)
+	 */
+	@Override
+	public String addMWechatOrder(String code,String state,HttpServletRequest request,String domainBaseUrl) {
+		return addWechatOrder(code,state,request,domainBaseUrl);
+	}
+
+	/* (non-Javadoc)组合授权地址
+	 * @see com.etaoguan.wea.client.mobile.service.IMPaymentInfoService#mAssembleUrl(java.lang.String, java.lang.String)
+	 */
+	@Override
+	public String mAssembleUrl(String orderNum, String domainBaseUrl) {
+		return assembleUrl(orderNum, domainBaseUrl);
+	}
+	
+	
+}

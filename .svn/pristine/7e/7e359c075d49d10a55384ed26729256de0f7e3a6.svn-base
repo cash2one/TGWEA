@@ -1,0 +1,43 @@
+
+<ion-view title="修改个人信息">
+    <ion-nav-buttons side="left">
+        <button ng-click="back()" class="button button-clear">
+            <i class="ion-ios-arrow-back"></i>
+            <span id="barItemlText">返 回</span>
+        </button>
+    </ion-nav-buttons>
+    <ion-content>
+        <div class="list list-inset">
+            <div class="item" style="border: 0;padding-bottom: 0px;">
+                <h2 ng-bind="iInfoName"></h2>
+            </div>
+        </div>
+        <div class="list list-inset">
+            <label class="item item-input iLabel">
+                <i class=" ion-card dark placeholder-icon" ng-style="mCompany" style="padding-top:3px;"></i>
+                <input type="text" placeholder="公司名" style="font-size: 16px;margin-left:5px;" ng-model="modify.userCompany" ng-focus="muserCompanyFocus()" ng-blur="muserCompanyBlur()"/>
+            </label>
+        </div>
+        <div class="list list-inset">
+            <label class="item item-input iLabel">
+                <i class=" ion-person dark placeholder-icon" ng-style="mName" style="font-size: 26px;margin-left:2px;padding-top:5px;"></i>
+                <input type="text" placeholder="联系人" style="font-size: 16px;margin-left:5px;" ng-model="modify.userName" ng-focus="muserNameFocus()" ng-blur="muserNameBlur()"/>
+            </label>
+        </div>
+        <div class="list list-inset">
+            <label class="item item-input iLabel">
+                <i class=" ion-iphone dark placeholder-icon" ng-style="mPhone" style="margin-left: 5px;padding-top:2px;font-size: 32px;"></i>
+                <input type="text" placeholder="手机号码" style="margin-left: 6px;font-size: 16px;" ng-model="modify.userPhone" ng-focus="muserPhoneFocus()" ng-blur="muserPhoneBlur()"/>
+            </label>
+        </div>
+        <div class="list list-inset">
+            <label class="item item-input iLabel">
+                <i class=" ion-location dark placeholder-icon" ng-style="mAddress" style="margin-left: 5px;padding-top:2px;font-size: 30px;"></i>
+                <input type="text" placeholder="公司地址" style="margin-left: 6px;font-size: 16px;" ng-model="modify.userAddress" ng-focus="muserAddressFocus()" ng-blur="muserAddressBlur()"/>
+            </label>
+        </div>
+        <div class="row padding">
+            <button class="button button-block button-positive" id="sendMessage" ng-click="updateUserInfo()">确认修改</button>
+        </div>
+    </ion-content>
+</ion-view>

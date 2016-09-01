@@ -1,0 +1,68 @@
+package com.etaoguan.wea.report.vo;
+
+import com.etaoguan.wea.vo.BaseVo;
+
+/**
+ * @author cunli 报表
+ */
+public class DailyReport extends BaseVo {
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	private String prodNum;
+	private int cases;
+	private double custPriceTotal;
+	private String unit;
+	private String prodName;
+	private String stdPrice;
+
+	public String getProdName() {
+		return prodName;
+	}
+
+	public void setProdName(String prodName) {
+		this.prodName = prodName;
+	}
+
+	public String getStdPrice() {
+		return stdPrice;
+	}
+
+	public void setStdPrice(String stdPrice) {
+		this.stdPrice = stdPrice;
+	}
+
+	public String getProdNum() {
+		return prodNum;
+	}
+
+	public void setProdNum(String prodNum) {
+		this.prodNum = prodNum;
+	}
+
+	public double getCustPriceTotal() {
+		return custPriceTotal;
+	}
+
+	public void setCustPriceTotal(double custPriceTotal) {
+		this.custPriceTotal = custPriceTotal;
+	}
+
+	public int getCases() {
+		return cases;
+	}
+
+	public void setCases(int cases) {
+		this.cases = cases;
+	}
+
+	public String getUnit() {
+		return unit;
+	}
+
+	public void setUnit(String unit) {
+		this.unit = unit;
+	}
+}

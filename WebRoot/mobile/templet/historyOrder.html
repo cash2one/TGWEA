@@ -1,0 +1,48 @@
+<ion-view title="{{companyTitle}}">
+    <ion-nav-buttons side="left">
+        <button ng-click="back()" class="button button-clear button-light ion-ios7-arrow-back barIcon"></button>
+    </ion-nav-buttons>
+
+    <ion-content>
+        <div class="list waitingList" ng-repeat="aOrders in histroyOrders">
+            <div class="item item-icon-right waitingHead" ng-click="toOrderDetailed($index)">
+                <span ng-bind="aOrders.orderNum"></span>
+                <i class="icon ion-chevron-right" style="font-size: 25px; color: #3a3735;"></i>
+            </div>
+
+            <div id="mainContent">
+            <div class="padding-left-right-10 orderItem floorMain">
+                <div class="item item-thumbnail-left" ng-repeat="iPros in aOrders.iPros" ng-click="toDetailed(iPros.proId)">
+                    <img  id="orderItemImg" _lazysrc="{{iPros.img}}" onerror=this.src=errImg>
+                    <p class="proName" ng-bind="iPros.name"></p>
+                    <p class="margin-bottom-none"><b class="proModel itemProNum" ng-bind="iPros.num"></b></p>
+                    <p><span class="proPrice" ng-bind="iPros.price"></span></p>
+                </div>
+            </div>
+                <div class="padding-left-right-10 orderItem floorMain" ng-hide="aOrders.isHidePro">
+                    <div class="item item-thumbnail-left" ng-repeat="iHidePros in aOrders.iHidePros" ng-click="toDetailed(iHidePros.proId)">
+                        <img id="orderItemImg" _lazysrc="{{iHidePros.img}}" onerror=this.src=errImg>
+                        <p class="proName" ng-bind="iHidePros.name"></p>
+                        <p class="margin-bottom-none"><b class="proModel itemProNum" ng-bind="iHidePros.num"></b></p>
+                        <p><span class="proPrice" ng-bind="iHidePros.price"></span></p>
+                    </div>
+                </div>
+                <div class="item text-center btnItem" ng-hide="aOrders.isHide">
+                    <button class="button waitingBtn" ng-bind="aOrders.btnText" ng-click="hideShowPro($index)"></button>
+                </div>
+                <div class="item row itemFooter">
+                    <span class="col col-33" ng-bind="aOrders.date"></span>
+                <span class="col col-45 text-right">
+                    共<span ng-bind="aOrders.proCount"></span>件
+                    总价 : <span ng-bind="aOrders.proPrices" class="icountPrice"></span>
+                </span>
+                </div>
+            </div>
+        </div>
+
+        <h2 class="noMore margin-top-none" ng-hide="noMoreHide">已经到底啦</h2>
+        <ion-infinite-scroll icon="icon-spinner icon-spin" distance="0px" on-infinite="adminOrderLoadMore()" ng-hide="loadingHide"></ion-infinite-scroll>
+        <div style="height: 30px;"></div>
+    </ion-content>
+
+</ion-view>

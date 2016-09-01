@@ -1,0 +1,105 @@
+@charset "utf-8";
+
+body {
+	padding: 0px;
+	margin: 0;
+}
+
+#main {
+	width: 100%;
+	height: 400px;
+	margin: 0;
+	padding: 0;
+}
+
+#leftmenu {
+	width: 200px;
+	overflow: hidden;
+}
+
+#maincontent {
+	overflow: auto;
+	margin: 10px;
+}
+
+.l-link {
+	display: block;
+	line-height: 22px;
+	height: 22px;
+	padding-left: 16px;
+	border: 1px solid white;
+	margin: 4px;
+	color: #333;
+}
+
+.l-link-over {
+	background: #FFEEAC;
+	border: 1px solid #DB9F00;
+}
+
+.i-spacing-first {
+	font-style: normal;
+	width: 90px;
+	float: left;
+	white-space: normal;
+	word-wrap: break-word;
+	word-break: break-all;
+}
+
+.i-spacing-follow {
+	font-style: normal;
+	padding-right: 30px;
+	float: left;
+	white-space: normal;
+	word-wrap: break-word;
+	word-break: break-all;
+}
+
+.li-line {
+	clear: both;
+	padding-top: 15px;
+}
+
+.button-submit,.button-cancel {
+	width: 80px;
+	margin-right: 20px;
+	padding-bottom: 2px;
+}
+
+.button-common {
+	width: 80px;
+	margin-right: 20px;
+	padding-bottom: 2px;
+}
+
+.popImgMenu {
+	width: 150px;
+	height: auto;
+	background-color: #000;
+	FILTER: alpha(opacity = 60);
+	opacity: 0.8;
+	-moz-opacity: 0.8;
+	position: absolute;
+	left: 0px;
+	bottom: 0px;
+	padding-top: 10px;
+	padding-bottom: 10px;
+	color: #fff;
+	font-size: 12px;
+	line-height: 200%;
+}
+
+.popImgMenu a {
+	color: white;
+	padding-right: 10px;
+}
+
+.imgMenuDiv a {
+	padding-right: 10px;
+}
+
+.spanField {
+	display: block;
+	font-style: italic;
+	font-weight: bold
+}

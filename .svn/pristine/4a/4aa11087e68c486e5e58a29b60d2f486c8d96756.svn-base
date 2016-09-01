@@ -1,0 +1,186 @@
+package com.etaoguan.wea.dao.impl;
+
+import java.util.List;
+
+import javax.annotation.Resource;
+
+import org.springframework.stereotype.Repository;
+
+import com.etaoguan.wea.common.DataCriteria;
+import com.etaoguan.wea.dao.IAdminDao;
+import com.etaoguan.wea.vo.AccessOperation;
+import com.etaoguan.wea.vo.Admin;
+import com.etaoguan.wea.vo.AdminGroup;
+import com.etaoguan.wea.vo.AdminGroupRef;
+import com.etaoguan.wea.vo.AdminGroupRoleRef;
+import com.etaoguan.wea.vo.AdminRole;
+import com.etaoguan.wea.vo.AdminRoleOperationRef;
+import com.ibatis.sqlmap.client.SqlMapClient;
+
+@Repository
+public class AdminDao extends SpringBaseDao implements IAdminDao{
+
+	@Override
+	@Resource(name="adminSqlMapClient")
+	public void setSbiSqlMapClient(SqlMapClient sqlMapClient){
+		
+		super.setSqlMapClient(sqlMapClient);
+	}
+	
+	public int addAdmin(Admin admin) {
+		return (Integer)this.getSqlMapClientTemplate().insert("createAdmin", admin);
+		
+	}
+
+	public int addGroup(AdminGroup group) {
+		return (Integer)this.getSqlMapClientTemplate().insert("createGroup", group);
+		
+	}
+
+	public int addRole(AdminRole role) {
+		return (Integer)this.getSqlMapClientTemplate().insert("createRole", role);
+	}
+
+	public void delAdmin(DataCriteria dataCriteria) {
+		this.getSqlMapClientTemplate().delete("deleteAdmin", dataCriteria.getParams());
+		
+	}
+
+	public void delGroup(DataCriteria dataCriteria) {
+		this.getSqlMapClientTemplate().delete("deleteGroup", dataCriteria.getParams());
+		
+	}
+
+	public void delRole(DataCriteria dataCriteria) {
+		this.getSqlMapClientTemplate().delete("deleteRole", dataCriteria.getParams());
+		
+	}
+
+	@SuppressWarnings("unchecked")
+	public List<AdminGroup> getAdminGroups(DataCriteria dataCriteria) {
+
+		return this.getSqlMapClientTemplate().queryForList("getAdminGroups", dataCriteria.getParams());
+	}
+
+	@SuppressWarnings("unchecked")
+	public List<Admin> getGroupAdmins(DataCriteria dataCriteria) {
+		return this.getSqlMapClientTemplate().queryForList("getGroupAdmins", dataCriteria.getParams());
+	}
+
+	@SuppressWarnings("unchecked")
+	public List<AdminRole> getGroupRoles(DataCriteria dataCriteria) {
+		return this.getSqlMapClientTemplate().queryForList("getGroupRoles", dataCriteria.getParams());
+	}
+
+	@SuppressWarnings("unchecked")
+	public List<AdminGroup> getNoAdminGroups(DataCriteria dataCriteria) {
+		return this.getSqlMapClientTemplate().queryForList("getNoAdminGroups", dataCriteria.getParams());
+	}
+
+	@SuppressWarnings("unchecked")
+	public List<Admin> getNoGroupAdmins(DataCriteria dataCriteria) {
+		return this.getSqlMapClientTemplate().queryForList("getNoGroupAdmins", dataCriteria.getParams());
+	}
+
+	@SuppressWarnings("unchecked")
+	public List<AdminRole> getNoGroupRoles(DataCriteria dataCriteria) {
+		return this.getSqlMapClientTemplate().queryForList("getNoGroupRoles", dataCriteria.getParams());
+	}
+
+	public void updateAdmin(Admin admin) {
+		this.getSqlMapClientTemplate().update("updateAdmin", admin);
+		
+	}
+
+	public void updateGroup(AdminGroup group) {
+		this.getSqlMapClientTemplate().update("updateGroup", group);
+		
+	}
+
+	public void updateRole(AdminRole role) {
+		this.getSqlMapClientTemplate().update("updateRole", role);
+		
+	}
+
+	public void updateAdmin(DataCriteria dataCriteria) {
+		this.getSqlMapClientTemplate().update("updateAdminByMap", dataCriteria.getParams());
+		
+	}
+
+	@SuppressWarnings("unchecked")
+	public List<Admin> getAdmins(DataCriteria dataCriteria) {
+		return this.getSqlMapClientTemplate().queryForList("getAdmins", dataCriteria.getParams());
+	}
+
+	@SuppressWarnings("unchecked")
+	public List<AdminGroup> getGroups(DataCriteria dataCriteria) {
+		return this.getSqlMapClientTemplate().queryForList("getGroups", dataCriteria.getParams());
+	}
+
+	@SuppressWarnings("unchecked")
+	public List<AdminRole> getRoles(DataCriteria dataCriteria) {
+		return this.getSqlMapClientTemplate().queryForList("getRoles", dataCriteria.getParams());
+	}
+
+	public void addAdminGroupRef(AdminGroupRef adminGroupRef) {
+		this.getSqlMapClientTemplate().insert("createAdminGroupRef", adminGroupRef);
+		
+	}
+
+	public void addAdminGroupRoleRef(AdminGroupRoleRef adminGroupRoleRef) {
+		this.getSqlMapClientTemplate().insert("createAdminGroupRoleRef", adminGroupRoleRef);
+	}
+
+	public void addAdminRoleOperationRef(AdminRoleOperationRef adminRoleOperationRef) {
+		this.getSqlMapClientTemplate().insert("createAdminRoleOperationRef", adminRoleOperationRef);
+	}
+
+	public void delAdminGroupRef(DataCriteria dataCriteria) {
+		this.getSqlMapClientTemplate().delete("delAdminGroupRef", dataCriteria.getParams());
+		
+	}
+
+	public void delAdminGroupRoleRef(DataCriteria dataCriteria) {
+		this.getSqlMapClientTemplate().delete("delAdminGroupRoleRef", dataCriteria.getParams());
+		
+	}
+
+	public void delAdminRoleOperationRef(DataCriteria dataCriteria) {
+		this.getSqlMapClientTemplate().delete("delAdminRoleOperationRef", dataCriteria.getParams());
+		
+	}
+
+	public Admin getLoginAdmin(DataCriteria dataCriteria) {
+		return (Admin)this.getSqlMapClientTemplate().queryForObject("getLoginAdmin", dataCriteria.getParams());
+	}
+
+	@SuppressWarnings("unchecked")
+	public List<AdminRole> getFinalAdminRoles(DataCriteria dataCriteria) {
+		return this.getSqlMapClientTemplate().queryForList("getFinalAdminRoles", dataCriteria.getParams());
+	}
+
+	public Admin getAdmin(DataCriteria dataCriteria) {
+		return (Admin)this.getSqlMapClientTemplate().queryForObject("getAdmin", dataCriteria.getParams());
+	}
+
+	public AdminGroup getGroup(DataCriteria dataCriteria) {
+		return (AdminGroup)this.getSqlMapClientTemplate().queryForObject("getGroup", dataCriteria.getParams());
+	}
+
+	public AdminRole getRole(DataCriteria dataCriteria) {
+		return (AdminRole)this.getSqlMapClientTemplate().queryForObject("getRole", dataCriteria.getParams());
+	}
+
+
+	@SuppressWarnings("unchecked")
+	public List<AccessOperation> getAccessOperations(DataCriteria dataCriteria) {
+		return this.getSqlMapClientTemplate().queryForList("getAccessOperations", dataCriteria.getParams());
+	}
+
+	@SuppressWarnings("unchecked")
+	public List<AccessOperation> getAdminRoleAccessOperations(
+			DataCriteria dataCriteria) {
+		return this.getSqlMapClientTemplate().queryForList("getRoleAccessOperations", dataCriteria.getParams());
+	}
+
+}

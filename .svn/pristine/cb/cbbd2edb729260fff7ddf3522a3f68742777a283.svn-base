@@ -1,0 +1,551 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+
+<!-- author 刘卿 -->
+<!-- 感谢ibatis的持久层框架 -->
+
+<sqlMap>
+
+	<typeAlias alias="OWNER" type="com.etaoguan.wea.vo.Owner" />
+
+
+	<resultMap id="owner" class="OWNER">
+		<result property="ownerNum" column="owner_num" />
+		<result property="companyName" column="company_name" />
+		<result property="shopNum" column="shop_num" />
+		<result property="tradeId" column="trade_id" />
+		<result property="contactPerson" column="contact_person" />
+		<result property="phoneNum" column="phone_number" />
+		<result property="mobileNum" column="mobile_number" />
+		<result property="address" column="address" />
+		<result property="ownerImg" column="owner_img" />
+		<result property="mapImg" column="map_img" />
+		<result property="activeFlag" column="active_flag" />
+		<result property="delFlag" column="del_flag" />
+		<result property="regionCode" column="region_code" />
+		<result property="introduction" column="introduction" />
+		<result property="webSite" column="website" />
+		<result property="remark" column="remark" />
+		<result property="externalSysCode" column="external_syscode" />
+		<result property="createDate" column="create_date" />
+		<result property="createBy" column="create_by" />
+		<result property="updateDate" column="update_date" />
+		<result property="updateBy" column="update_by" />
+		<result property="shopNum" column="shop_num" />
+		<result property="longitude" column="longitude" />
+		<result property="latitudes" column="latitudes" />
+	</resultMap>
+
+
+	<select id="getOwnerCount" parameterClass="java.util.HashMap"
+		resultClass="java.lang.Integer">
+		SELECT
+		count(1)
+		FROM
+		owner where del_flag = 0
+		<dynamic>
+			<isNotEmpty property="phoneNum" prepend="and">
+				phone_number like
+				CONCAT('%',#phoneNum#, '%')
+			</isNotEmpty>
+			<isNotEmpty property="contactPerson" prepend="and">
+				contact_person like CONCAT('%',#contactPerson#, '%')
+			</isNotEmpty>
+			<isNotEmpty property="companyName" prepend="and">
+				company_name
+				like CONCAT('%',#companyName#, '%')
+			</isNotEmpty>
+			<isNotEmpty property="activeFlag" prepend="and">
+				active_flag =
+				#activeFlag#
+			</isNotEmpty>
+			<isNotEmpty property="tradeId" prepend="and">
+				trade_id =
+				#tradeId#
+			</isNotEmpty>
+			<isNotEmpty property="regionCodes" prepend="and">
+				region_code IN
+				<iterate property="regionCodes" open="(" close=")"
+					conjunction=",">
+					#regionCodes[]#
+				</iterate>
+			</isNotEmpty>
+		</dynamic>
+
+	</select>
+	
+	
+	<resultMap id="compOwner" class="OWNER" extends="owner">
+		<result property="ownerMobileGeneration.createDate" column="owner_mobile_generation.create_date" />
+	</resultMap>
+
+	<select id="getOwnerDatSet" parameterClass="java.util.HashMap" resultMap="compOwner">
+		SELECT
+		`owner`.owner_num,
+		`owner`.company_name,
+		`owner`.contact_person,
+		`owner`.phone_number,
+		`owner`.mobile_number,
+		`owner`.trade_id,
+		`owner`.region_code,
+		`owner`.address,
+		`owner`.owner_img,
+		`owner`.map_img,
+		`owner`.website,
+		`owner`.introduction,
+		`owner`.active_flag,
+		`owner`.del_flag,
+		`owner`.external_syscode,
+		`owner`.remark,
+		`owner`.create_date,
+		`owner`.create_by,
+		`owner`.update_date,
+		`owner`.update_by,
+		`owner`.shop_num,
+		`owner`.longitude,
+		`owner`.latitudes,
+		owner_mobile_generation.owner_num,
+	owner_mobile_generation.create_date
+		
+		FROM
+		`owner` LEFT JOIN owner_mobile_generation ON `owner`.owner_num = owner_mobile_generation.owner_num
+		where 1 = 1
+
+		<dynamic>
+			<isNotEmpty property="phoneNum" prepend="and">
+				phone_number like
+				CONCAT('%',#phoneNum#, '%')
+			</isNotEmpty>
+			<isNotEmpty property="contactPerson" prepend="and">
+				contact_person like CONCAT('%',#contactPerson#, '%')
+			</isNotEmpty>
+			<isNotEmpty property="companyName" prepend="and">
+				company_name
+				like CONCAT('%',#companyName#, '%')
+			</isNotEmpty>
+			<isNotEmpty property="activeFlag" prepend="and">
+				active_flag =
+				#activeFlag#
+			</isNotEmpty>
+			<isNotEmpty property="delFlag" prepend="and">
+				del_flag =
+				#delFlag#
+			</isNotEmpty>
+			<isNotEmpty property="tradeId" prepend="and">
+				trade_id =
+				#tradeId#
+			</isNotEmpty>
+			<isNotEmpty property="regionCodes" prepend="and">
+				region_code IN
+				<iterate property="regionCodes" open="(" close=")"
+					conjunction=",">
+					#regionCodes[]#
+				</iterate>
+			</isNotEmpty>
+		</dynamic>
+
+		limit #limit# offset #offset#
+	</select>
+
+
+	<select id="getRandomOwnerShopNum" parameterClass="java.util.HashMap"
+		resultClass="java.lang.String">
+		SELECT
+		concat('tgshop',date_format(now(), '%Y%m%d%H%i%s'),FLOOR(100+(RAND()
+		* 899)))
+
+	</select>
+	
+	<insert id="createOwner" parameterClass="OWNER">
+		insert into owner
+		(
+		owner_num,
+		company_name,
+		shop_num,
+		contact_person,
+		phone_number,
+		mobile_number,
+		trade_id,
+		region_code,
+		address,
+		owner_img,
+		map_img,
+		introduction,
+		website,
+		active_flag,
+		del_flag,
+		remark,
+		external_syscode,
+		create_date,
+		create_by,
+		update_date,
+		update_by,
+		longitude,
+		latitudes
+		)
+		values(
+		#ownerNum#
+		<isNotEmpty property="companyName" prepend=",">
+			#companyName#
+		</isNotEmpty>
+		<isEmpty property="companyName" prepend=",">
+			''
+		</isEmpty>
+		<isNotEmpty property="shopNum" prepend=",">
+			#shopNum#
+		</isNotEmpty>
+		<isEmpty property="shopNum" prepend=",">
+			concat('tgshop',date_format(now(), '%Y%m%d%H%i%s'),FLOOR(100+(RAND()
+		* 899)))
+		</isEmpty>
+		<isNotEmpty property="contactPerson" prepend=",">
+			#contactPerson#
+		</isNotEmpty>
+		<isEmpty property="contactPerson" prepend=",">
+			''
+		</isEmpty>
+		<isNotEmpty property="phoneNum" prepend=",">
+			#phoneNum#
+		</isNotEmpty>
+		<isEmpty property="phoneNum" prepend=",">
+			''
+		</isEmpty>
+		<isNotEmpty property="mobileNum" prepend=",">
+			#mobileNum#
+		</isNotEmpty>
+		<isEmpty property="mobileNum" prepend=",">
+			''
+		</isEmpty>
+		<isNotEmpty property="tradeId" prepend=",">
+			#tradeId#
+		</isNotEmpty>
+		<isEmpty property="tradeId" prepend=",">
+			''
+		</isEmpty>
+		<isNotEmpty property="regionCode" prepend=",">
+			#regionCode#
+		</isNotEmpty>
+		<isEmpty property="regionCode" prepend=",">
+			'000000'
+		</isEmpty>
+		<isNotEmpty property="address" prepend=",">
+			#address#
+		</isNotEmpty>
+		<isEmpty property="address" prepend=",">
+			''
+		</isEmpty>
+		<isNotEmpty property="ownerImg" prepend=",">
+			#ownerImg#
+		</isNotEmpty>
+		<isEmpty property="ownerImg" prepend=",">
+			''
+		</isEmpty>
+		<isNotEmpty property="mapImg" prepend=",">
+			#mapImg#
+		</isNotEmpty>
+		<isEmpty property="mapImg" prepend=",">
+			''
+		</isEmpty>
+		<isNotEmpty property="introduction" prepend=",">
+			#introduction#
+		</isNotEmpty>
+		<isEmpty property="introduction" prepend=",">
+			''
+		</isEmpty>
+		<isNotEmpty property="webSite" prepend=",">
+			#webSite#
+		</isNotEmpty>
+		<isEmpty property="webSite" prepend=",">
+			''
+		</isEmpty>
+		,1
+		,0
+		<isNotEmpty property="remark" prepend=",">
+			#remark#
+		</isNotEmpty>
+		<isEmpty property="remark" prepend=",">
+			''
+		</isEmpty>
+		<isNotEmpty property="externalSysCode" prepend=",">
+			#externalSysCode#
+		</isNotEmpty>
+		<isEmpty property="externalSysCode" prepend=",">
+			'wea'
+		</isEmpty>
+		<isNotEmpty property="createDate" prepend=",">
+			#createDate#
+		</isNotEmpty>
+		<isEmpty property="createDate" prepend=",">
+			now()
+		</isEmpty>
+		<isNotEmpty property="createBy" prepend=",">
+			#createBy#
+		</isNotEmpty>
+		<isEmpty property="createBy" prepend=",">
+			''
+		</isEmpty>
+		<isNotEmpty property="updateDate" prepend=",">
+			#updateDate#
+		</isNotEmpty>
+		<isEmpty property="updateDate" prepend=",">
+			now()
+		</isEmpty>
+		<isNotEmpty property="updateBy" prepend=",">
+			#updateBy#
+		</isNotEmpty>
+		<isEmpty property="updateBy" prepend=",">
+			''
+		</isEmpty>
+		
+		<isNotEmpty property="longitude" prepend=",">
+			#longitude#
+		</isNotEmpty>
+		<isEmpty property="longitude" prepend=",">
+			''
+		</isEmpty>
+		<isNotEmpty property="latitudes" prepend=",">
+			#latitudes#
+		</isNotEmpty>
+		<isEmpty property="latitudes" prepend=",">
+			''
+		</isEmpty>
+		)
+	</insert>
+
+	<select id="getOwner" parameterClass="java.util.HashMap"
+		resultMap="owner">
+		SELECT
+		`owner`.owner_num,
+		`owner`.company_name,
+		`owner`.contact_person,
+		`owner`.phone_number,
+		`owner`.mobile_number,
+		`owner`.trade_id,
+		`owner`.region_code,
+		`owner`.address,
+		`owner`.owner_img,
+		`owner`.map_img,
+		`owner`.website,
+		`owner`.introduction,
+		`owner`.active_flag,
+		`owner`.del_flag,
+		`owner`.external_syscode,
+		`owner`.remark,
+		`owner`.create_date,
+		`owner`.create_by,
+		`owner`.update_date,
+		`owner`.update_by,
+		`owner`.shop_num,
+		`owner`.longitude,
+		`owner`.latitudes
+		FROM
+		`owner`
+		WHERE
+		`owner`.owner_num = #ownerNum#
+	</select>
+
+	<update id="updateOwner" parameterClass="OWNER">
+		update owner set
+		<isNotEmpty property="delFlag">
+			del_flag = #delFlag#
+		</isNotEmpty>
+		
+		<isNotEqual property="tradeId" compareValue="-1">
+			<isNotEmpty property="tradeId">
+				trade_id = #tradeId#
+			</isNotEmpty>
+		</isNotEqual>
+
+		<isEmpty property="tradeId">
+			trade_id = trade_id
+		</isEmpty>
+		<isNotEmpty property="companyName" prepend=",">
+			company_name =
+			#companyName#
+		</isNotEmpty>
+		<isNotEmpty property="contactPerson" prepend=",">
+			contact_person = #contactPerson#
+		</isNotEmpty>
+		<isNotEmpty property="phoneNum" prepend=",">
+			phone_number =
+			#phoneNum#
+		</isNotEmpty>
+		<isNotEmpty property="mobileNum" prepend=",">
+			mobile_number =
+			#mobileNum#
+		</isNotEmpty>
+		<isNotEmpty property="address" prepend=",">
+			address = #address#
+		</isNotEmpty>
+		<isNotEmpty property="ownerImg" prepend=",">
+			owner_img =
+			#ownerImg#
+		</isNotEmpty>
+		<isNotEmpty property="mapImg" prepend=",">
+			map_img = #mapImg#
+		</isNotEmpty>
+		<isNotEmpty property="introduction" prepend=",">
+			introduction =
+			#introduction#
+		</isNotEmpty>
+		<isNotEmpty property="webSite" prepend=",">
+			website = #webSite#
+		</isNotEmpty>
+		<isNotEmpty property="regionCode" prepend=",">
+			region_code =
+			#regionCode#
+		</isNotEmpty>
+		<isNotEmpty property="remark" prepend=",">
+			remark = #remark#
+		</isNotEmpty>
+		<isNotEmpty property="updateDate" prepend=",">
+			update_date =
+			#updateDate#
+		</isNotEmpty>
+		<isEmpty property="updateDate" prepend=",">
+			update_date = now()
+		</isEmpty>
+		<isNotEmpty property="updateBy" prepend=",">
+			update_by =
+			#updateBy#
+		</isNotEmpty>
+		<isNotEmpty property="updateBy" prepend=",">
+			shop_num =
+			#shopNum#
+		</isNotEmpty>
+		<isNotEmpty property="longitude" prepend=",">
+			longitude = #longitude#
+		</isNotEmpty>
+		<isNotEmpty property="latitudes" prepend=",">
+			latitudes = #latitudes#
+		</isNotEmpty>
+		where owner_num = #ownerNum#
+
+	</update>
+	<update id="updateOwnerByMap" parameterClass="java.util.HashMap">
+		update owner set
+		<isNotEmpty property="tradeId">
+			trade_id = #tradeId#
+		</isNotEmpty>
+		<isEmpty property="tradeId">
+			trade_id = trade_id
+		</isEmpty>
+		<isNotEmpty property="companyName" prepend=",">
+			company_name =
+			#companyName#
+		</isNotEmpty>
+		<isNotEmpty property="contactPerson" prepend=",">
+			contact_person = #contactPerson#
+		</isNotEmpty>
+		<isNotEmpty property="phoneNum" prepend=",">
+			phone_number =
+			#phoneNum#
+		</isNotEmpty>
+		<isNotEmpty property="mobileNum" prepend=",">
+			mobile_number =
+			#mobileNum#
+		</isNotEmpty>
+		<isNotEmpty property="address" prepend=",">
+			address = #address#
+		</isNotEmpty>
+		<isNotEmpty property="ownerImg" prepend=",">
+			owner_img =
+			#ownerImg#
+		</isNotEmpty>
+		<isNotEmpty property="mapImg" prepend=",">
+			map_img = #mapImg#
+		</isNotEmpty>
+		<isNotEmpty property="introduction" prepend=",">
+			introduction =
+			#introduction#
+		</isNotEmpty>
+		<isNotEmpty property="webSite" prepend=",">
+			website = #webSite#
+		</isNotEmpty>
+		<isNotEmpty property="activeFlag" prepend=",">
+			active_flag =
+			#activeFlag#
+		</isNotEmpty>
+		<isNotEmpty property="delFlag" prepend=",">
+			del_flag = #delFlag#
+		</isNotEmpty>
+		<isNotEmpty property="regionCode" prepend=",">
+			region_code =
+			#regionCode#
+		</isNotEmpty>
+		<isNotEmpty property="remark" prepend=",">
+			remark = #remark#
+		</isNotEmpty>
+		<isNotEmpty property="updateDate" prepend=",">
+			update_date =
+			#updateDate#
+		</isNotEmpty>
+		<isEmpty property="updateDate" prepend=",">
+			update_date = now()
+		</isEmpty>
+		<isNotEmpty property="updateBy" prepend=",">
+			update_by =
+			#updateBy#
+		</isNotEmpty>
+		
+		<isNotEmpty property="longitude" prepend=",">
+			longitude =
+			#longitude#
+		</isNotEmpty>
+		<isNotEmpty property="latitudes" prepend=",">
+			latitudes =
+			#latitudes#
+		</isNotEmpty>
+
+		where owner_num =#ownerNum#
+
+	</update>
+
+	<update id="updateOwnerShopNum" parameterClass="java.util.HashMap">
+		update owner set
+		shop_num = #shopNum#
+		where owner_num =#ownerNum#
+
+	</update>
+
+	<select id="getExistShopCount" parameterClass="java.util.HashMap"
+		resultClass="java.lang.Integer">
+		SELECT
+		count(1)
+		FROM
+		owner
+		where shop_num = #shopNum# and
+		owner_num &lt;&gt; #ownerNum#
+	</select>
+
+	<select id="getAllOwner" parameterClass="java.util.HashMap"
+		resultMap="owner">
+		SELECT
+		`owner`.owner_num,
+		`owner`.company_name,
+		`owner`.contact_person,
+		`owner`.phone_number,
+		`owner`.mobile_number,
+		`owner`.trade_id,
+		`owner`.region_code,
+		`owner`.address,
+		`owner`.owner_img,
+		`owner`.map_img,
+		`owner`.website,
+		`owner`.introduction,
+		`owner`.active_flag,
+		`owner`.del_flag,
+		`owner`.external_syscode,
+		`owner`.remark,
+		`owner`.create_date,
+		`owner`.create_by,
+		`owner`.update_date,
+		`owner`.update_by,
+		`owner`.shop_num,
+		`owner`.longitude,
+		`owner`.latitudes
+		FROM
+		`owner`
+
+	</select>
+</sqlMap>

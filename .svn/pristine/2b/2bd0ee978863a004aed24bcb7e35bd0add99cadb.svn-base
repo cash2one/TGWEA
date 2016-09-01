@@ -1,0 +1,139 @@
+package com.etaoguan.wea.common;
+
+import java.util.Properties;
+
+import org.springframework.context.ApplicationContext;
+
+import com.etaoguan.wea.service.IAccessAuthService;
+import com.etaoguan.wea.service.IAppSettingService;
+import com.etaoguan.wea.service.IBasicDataService;
+import com.etaoguan.wea.service.IFileCacheService;
+import com.etaoguan.wea.service.ILogService;
+import com.etaoguan.wea.service.IOwnerService;
+import com.etaoguan.wea.service.IOwnerSettingService;
+import com.etaoguan.wea.service.IPushMessageJobService;
+import com.etaoguan.wea.service.ITableCodeNameService;
+
+public class WeaApplication {
+	private static WeaApplication instance = null;
+	
+	private Properties serverProperties = new Properties();
+	
+	private ApplicationContext appContext;
+
+	private String appRealPath;
+	
+	private String appContextName;
+
+	public Properties getServerProperties() {
+		return serverProperties;
+	}
+
+	public void setServerProperties(Properties serverProperties) {
+		this.serverProperties = serverProperties;
+	}
+
+	public ApplicationContext getAppContext() {
+		return appContext;
+	}
+
+	public void setAppContext(ApplicationContext appContext) {
+		this.appContext = appContext;
+	}
+
+	public String getAppRealPath() {
+		return appRealPath;
+	}
+
+	public void setAppRealPath(String appRealPath) {
+		this.appRealPath = appRealPath;
+	}
+
+	public String getAppContextName() {
+		return appContextName;
+	}
+
+	public void setAppContextName(String appContextName) {
+		this.appContextName = appContextName;
+	}
+	
+	 public static synchronized WeaApplication getInstance() {
+		 if(instance == null){
+			 instance = new WeaApplication();
+        }
+        return instance;
+	 }
+
+	
+	public IAccessAuthService getAccessAuthService(){
+		return (IAccessAuthService)getInstance().getAppContext().getBean("accessAuthService");
+	}
+	
+	public IOwnerService getOwnerService(){
+		return (IOwnerService)getInstance().getAppContext().getBean("ownerService");
+	}
+	
+	public ILogService getLogService(){
+		return (ILogService)getInstance().getAppContext().getBean("logService");
+	}
+	
+    public boolean islogMethod() {
+    	return Boolean.valueOf(serverProperties.getProperty("logMethod"));
+	}
+    
+    public String getImageMagickPath() {
+    	return serverProperties.getProperty("imageMagickPath");
+	}
+    public String getFileSvrAddr() {
+    	return serverProperties.getProperty("fileSvrAddr");
+	}
+    public String getFileSaveAddr() {
+    	return serverProperties.getProperty("fileSaveAddr");
+	}
+    public String getMobileTemplete() {
+    	return serverProperties.getProperty("mobileTemplete");
+    }
+    public String getImgSvrAddr() {
+    	return serverProperties.getProperty("imgSvrAddr");
+    }
+    
+    public String getImgSaveAddr() {
+    	return serverProperties.getProperty("imgSaveAddr");
+    }
+    
+    public String getE688ClientId() {
+    	
+    	return serverProperties.getProperty("1688ClientId");
+	}
+    
+    public String getE688AppSecretKey() {
+
+    	return serverProperties.getProperty("1688AppSecretKey");
+
+	}
+    
+    public IBasicDataService getBasicDataService(){
+		return (IBasicDataService)getInstance().getAppContext().getBean("basicDataService");
+	}
+    
+    public ITableCodeNameService getTableCodeNameService(){
+		return (ITableCodeNameService)getInstance().getAppContext().getBean("tableCodeNameService");
+	}
+    
+    public IAppSettingService getAppSettingService(){
+		return (IAppSettingService)getInstance().getAppContext().getBean("appSettingService");
+	}
+    
+    public IOwnerSettingService getOwnerSettingService(){
+		return (IOwnerSettingService)getInstance().getAppContext().getBean("ownerSettingService");
+	}
+    
+    public IPushMessageJobService getPushMessageJobService(){
+		return (IPushMessageJobService)getInstance().getAppContext().getBean("pushMessageJobService");
+	}
+    
+    public IFileCacheService getFileCacheService(){
+		return (IFileCacheService)getInstance().getAppContext().getBean("fileCacheService");
+	}
+
+}

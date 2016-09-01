@@ -1,0 +1,39 @@
+package com.etaoguan.wea.client.web.service.impl;
+
+import java.util.List;
+
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.stereotype.Service;
+
+import com.etaoguan.wea.client.web.service.IWProdCatService;
+import com.etaoguan.wea.service.impl.ProdCatService;
+import com.etaoguan.wea.vo.ProdCat;
+@Service("wprodCatService")
+public class WProdCatService extends ProdCatService implements IWProdCatService{
+
+	public void saveOrUpdateProdCat(ProdCat prodCat) {
+		if(StringUtils.isEmpty(prodCat.getProdCatId())){
+			addProdCat(prodCat);
+		}else{
+			updateProdCat(prodCat);
+		}
+		
+	}
+
+	public List<ProdCat> getProdCatsIncRootByOwnerNum(String ownerNum) {
+		List<ProdCat> prodCatList = getProdCatsByOwnerNum(ownerNum);
+		ProdCat prodCat = new ProdCat();
+		prodCat.setProdCatName("根类目");
+		prodCat.setProdCatId(iKeyGenService.getRootKey());
+		prodCatList.add(prodCat);
+		return prodCatList;
+	}
+
+	public void delBatchProdCat(String ownerNum,String[] prodCatIds) {
+		for(String prodCatId:prodCatIds){
+			delProdCat(ownerNum,prodCatId);
+		}
+		
+	}
+
+}

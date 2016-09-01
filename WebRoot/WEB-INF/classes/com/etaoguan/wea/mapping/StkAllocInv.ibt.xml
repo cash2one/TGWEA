@@ -1,0 +1,359 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+
+<!-- author 刘卿 -->
+<!-- 感谢ibatis的持久层框架 -->
+
+<sqlMap>
+
+	<typeAlias alias="STKALLOCINV" type="com.etaoguan.wea.vo.StockAllocateInvoice"/>
+	<typeAlias alias="STKALLOCINVITEM" type="com.etaoguan.wea.vo.StockAllocateInvoiceItem"/>
+
+	<resultMap id="stkAllocInv" class="STKALLOCINV">
+		<result property="stkAllocNum" column="stkalloc_num"/>
+		<result property="ownerNum" column="owner_num"/>
+		<result property="fromWhNum" column="wh_num_from"/>
+		<result property="fromWhName" column="wh_name_from"/>
+		<result property="toWhNum" column="wh_num_to"/>
+		<result property="toWhName" column="wh_name_to"/>
+		<result property="stkAllocStatus" column="stkalloc_status"/>
+		<result property="remark" column="remark"/>
+		<result property="createDate" column="create_date"/>
+		<result property="createBy" column="create_by"/>
+		<result property="updateDate" column="update_date"/>
+		<result property="updateBy" column="update_by"/>
+	</resultMap>
+	
+	<resultMap id="stkAllocInvDataSet" extends="stkAllocInv" class="STKALLOCINV">
+		<result property="prodCount" column="prod_count"/>
+	</resultMap>
+
+	<resultMap id="stkAllocInvItem" class="STKALLOCINVITEM">
+		<result property="stkAllocNum" column="stkalloc_num"/>
+		<result property="prodNum" column="prod_num"/>
+		<result property="prodName" column="prod_name"/>
+		<result property="differName" column="differ_name"/>
+		<result property="unit" column="unit"/>
+		<result property="cases" column="cases"/>
+		<result property="pieces" column="pieces"/>
+	</resultMap>	
+	<resultMap id="compStkAllocInvItem" extends="stkAllocInvItem" class="STKALLOCINVITEM">
+		<result property="availCases" column="avail_cases"/>
+	</resultMap>
+
+	<select id="getStkAllocInvCount" parameterClass="java.util.HashMap" resultClass="java.lang.Integer">
+
+		<isNotEmpty property="prodName">
+			select count(1) from
+			(select distinct t3.stkalloc_num from 
+			(select t1.stkalloc_num,t1.prod_num from stock_allocate_invoice_item t1 
+			where exists (SELECT 1 FROM
+			(select stkalloc_num 
+			from stock_allocate_invoice
+			where owner_num = #ownerNum#  
+				<isNotEmpty property="fromWhNum"  prepend="and">
+					wh_num_from = #fromWhNum#
+				</isNotEmpty>
+				<isNotEmpty property="toWhNum"  prepend="and">
+					wh_num_to = #toWhNum#
+				</isNotEmpty>
+			) t2 where t1.stkalloc_num = t2.stkalloc_num) ) t3 
+			where exists(SELECT 1 FROM 
+			(
+			SELECT
+			prod_num  
+			FROM 
+			product where owner_num = #ownerNum# and 
+			prod_name like CONCAT(#prodName#, '%') 
+			)  t4 where t3.prod_num = t4.prod_num)) t5
+		</isNotEmpty> 
+		<isEmpty property="prodName">
+			select count(1) 
+			from stock_allocate_invoice 
+			where owner_num = #ownerNum#  
+				<isNotEmpty property="fromWhNum"  prepend="and">
+					wh_num_from = #fromWhNum#
+				</isNotEmpty>
+				<isNotEmpty property="toWhNum"  prepend="and">
+					wh_num_to = #toWhNum#
+				</isNotEmpty>
+		</isEmpty> 
+		
+	</select>
+
+	<select id="getStkAllocInvDatSet" parameterClass="java.util.HashMap"  resultMap="stkAllocInvDataSet">
+		select sainv.*,sapcnt.prod_count from 
+		
+		stock_allocate_invoice sainv,
+ 		(
+		<isNotEmpty property="prodName">
+			select t3.stkalloc_num, count(1) prod_count from 
+			(select t1.stkalloc_num,t1.prod_num from stock_allocate_invoice_item t1 
+			where exists (SELECT 1 FROM
+			(select stkalloc_num
+			from stock_allocate_invoice 
+			where owner_num = #ownerNum#  
+				<isNotEmpty property="fromWhNum"  prepend="and">
+					wh_num_from = #fromWhNum#
+				</isNotEmpty>
+				<isNotEmpty property="toWhNum"  prepend="and">
+					wh_num_to = #toWhNum#
+				</isNotEmpty>
+			) t2 where t1.stkalloc_num = t2.stkalloc_num) ) t3 
+			where exists(SELECT 1 FROM 
+			(
+			SELECT
+			prod_num  
+			FROM 
+			product where owner_num = #ownerNum# and 
+			prod_name like CONCAT(#prodName#, '%') 
+			)  t4 where t3.prod_num = t4.prod_num) group by t3.stkalloc_num  
+		</isNotEmpty> 
+		<isEmpty property="prodName">
+			select t1.stkalloc_num, count(1) prod_count from stock_allocate_invoice_item t1 
+			where exists (SELECT 1 FROM
+			(select stkalloc_num
+			from stock_allocate_invoice 
+			where owner_num = #ownerNum#  
+				<isNotEmpty property="fromWhNum"  prepend="and">
+					wh_num_from = #fromWhNum#
+				</isNotEmpty>
+				<isNotEmpty property="toWhNum"  prepend="and">
+					wh_num_to = #toWhNum#
+				</isNotEmpty>
+			) t2 where t1.stkalloc_num = t2.stkalloc_num) group by t1.stkalloc_num 
+		</isEmpty> 
+		) sapcnt 
+		
+		where sapcnt.stkalloc_num = sainv.stkalloc_num 
+			
+		order by sainv.update_date desc 
+		
+		limit #limit# offset #offset#
+
+	</select>
+	
+	<select id="getStkAllocInvItemList" parameterClass="java.util.HashMap" resultMap="compStkAllocInvItem">
+		SELECT t3.*,IFNULL(t4.cases,0) avail_cases FROM 
+		(SELECT
+		stkalloc_num,
+		prod_num,
+		prod_name,
+		differ_name,
+		unit,
+		cases,
+		pieces
+		FROM 
+		stock_allocate_invoice_item where stkalloc_num = #stkAllocNum#
+		) t3 left outer join 
+		(select prod_num,differ_name,cases from product_stock t1 where 
+		exists(SELECT 1 FROM(
+		select wh_num_from,owner_num from stock_allocate_invoice 
+		where stkalloc_num = #stkAllocNum#
+		) t2 where t1.wh_num = t2.wh_num_from 
+		and t1.owner_num = t2.owner_num)) t4 
+		on t3.prod_num = t4.prod_num and t3.differ_name = t4.differ_name
+
+	</select>
+	
+
+	<insert id="createStkAllocInv"  parameterClass="STKALLOCINV">
+		insert into stock_allocate_invoice 
+		(
+		stkalloc_num,
+		owner_num,
+		wh_num_from,
+		wh_name_from,
+		wh_num_to,
+		wh_name_to,
+		stkalloc_status,
+		remark,
+		create_date,
+		create_by,
+		update_date,
+		update_by  
+			
+		)
+		values(
+			#stkAllocNum#,
+			#ownerNum#,
+			#fromWhNum#,		
+			#fromWhName#,
+			#toWhNum#,		
+			#toWhName#,
+			0
+			<isNotEmpty property="remark" prepend=",">
+				#remark#
+			</isNotEmpty>
+			<isEmpty property="remark" prepend=",">
+				''
+			</isEmpty>	
+			<isNotEmpty property="createDate" prepend=",">
+				#createDate#
+			</isNotEmpty>
+			<isEmpty property="createDate" prepend=",">
+				now()
+			</isEmpty>			
+			<isNotEmpty property="createBy" prepend=",">
+				#createBy#
+			</isNotEmpty>
+			<isEmpty property="createBy" prepend=",">
+				''
+			</isEmpty>			
+			<isNotEmpty property="updateDate" prepend=",">
+				#updateDate#
+			</isNotEmpty>
+			<isEmpty property="updateDate" prepend=",">
+				now()
+			</isEmpty>			
+			<isNotEmpty property="updateBy" prepend=",">
+				#updateBy#
+			</isNotEmpty>
+			<isEmpty property="updateBy" prepend=",">
+				''
+			</isEmpty>		
+		)
+
+	</insert>
+	
+	<insert id="createStkAllocItem"  parameterClass="STKALLOCINVITEM">
+		insert into stock_allocate_invoice_item 
+		(
+		stkalloc_num,
+		prod_num,
+		prod_name,
+		differ_name,
+		unit,
+		cases,
+		pieces
+		)
+		values(
+			#stkAllocNum#,
+			#prodNum#,		
+			#prodName#,	
+			#differName#,	
+			#unit#,
+			#cases#,	
+			#pieces#
+		)
+
+	</insert>
+	
+
+	<statement id="deleteStkAllocInv" parameterClass="java.util.HashMap">
+		DELETE 
+		FROM
+		stock_allocate_invoice where stkalloc_num = #stkAllocNum#;
+		DELETE 
+		FROM
+		stock_allocate_invoice_item where stkalloc_num = #stkAllocNum#;
+
+	</statement>
+	
+	<delete id="deleteStkAllocInvItem" parameterClass="java.util.HashMap">
+
+		DELETE 
+		FROM
+		stock_allocate_invoice_item where stkalloc_num = #stkAllocNum#
+		<isNotEmpty property="prodNum" prepend="and">
+			prod_num = #prodNum#
+		</isNotEmpty>
+
+	</delete>
+	
+	<select id="getStkAllocInv" parameterClass="java.util.HashMap" resultMap="stkAllocInv">
+		SELECT  stkalloc_num,
+		owner_num,
+		wh_num_from,
+		wh_name_from,
+		wh_num_to,
+		wh_name_to,
+		remark,
+		stkalloc_status,
+		create_date,
+		create_by,
+		update_date,
+		update_by  
+		FROM
+		stock_allocate_invoice  
+		where stkalloc_num = #stkAllocNum#
+
+	</select>
+	
+	<update id="updateStkAllocInvByMap"  parameterClass="java.util.HashMap">
+
+		update stock_allocate_invoice set 
+			<isNotEmpty property="stkAllocStatus" >
+				stkalloc_status = #stkAllocStatus#
+			</isNotEmpty>
+			<isEmpty property="stkAllocStatus" >
+				stkalloc_status = stkalloc_status
+			</isEmpty>
+			<isNotEmpty property="fromWhNum" prepend=",">
+				wh_num_from = #fromWhNum#
+			</isNotEmpty>
+			<isNotEmpty property="fromWhName" prepend=",">
+				wh_name_from = #fromWhName#
+			</isNotEmpty>
+			<isNotEmpty property="toWhNum" prepend=",">
+				wh_num_to = #toWhNum#
+			</isNotEmpty>
+			<isNotEmpty property="toWhName" prepend=",">
+				wh_name_to = #toWhName#
+			</isNotEmpty>
+			<isNotEmpty property="remark" prepend=",">
+				remark = #remark#
+			</isNotEmpty>									
+			<isNotEmpty property="updateDate" prepend=",">
+				update_date = #updateDate#
+			</isNotEmpty>
+			<isEmpty property="updateDate" prepend=",">
+				update_date = now()
+			</isEmpty>				
+			<isNotEmpty property="updateBy" prepend=",">
+				update_by = #updateBy#
+			</isNotEmpty>	
+			
+		where stkalloc_num = #stkAllocNum#
+
+
+	</update>
+	
+	<update id="updateStkAllocInv"  parameterClass="STKALLOCINV">
+			update stock_allocate_invoice set 
+			<isNotEmpty property="stkAllocStatus" >
+				stkalloc_status = #stkAllocStatus#
+			</isNotEmpty>
+			<isEmpty property="stkAllocStatus" >
+				stkalloc_status = stkalloc_status
+			</isEmpty>
+			<isNotEmpty property="fromWhNum" prepend=",">
+				wh_num_from = #fromWhNum#
+			</isNotEmpty>
+			<isNotEmpty property="fromWhName" prepend=",">
+				wh_name_from = #fromWhName#
+			</isNotEmpty>
+			<isNotEmpty property="toWhNum" prepend=",">
+				wh_num_to = #toWhNum#
+			</isNotEmpty>
+			<isNotEmpty property="toWhName" prepend=",">
+				wh_name_to = #toWhName#
+			</isNotEmpty>
+			<isNotEmpty property="remark" prepend=",">
+				remark = #remark#
+			</isNotEmpty>									
+			<isNotEmpty property="updateDate" prepend=",">
+				update_date = #updateDate#
+			</isNotEmpty>
+			<isEmpty property="updateDate" prepend=",">
+				update_date = now()
+			</isEmpty>				
+			<isNotEmpty property="updateBy" prepend=",">
+				update_by = #updateBy#
+			</isNotEmpty>	
+			
+		where stkalloc_num = #stkAllocNum#
+
+	</update>
+
+</sqlMap>

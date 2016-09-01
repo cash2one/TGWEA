@@ -1,0 +1,65 @@
+package com.etaoguan.wea.client.web.service.impl;
+
+import java.util.HashMap;
+import java.util.Map;
+
+import org.apache.commons.lang.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.etaoguan.wea.client.vo.SortParam;
+import com.etaoguan.wea.client.web.service.IWOwnerService;
+import com.etaoguan.wea.client.web.service.IWWechatKeysService;
+import com.etaoguan.wea.client.web.vo.WPage;
+import com.etaoguan.wea.client.web.vo.WPagingRequest;
+import com.etaoguan.wea.client.web.vo.WechatKeysSearch;
+import com.etaoguan.wea.common.DataCriteria;
+import com.etaoguan.wea.common.DataSet;
+import com.etaoguan.wea.common.OffsetRequest;
+import com.etaoguan.wea.service.impl.WechatKeysService;
+import com.etaoguan.wea.vo.WechatKeys;
+
+@Service("wwechatKeysService")
+public class WWechatKeysService extends WechatKeysService implements IWWechatKeysService{
+
+	@Autowired
+	IWOwnerService iWOwnerService;
+	
+	@Override
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	public Map getEditWechatKeysInitData(String ownerNum) {
+		Map dataMap = new HashMap();
+		dataMap.put("wechatKeys",getWechatKeys(ownerNum));
+		dataMap.put("owner",iWOwnerService.getOwner(ownerNum));
+		return dataMap;
+	}
+
+	@Override
+	@SuppressWarnings("rawtypes")
+	public WPage listWechatKeys(WechatKeysSearch wechatKeysSearch,
+			SortParam sortParam, WPagingRequest wpagingRequest) {
+		OffsetRequest offsetRequest = wpagingRequest.format2OffsetRequest();
+		DataCriteria dataCriteria = new DataCriteria();
+		dataCriteria.setParam("ownerNum", wechatKeysSearch.getOwnerNum());
+		DataSet dataSet = listWechatKeys(dataCriteria, offsetRequest);
+		
+		return new WPage(wpagingRequest,dataSet);
+	}
+
+	@Override
+	public void saveOrUpdateWechatKeys(WechatKeys wechatKeys) {
+		if(StringUtils.isEmpty(wechatKeys.getOwnerNum())){
+			addWechatKeys(wechatKeys);
+		}else{
+			updateWechatKeys(wechatKeys);
+		}
+		
+	}
+
+	@Override
+	public WechatKeys wechatKeys(String ownerNum) {
+		
+		return getWechatKeys(ownerNum);
+	}
+
+}

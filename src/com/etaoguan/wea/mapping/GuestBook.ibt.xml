@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+
+<!-- author 刘卿 -->
+<!-- 感谢ibatis的持久层框架 -->
+
+<sqlMap>
+
+	<typeAlias alias="GUESTBOOK" type="com.etaoguan.wea.vo.GuestBook"/>
+
+	<resultMap id="guestBook" class="GUESTBOOK">
+		<result property="messageId" column="message_id"/>
+		<result property="content" column="content"/>
+		<result property="ownerNum" column="owner_num"/>
+		<result property="createDate" column="create_date"/>
+		<result property="createBy" column="create_by"/>
+		<result property="updateDate" column="update_date"/>
+		<result property="updateBy" column="update_by"/>
+	</resultMap>
+	
+	<resultMap id="compGuestBook" extends="guestBook" class="GUESTBOOK">
+		<result property="customer.custNum" column="cust_num"/>
+		<result property="customer.custName" column="cust_name"/>
+		<result property="customer.companyName" column="company_name"/>
+	</resultMap>
+	
+	
+	<!-- 获取留言总数-->
+	<select id="getGuestBookCount" parameterClass="java.util.HashMap" resultClass="java.lang.Integer">
+		SELECT
+		count(1) 
+		FROM
+		guest_book where owner_num = #ownerNum#
+	</select>
+	
+	<!-- 获取留言分页信息-->
+	<select id="getGuestBookDatSet" parameterClass="java.util.HashMap"  resultMap="compGuestBook">
+		SELECT t1.*,
+		t2.cust_num,
+		t2.cust_name,
+		t2.company_name 
+		FROM  
+		(SELECT
+		message_id,
+		owner_num,
+		content,
+		create_date,
+		create_by,
+		update_date,
+		update_by 
+		FROM 
+		guest_book where owner_num = #ownerNum#
+
+		<isNull property="asc">
+			<isNull property="desc">order by create_date desc
+			</isNull>
+		</isNull>
+
+		limit #limit# offset #offset#
+		) t1 left outer join Customer t2 
+		on t1.create_by =  t2.cust_num
+	</select>
+	
+
+
+	<insert id="createGuestBook"  parameterClass="GUESTBOOK">
+		insert into guest_book 
+		(
+			owner_num,
+			content,
+			create_date,
+			create_by,
+			update_date,
+			update_by
+		)
+		values(
+			#ownerNum#,
+			#content#	
+			<isNotEmpty property="createDate" prepend=",">
+				#createDate#
+			</isNotEmpty>
+			<isEmpty property="createDate" prepend=",">
+				now()
+			</isEmpty>			
+			<isNotEmpty property="createBy" prepend=",">
+				#createBy#
+			</isNotEmpty>
+			<isEmpty property="createBy" prepend=",">
+				''
+			</isEmpty>			
+			<isNotEmpty property="updateDate" prepend=",">
+				#updateDate#
+			</isNotEmpty>
+			<isEmpty property="updateDate" prepend=",">
+				now()
+			</isEmpty>			
+			<isNotEmpty property="updateBy" prepend=",">
+				#updateBy#
+			</isNotEmpty>
+			<isEmpty property="updateBy" prepend=",">
+				''
+			</isEmpty>		
+		
+		)
+
+	</insert>
+
+	<delete id="deleteGuestBook" parameterClass="java.util.HashMap">
+
+		DELETE 
+		FROM
+		guest_book where message_id = #messageId# 
+
+	</delete>
+</sqlMap>

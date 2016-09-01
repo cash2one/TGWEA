@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+
+<sqlMap>
+
+	<typeAlias alias="WechatMassMsgRequest"
+		type="com.etaoguan.wea.wechat.vo.WechatMassMsgRequest" />
+
+
+	<resultMap id="wmmrMap" class="WechatMassMsgRequest">
+
+		<result property="requestId" column="request_id" />
+		<result property="ownerNum" column="owner_num" />
+		<result property="massMessageId" column="mass_message_id" />
+		<result property="wechatMsgId" column="wechat_msg_id" />
+		<result property="processStatus" column="process_status" />
+		<result property="requestErrorCode" column="request_error_code" />
+		<result property="responseStatus" column="response_status" />
+		<result property="responseErrorCount" column="response_error_count" />
+		<result property="responseStatus" column="response_status" />
+		<result property="requestDate" column="request_date" />
+		<result property="requestBy" column="request_by" />
+		<result property="responseDate" column="response_date" />
+		<result property="responseBy" column="response_by" />
+
+	</resultMap>
+
+    <delete id="deleteWechatMassMsgRequest" parameterClass="java.util.HashMap">
+		DELETE  FROM wechat_mass_msg_request where wechat_mass_msg_request.mass_message_id = #massMessageId#
+
+	</delete>
+	
+	<update id="updateWechatMassMsgRequest" parameterClass="WechatMassMsgRequest">
+		UPDATE wechat_mass_msg_request SET response_status=#responseStatus#,response_error_count=#responseErrorCount#,response_date=now(),response_by=#responseBy#
+		WHERE wechat_msg_id = #wechatMsgId#
+	</update>
+
+	<insert id="createWechatMassMsgRequest" parameterClass="WechatMassMsgRequest">
+		INSERT
+		INTO wechat_mass_msg_request (
+		wechat_mass_msg_request.mass_message_id,
+		wechat_mass_msg_request.owner_num,
+		wechat_mass_msg_request.wechat_msg_id,
+		wechat_mass_msg_request.process_status,
+		wechat_mass_msg_request.request_error_code,
+		wechat_mass_msg_request.response_status,
+		wechat_mass_msg_request.response_error_count,
+		wechat_mass_msg_request.request_date,
+		wechat_mass_msg_request.request_by,
+		wechat_mass_msg_request.response_date,
+		wechat_mass_msg_request.response_by
+		)
+		VALUES
+		(
+		#massMessageId#,
+		#ownerNum#,
+		#wechatMsgId#,
+		#processStatus#,
+		#requestErrorCode#,
+		#responseStatus#,
+		#responseErrorCount#,
+		now(),
+		#requestBy#,
+		now(),
+		#responseBy#
+		)
+
+	</insert>
+
+</sqlMap>

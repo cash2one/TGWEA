@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
+<properties>
+<entry key="app_preset_prof_preset_name">MOwnerAppUpgradeAction Launch Configuration</entry>
+<entry key="app_preset_prof_preset_filter_s"/>
+<entry key="app_preset_prof_preset_filter_p">com.etaoguan.wea.annotation.*,
+com.etaoguan.wea.client.action.*,
+com.etaoguan.wea.client.mobile.action.*,
+com.etaoguan.wea.client.mobile.service.*,
+com.etaoguan.wea.client.mobile.util.*,
+com.etaoguan.wea.client.mobile.vo.*,
+com.etaoguan.wea.client.servlet.*,
+com.etaoguan.wea.client.vo.*,
+com.etaoguan.wea.client.web.action.*,
+com.etaoguan.wea.client.web.service.*,
+com.etaoguan.wea.client.web.vo.*,
+com.etaoguan.wea.common.*,
+com.etaoguan.wea.constant.*,
+com.etaoguan.wea.dao.*,
+com.etaoguan.wea.e688.vo.*,
+com.etaoguan.wea.filter.*,
+com.etaoguan.wea.interceptor.*,
+com.etaoguan.wea.job.*,
+com.etaoguan.wea.listener.*,
+com.etaoguan.wea.service.*,
+com.etaoguan.wea.servlet.*,
+com.etaoguan.wea.test.*,
+com.etaoguan.wea.util.*,
+com.etaoguan.wea.vo.*,
+com.etaoguan.wea.wechat.util.*,
+com.etaoguan.wea.wechat.vo.*</entry>
+<entry key="app_preset_prof_preset_alloc_p">10</entry>
+<entry key="app_preset_"/>
+<entry key="app_preset_prof_preset_samplingRefreshRate_s">1000</entry>
+<entry key="app_preset_prof_preset_stacks_p">false</entry>
+<entry key="app_preset_prof_preset_roots_p">com.etaoguan.wea.annotation.**
+com.etaoguan.wea.client.action.**
+com.etaoguan.wea.client.mobile.action.**
+com.etaoguan.wea.client.mobile.service.**
+com.etaoguan.wea.client.mobile.util.**
+com.etaoguan.wea.client.mobile.vo.**
+com.etaoguan.wea.client.servlet.**
+com.etaoguan.wea.client.vo.**
+com.etaoguan.wea.client.web.action.**
+com.etaoguan.wea.client.web.service.**
+com.etaoguan.wea.client.web.vo.**
+com.etaoguan.wea.common.**
+com.etaoguan.wea.constant.**
+com.etaoguan.wea.dao.**
+com.etaoguan.wea.e688.vo.**
+com.etaoguan.wea.filter.**
+com.etaoguan.wea.interceptor.**
+com.etaoguan.wea.job.**
+com.etaoguan.wea.listener.**
+com.etaoguan.wea.service.**
+com.etaoguan.wea.servlet.**
+com.etaoguan.wea.test.**
+com.etaoguan.wea.util.**
+com.etaoguan.wea.vo.**
+com.etaoguan.wea.wechat.util.**
+com.etaoguan.wea.wechat.vo.**
+</entry>
+<entry key="profiler.settings.instrument.empty.methods">false</entry>
+<entry key="myeclipse.profiling.mode">0</entry>
+<entry key="profiler.settings.istrument.getter.setter.methods">false</entry>
+<entry key="app_preset_prof_preset_samplingRate_s">100</entry>
+<entry key="app_preset_prof_preset_filterMode_s">true</entry>
+<entry key="app_preset_prof_preset_selector"/>
+<entry key="app_preset_prof_preset_refreshRate_s">1000</entry>
+<entry key="app_preset_prof_preset_runnables_p">true</entry>
+<entry key="app_preset_prof_preset_filterMode_p">false</entry>
+<entry key="app_preset_prof_preset_memoryMode_p">true</entry>
+</properties>

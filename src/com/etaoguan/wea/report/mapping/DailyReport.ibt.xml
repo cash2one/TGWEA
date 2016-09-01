@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+
+<!-- author 刘卿 -->
+<!-- 感谢ibatis的持久层框架 -->
+
+<sqlMap>
+
+	<typeAlias alias="DailyReport" type="com.etaoguan.wea.report.vo.DailyReport" />
+
+	<!-- 订单信息SQL映射 -->
+	<resultMap id="dailyReportMap" class="DailyReport">
+		<result property="prodNum" column="prod_num" />
+		<result property="cases" column="cases" />
+		<result property="custPriceTotal" column="cust_price_total" />
+		<result property="unit" column="unit" />
+		<result property="createDate" column="create_date" />
+		<result property="prodName" column="prod_name" />
+		<result property="stdPrice" column="std_price" />
+	</resultMap>
+
+	
+	
+	<!-- 收款单信息列表 -->
+	<select id="dailyReportList" parameterClass="java.util.HashMap" resultMap="dailyReportMap">
+		SELECT
+	t4.prod_num,t4.create_date,t4.cases,t4.cust_price_total,t4.prod_name,t4.std_price,t5.unit
+FROM
+	(
+		SELECT
+			create_date,
+			prod_num,
+			prod_name,
+			std_price,
+			sum(cases) as cases,
+			sum(cust_price_total) as cust_price_total
+		FROM
+			(
+				SELECT
+					t1.create_date,
+					t2.*
+				FROM
+					(
+						SELECT
+							`order`.order_num,
+							`order`.create_date
+						FROM
+							`order`
+						WHERE
+							owner_num = #ownerNum#
+						AND create_date BETWEEN #createDate#
+						AND (date_add(#updateDate#, interval 1 day))
+						AND cust_num = #custNum#
+					) t1,
+					order_item t2
+				WHERE
+					t1.order_num = t2.order_num
+			) t3
+		GROUP BY
+			t3.create_date,
+			t3.prod_num
+	) t4,
+	product t5
+WHERE
+	t4.prod_num = t5.prod_num
+ORDER BY
+	t4.create_date ASC
+	</select>
+	
+</sqlMap>

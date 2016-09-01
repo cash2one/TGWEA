@@ -1,0 +1,15 @@
+<ion-view title="企业简介">
+    <ion-nav-buttons side="left">
+        <button ng-click="back()" class="button button-clear button-light ion-ios7-arrow-back barIcon"></button>
+    </ion-nav-buttons>
+
+
+    <div class="iAbout">
+    <ion-content>
+        <div id="mainContent">
+            <div class="aboutImg floorMain"><img src="img/nopic.jpg"  _lazysrc="{{iAboutImg}}" onerror=this.src=errImg></div>
+        </div>
+        <div class="margin-top-none" style=" line-height: 25px;" id="codetext" ng-bind-html="iAboutText"></div>
+    </ion-content>
+    </div>
+</ion-view>

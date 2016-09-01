@@ -1,0 +1,39 @@
+package com.etaoguan.wea.vo;
+
+import java.util.List;
+
+public class AdminGroup extends BaseVo{
+
+	private int groupId;
+	private String groupName;
+	private String remark;
+	private List<AdminRole> roleList;
+	
+	public int getGroupId() {
+		return groupId;
+	}
+	public void setGroupId(int groupId) {
+		this.groupId = groupId;
+	}
+	
+	public String getGroupName() {
+		return groupName;
+	}
+	public void setGroupName(String groupName) {
+		this.groupName = groupName;
+	}
+	
+	public List<AdminRole> getRoleList() {
+		return roleList;
+	}
+	public void setRoleList(List<AdminRole> roleList) {
+		this.roleList = roleList;
+	}
+	public String getRemark() {
+		return remark;
+	}
+	public void setRemark(String remark) {
+		this.remark = remark;
+	}
+	
+}

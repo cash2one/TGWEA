@@ -1,0 +1,1020 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+
+<!-- author 刘卿 -->
+<!-- 感谢ibatis的持久层框架 -->
+
+<sqlMap>
+
+	<typeAlias alias="ORDER" type="com.etaoguan.wea.vo.Order" />
+	<typeAlias alias="ORDERITEM" type="com.etaoguan.wea.vo.OrderItem" />
+	<typeAlias alias="PRODQTY" type="com.etaoguan.wea.vo.ProdQty" />
+
+
+	<!-- 订单信息SQL映射 -->
+	<resultMap id="order" class="ORDER">
+		<result property="orderNum" column="order_num" />
+		<result property="deliverLocation" column="deliver_location" />
+		<result property="custNum" column="cust_num" />
+		<result property="custName" column="cust_name" />
+		<result property="ownerNum" column="owner_num" />
+		<result property="stdPriceTotal" column="std_price_total" />
+		<result property="realPriceTotal" column="real_price_total" />
+		<result property="custPriceTotal" column="cust_price_total" />
+		<result property="deliverStatus" column="deliver_status" />
+		<result property="deliverDate" column="deliver_date" />
+		<result property="deliverBy" column="deliver_by" />
+		<result property="deliverAddr" column="deliver_addr" />
+		<result property="cashType" column="cash_type" />
+		<result property="cashStatus" column="cash_status" />
+		<result property="cashDate" column="cash_date" />
+		<result property="cashBy" column="cash_by" />
+		<result property="settleStatus" column="settle_status" />
+		<result property="settleDate" column="settle_date" />
+		<result property="settleBy" column="settle_by" />
+		<result property="origReferOrderNum" column="original_order_num" />
+		<result property="createFrom" column="create_from" />
+		<result property="remark" column="remark" />
+		<result property="createDate" column="create_date" />
+		<result property="createBy" column="create_by" />
+		<result property="updateDate" column="update_date" />
+		<result property="updateBy" column="update_by" />
+	</resultMap>
+
+	<resultMap id="compOrder" class="ORDER" extends="order">
+		<result property="customer.custName" column="cust_name" />
+		<result property="customer.companyName" column="company_name" />
+		<result property="customer.contactPerson" column="contact_person" />
+		<result property="customer.phoneNum" column="phone_number" />
+	</resultMap>
+
+	<resultMap id="compOrderDataSet" class="ORDER" extends="compOrder">
+		<result property="onlinePayStatus" column="online_pay_status"/>
+		<result property="retInvCount" column="retinv_count" />
+	</resultMap>
+
+	<resultMap id="compOrderWithItemDataSet" class="ORDER" extends="compOrder">
+		<result property="onlinePayStatus" column="online_pay_status"/>
+		<result property="orderItemList" column="order_num" select="getOrderItemListWithOrder" />
+	</resultMap>
+
+	<!-- 订单明细信息SQL映射 -->
+	<resultMap id="orderItem" class="ORDERITEM">
+		<result property="orderNum" column="order_num" />
+		<result property="prodNum" column="prod_num" />
+		<result property="prodName" column="prod_name" />
+		<result property="differName" column="differ_name" />
+		<result property="unit" column="unit" />
+		<result property="stdProdPrice" column="std_price" />
+		<result property="custProdPrice" column="cust_price" />
+		<result property="stdProdPriceTotal" column="std_price_total" />
+		<result property="custProdPriceTotal" column="cust_price_total" />
+		<result property="cases" column="cases" />
+		<result property="pieces" column="pieces" />
+
+	</resultMap>
+
+	<resultMap id="compOrderItem" class="ORDERITEM" extends="orderItem">
+		<result property="whereimg" column="whereimg" />
+	</resultMap>
+
+	<resultMap id="prodQty" class="PRODQTY">
+		<result property="prodNum" column="prod_num" />
+		<result property="prodName" column="prod_name" />
+		<result property="differName" column="differ_name" />
+		<result property="unit" column="unit" />
+		<result property="cases" column="cases" />
+		<result property="pieces" column="pieces" />
+	</resultMap>
+
+
+	<!-- 获取订单总数 -->
+	<select id="getOrderCount" parameterClass="java.util.HashMap" resultClass="java.lang.Integer">
+		select count(1) from
+		(SELECT
+		*
+		FROM
+		`order` where 1=1
+		<dynamic>
+			<isNotEmpty property="settleStatus">
+				<isNotEqual property="settleStatus" compareValue="-1" prepend="and">
+					settle_status = #settleStatus#
+				</isNotEqual>
+			</isNotEmpty>
+			<isNotEmpty property="cashStatus">
+				<isNotEqual property="cashStatus" compareValue="-1" prepend="and">
+					cash_status = #cashStatus#
+				</isNotEqual>
+			</isNotEmpty>
+			<isNotEmpty property="deliverStatus">
+				<isNotEqual property="deliverStatus" compareValue="-1" prepend="and">
+					deliver_status = #deliverStatus#
+				</isNotEqual>
+			</isNotEmpty>
+			<isNotEmpty property="ownerNum" prepend="and">
+				owner_num =
+				#ownerNum#
+			</isNotEmpty>
+			<isNotEmpty property="deliverLocation" prepend="and">
+				deliver_location = #deliverLocation#
+			</isNotEmpty>
+			<isNotEmpty property="custName" prepend="and">
+				cust_name like
+				CONCAT('%',#custName#, '%')
+			</isNotEmpty>
+			<isNotEmpty property="custCompanyName" prepend="and">
+				cust_num in
+				(select cust_num from customer
+				where company_name like
+				CONCAT('%',#custCompanyName#, '%')
+			</isNotEmpty>
+			<isNotEmpty property="createDateFrom" prepend="and">
+				<isNotEmpty property="createDateTo">
+					create_date between #createDateFrom#
+					and #createDateTo#
+				</isNotEmpty>
+				<isEmpty property="createDateTo">
+					create_date &gt;= #createDateFrom#
+				</isEmpty>
+			</isNotEmpty>
+			<isEmpty property="createDateFrom" prepend="and">
+				<isNotEmpty property="createDateTo">
+					create_date &lt;= #createDateTo#
+				</isNotEmpty>
+			</isEmpty>
+			<isNotEmpty property="orderNum" prepend="and">
+				order_num =
+				#orderNum#
+			</isNotEmpty>
+			<isNotEmpty property="origReferOrderNum" prepend="and">
+				original_order_num = #origReferOrderNum#
+			</isNotEmpty>
+			<isNotEmpty property="createFrom" prepend="and">
+				create_from =
+				#createFrom#
+			</isNotEmpty>
+			<isNotEmpty property="custNum" prepend="and">
+				cust_num =
+				#custNum#
+			</isNotEmpty>
+
+		</dynamic>
+		) t1 ,customer t2 where t1.cust_num = t2.cust_num and t2.del_flag = 0
+	</select>
+
+	<!-- 获取订单分页信息 -->
+	<select id="getOrderDatSet" parameterClass="java.util.HashMap" resultMap="compOrderDataSet">
+		SELECT t5.*,if(t6.order_num is null,0,1) online_pay_status
+		FROM (SELECT t3.*,IFNULL(t4.retinv_count,0) retinv_count FROM
+		(SELECT t1.*,
+		t2.company_name,
+		t2.contact_person,
+		t2.phone_number
+		FROM
+		(
+		select t5.* from
+		(
+		SELECT
+		order_num,
+		deliver_location,
+		cust_name,
+		owner_num,
+		std_price_total,
+		real_price_total,
+		cust_price_total,
+		deliver_status,
+		deliver_addr,
+		settle_status,
+		cust_num,
+		create_from,
+		remark,
+		create_date,
+		create_by,
+		update_date,
+		update_by,
+		deliver_date,
+		cash_type,
+		cash_status,
+		deliver_by,
+		cash_date,
+		cash_by,
+		settle_date,
+		settle_by,
+		original_order_num
+		FROM
+		`order`
+		where 1=1
+
+		<dynamic>
+			<isNotEmpty property="settleStatus">
+				<isNotEqual property="settleStatus" compareValue="-1" prepend="and">
+					settle_status = #settleStatus#
+				</isNotEqual>
+			</isNotEmpty>
+			<isNotEmpty property="cashStatus">
+				<isNotEqual property="cashStatus" compareValue="-1" prepend="and">
+					cash_status = #cashStatus#
+				</isNotEqual>
+			</isNotEmpty>
+			<isNotEmpty property="deliverStatus">
+				<isNotEqual property="deliverStatus" compareValue="-1" prepend="and">
+					deliver_status = #deliverStatus#
+				</isNotEqual>
+			</isNotEmpty>
+			<isNotEmpty property="createDateFrom" prepend="and">
+				<isNotEmpty property="createDateTo">
+					create_date between #createDateFrom#
+					and #createDateTo#
+				</isNotEmpty>
+				<isEmpty property="createDateTo">
+					create_date &gt;= #createDateFrom#
+				</isEmpty>
+			</isNotEmpty>
+			<isEmpty property="createDateFrom" prepend="and">
+				<isNotEmpty property="createDateTo">
+					create_date &lt;= #createDateTo#
+				</isNotEmpty>
+			</isEmpty>
+			<isNotEmpty property="ownerNum" prepend="and">
+				owner_num =
+				#ownerNum#
+			</isNotEmpty>
+			<isNotEmpty property="deliverLocation" prepend="and">
+				deliver_location = #deliverLocation#
+			</isNotEmpty>
+			<isNotEmpty property="custName" prepend="and">
+				cust_name like
+				CONCAT('%',#custName#, '%')
+			</isNotEmpty>
+			<isNotEmpty property="custCompanyName" prepend="and">
+				cust_num in
+				(select cust_num from customer
+				where company_name like
+				CONCAT('%',#custCompanyName#, '%') )
+			</isNotEmpty>
+			<isNotEmpty property="createDate" prepend="and">
+				date_format(create_date,'%Y-%m-%d') = #createDate#
+			</isNotEmpty>
+			<isNotEmpty property="orderNum" prepend="and">
+				order_num =
+				#orderNum#
+			</isNotEmpty>
+			<isNotEmpty property="origReferOrderNum" prepend="and">
+				original_order_num = #origReferOrderNum#
+			</isNotEmpty>
+			<isNotEmpty property="createFrom" prepend="and">
+				create_from =
+				#createFrom#
+			</isNotEmpty>
+			<isNotEmpty property="custNum" prepend="and">
+				cust_num =
+				#custNum#
+			</isNotEmpty>
+
+		</dynamic>
+		<!-- 页面传递的降序字段 -->
+		<isNotEmpty property="desc">
+			order by $desc$ desc
+		</isNotEmpty>
+		<!-- 页面传递的升序字段 -->
+		<isNotEmpty property="asc">
+			order by $asc$ asc
+		</isNotEmpty>
+		<isNull property="asc">
+			<isNull property="desc">order by create_date desc
+			</isNull>
+		</isNull>
+
+		limit #limit# offset #offset#
+		) t5 ,customer t6 where t5.cust_num =
+		t6.cust_num and t6.del_flag = 0
+		)
+		t1,
+		customer t2 where t1.cust_num =
+		t2.cust_num) t3 left outer join
+		(select refer_order_num,count(1)
+		retinv_count from returned_invoice
+		where 1=1
+
+		<dynamic>
+			<isNotEmpty property="ownerNum" prepend="and">
+				owner_num =
+				#ownerNum#
+			</isNotEmpty>
+			<isNotEmpty property="custNum" prepend="and">
+				cust_num =
+				#custNum#
+			</isNotEmpty>
+		</dynamic>
+		group by refer_order_num ) t4
+		on t3.order_num = t4.refer_order_num
+		) t5 left outer join order_pay_info t6 
+		on t5.order_num = t6.order_num
+	</select>
+
+	<!-- 获取订单总数 -->
+	<select id="getOrderWithItemCount" parameterClass="java.util.HashMap" resultClass="java.lang.Integer">
+		select count(1) from
+		(SELECT
+		*
+		FROM
+		`order`
+		where 1=1
+		<dynamic>
+			<isNotEmpty property="settleStatus">
+				<isNotEqual property="settleStatus" compareValue="-1" prepend="and">
+					settle_status = #settleStatus#
+				</isNotEqual>
+			</isNotEmpty>
+			<isNotEmpty property="cashStatus">
+				<isNotEqual property="cashStatus" compareValue="-1" prepend="and">
+					cash_status = #cashStatus#
+				</isNotEqual>
+			</isNotEmpty>
+			<isNotEmpty property="deliverStatus">
+				<isNotEqual property="deliverStatus" compareValue="-1" prepend="and">
+					deliver_status = #deliverStatus#
+				</isNotEqual>
+			</isNotEmpty>
+			<isNotEmpty property="ownerNum" prepend="and">
+				owner_num =
+				#ownerNum#
+			</isNotEmpty>
+			<isNotEmpty property="deliverLocation" prepend="and">
+				deliver_location = #deliverLocation#
+			</isNotEmpty>
+			<isNotEmpty property="custName" prepend="and">
+				cust_name like
+				CONCAT('%',#custName#, '%')
+			</isNotEmpty>
+			<isNotEmpty property="custCompanyName" prepend="and">
+				cust_num in
+				(select cust_num from customer
+				where company_name like
+				CONCAT('%',#custCompanyName#, '%') )
+			</isNotEmpty>
+			<isNotEmpty property="phoneNum" prepend="and">
+				cust_num in
+				(select cust_num from customer
+				where phone_number like
+				CONCAT('%',#phoneNum#, '%'))
+			</isNotEmpty>
+			<isNotEmpty property="createDateFrom" prepend="and">
+				<isNotEmpty property="createDateTo">
+					create_date between #createDateFrom#
+					and #createDateTo#
+				</isNotEmpty>
+				<isEmpty property="createDateTo">
+					create_date &gt;= #createDateFrom#
+				</isEmpty>
+			</isNotEmpty>
+			<isEmpty property="createDateFrom" prepend="and">
+				<isNotEmpty property="createDateTo">
+					create_date &lt;= #createDateTo#
+				</isNotEmpty>
+			</isEmpty>
+			<isNotEmpty property="orderNum" prepend="and">
+				order_num =
+				#orderNum#
+			</isNotEmpty>
+			<isNotEmpty property="origReferOrderNum" prepend=",">
+				original_order_num = #origReferOrderNum#
+			</isNotEmpty>
+			<isNotEmpty property="createFrom" prepend=",">
+				create_from =
+				#createFrom#
+			</isNotEmpty>
+			<isNotEmpty property="custNum" prepend="and">
+				cust_num =
+				#custNum#
+			</isNotEmpty>
+
+		</dynamic>
+		) t1 ,customer t2 where t1.cust_num = t2.cust_num and t2.del_flag = 0
+	</select>
+
+	<!-- 获取订单分页信息 -->
+	<select id="getOrderrWithItemDatSet" parameterClass="java.util.HashMap" resultMap="compOrderWithItemDataSet">
+		SELECT t3.*,if(t4.order_num is null,0,1) online_pay_status
+		FROM (SELECT t1.*,
+		t2.company_name,
+		t2.contact_person,
+		t2.phone_number
+		FROM
+		(
+		select t5.* from
+		(
+		SELECT
+		order_num,
+		deliver_location,
+		cust_name,
+		owner_num,
+		std_price_total,
+		real_price_total,
+		cust_price_total,
+		deliver_status,
+		deliver_addr,
+		settle_status,
+		cust_num,
+		create_from,
+		remark,
+		create_date,
+		create_by,
+		update_date,
+		update_by,
+		deliver_date,
+		cash_type,
+		cash_status,
+		deliver_by,
+		cash_date,
+		cash_by,
+		settle_date,
+		settle_by,
+		original_order_num
+		FROM
+		`order` where 1=1
+
+		<dynamic>
+			<isNotEmpty property="settleStatus">
+				<isNotEqual property="settleStatus" compareValue="-1" prepend="and">
+					settle_status = #settleStatus#
+				</isNotEqual>
+			</isNotEmpty>
+			<isNotEmpty property="cashStatus">
+				<isNotEqual property="cashStatus" compareValue="-1" prepend="and">
+					cash_status = #cashStatus#
+				</isNotEqual>
+			</isNotEmpty>
+			<isNotEmpty property="deliverStatus">
+				<isNotEqual property="deliverStatus" compareValue="-1" prepend="and">
+					deliver_status = #deliverStatus#
+				</isNotEqual>
+			</isNotEmpty>
+			<isNotEmpty property="createDateFrom" prepend="and">
+				<isNotEmpty property="createDateTo">
+					create_date between #createDateFrom#
+					and #createDateTo#
+				</isNotEmpty>
+				<isEmpty property="createDateTo">
+					create_date &gt;= #createDateFrom#
+				</isEmpty>
+			</isNotEmpty>
+			<isEmpty property="createDateFrom" prepend="and">
+				<isNotEmpty property="createDateTo">
+					create_date &lt;= #createDateTo#
+				</isNotEmpty>
+			</isEmpty>
+			<isNotEmpty property="ownerNum" prepend="and">
+				owner_num =
+				#ownerNum#
+			</isNotEmpty>
+			<isNotEmpty property="deliverLocation" prepend="and">
+				deliver_location = #deliverLocation#
+			</isNotEmpty>
+			<isNotEmpty property="custName" prepend="and">
+				cust_name like
+				CONCAT('%',#custName#, '%')
+			</isNotEmpty>
+			<isNotEmpty property="custCompanyName" prepend="and">
+				cust_num in
+				(select cust_num from customer
+				where company_name like
+				CONCAT('%',#custCompanyName#, '%') )
+			</isNotEmpty>
+			<isNotEmpty property="phoneNum" prepend="and">
+				cust_num in
+				(select cust_num from customer
+				where phone_number like
+				CONCAT('%',#phoneNum#, '%'))
+			</isNotEmpty>
+			<isNotEmpty property="createDate" prepend="and">
+				date_format(create_date,'%Y-%m-%d') = #createDate#
+			</isNotEmpty>
+			<isNotEmpty property="orderNum" prepend="and">
+				order_num =
+				#orderNum#
+			</isNotEmpty>
+			<isNotEmpty property="origReferOrderNum" prepend=",">
+				original_order_num = #origReferOrderNum#
+			</isNotEmpty>
+			<isNotEmpty property="createFrom" prepend=",">
+				create_from =
+				#createFrom#
+			</isNotEmpty>
+			<isNotEmpty property="custNum" prepend="and">
+				cust_num =
+				#custNum#
+			</isNotEmpty>
+
+		</dynamic>
+		<!-- 页面传递的降序字段 -->
+		<isNotEmpty property="desc">
+			order by $desc$ desc
+		</isNotEmpty>
+		<!-- 页面传递的升序字段 -->
+		<isNotEmpty property="asc">
+			order by $asc$ asc
+		</isNotEmpty>
+		<isNull property="asc">
+			<isNull property="desc">order by create_date desc
+			</isNull>
+		</isNull>
+
+		limit #limit# offset #offset#
+		) t5 ,customer t6 where t5.cust_num =
+		t6.cust_num and t6.del_flag = 0
+		)
+		t1,
+		customer t2 where t1.cust_num =
+		t2.cust_num) t3 left outer join order_pay_info t4 
+		on t3.order_num = t4.order_num
+	</select>
+
+	<!-- 保存订单信息 -->
+	<insert id="createOrder" parameterClass="ORDER">
+		insert into `order`
+		(
+		order_num,
+		deliver_location,
+		cust_num,
+		cust_name,
+		owner_num,
+		original_order_num,
+		std_price_total,
+		real_price_total,
+		cust_price_total,
+		create_from,
+		remark,
+		deliver_addr,
+		create_date,
+		create_by,
+		update_date,
+		update_by
+		)
+		values(
+		#orderNum#,
+		'',
+		#custNum#,
+		#custName#,
+		#ownerNum#,
+		#origReferOrderNum#,
+		0,
+		0,
+		0
+		<isNotEmpty property="createFrom" prepend=",">
+			#createFrom#
+		</isNotEmpty>
+		<isEmpty property="createFrom" prepend=",">
+			'mobile'
+		</isEmpty>
+		<isNotEmpty property="remark" prepend=",">
+			#remark#
+		</isNotEmpty>
+		<isEmpty property="remark" prepend=",">
+			''
+		</isEmpty>
+		<isNotEmpty property="deliverAddr" prepend=",">
+			#deliverAddr#
+		</isNotEmpty>
+		<isEmpty property="deliverAddr" prepend=",">
+			''
+		</isEmpty>
+		<isNotEmpty property="createDate" prepend=",">
+			#createDate#
+		</isNotEmpty>
+		<isEmpty property="createDate" prepend=",">
+			now()
+		</isEmpty>
+		<isNotEmpty property="createBy" prepend=",">
+			#createBy#
+		</isNotEmpty>
+		<isEmpty property="createBy" prepend=",">
+			''
+		</isEmpty>
+		<isNotEmpty property="updateDate" prepend=",">
+			#updateDate#
+		</isNotEmpty>
+		<isEmpty property="updateDate" prepend=",">
+			now()
+		</isEmpty>
+		<isNotEmpty property="updateBy" prepend=",">
+			#updateBy#
+		</isNotEmpty>
+		<isEmpty property="updateBy" prepend=",">
+			''
+		</isEmpty>
+		)
+
+	</insert>
+
+	<!-- 修改订单信息 -->
+	<update id="updateOrderByMap" parameterClass="java.util.HashMap">
+		update `order` set
+		<isNotEmpty property="deliverLocation">
+			deliver_location = #deliverLocation#
+		</isNotEmpty>
+		<isEmpty property="deliverLocation">
+			deliver_location = deliver_location
+		</isEmpty>
+		<isNotEmpty property="deliverAddr" prepend=",">
+			deliver_addr = #deliverAddr#
+		</isNotEmpty>
+		<isNotEmpty property="remark" prepend=",">
+			remark = #remark#
+		</isNotEmpty>
+		<isNotEmpty property="stdPriceTotal" prepend=",">
+			std_price_total = #stdPriceTotal#
+		</isNotEmpty>
+		<isNotEmpty property="custPriceTotal" prepend=",">
+			cust_price_total = #custPriceTotal#
+		</isNotEmpty>
+		<isNotEmpty property="realPriceTotal" prepend=",">
+			real_price_total = #realPriceTotal#
+		</isNotEmpty>
+		<isEmpty property="realPriceTotal" prepend=",">
+			<isNotEmpty property="custPriceTotal" prepend=",">
+				real_price_total = #custPriceTotal#
+			</isNotEmpty>
+		</isEmpty>
+		<isNotEmpty property="deliverStatus" prepend=",">
+			deliver_status = #deliverStatus#,
+			deliver_date = now()
+			<isNotEmpty property="deliverBy" prepend=",">
+				deliver_by =
+				#deliverBy#
+			</isNotEmpty>
+		</isNotEmpty>
+		<isNotEmpty property="settleStatus" prepend=",">
+			settle_status = #settleStatus#,
+			settle_date = now()
+			<isNotEmpty property="settleBy" prepend=",">
+				settle_by =
+				#settleBy#
+			</isNotEmpty>
+		</isNotEmpty>
+		<isNotEmpty property="cashStatus" prepend=",">
+			cash_status = #cashStatus#,
+			cash_date = now()
+			<isNotEmpty property="cashBy" prepend=",">
+				cash_by = #cashBy#
+			</isNotEmpty>
+			<isNotEmpty property="cashType" prepend=",">
+				cash_type =
+				#cashType#
+			</isNotEmpty>
+		</isNotEmpty>
+		<isNotEmpty property="origReferOrderNum" prepend=",">
+			original_order_num = #origReferOrderNum#
+		</isNotEmpty>
+		<isNotEmpty property="updateDate" prepend=",">
+			update_date =
+			#updateDate#
+		</isNotEmpty>
+		<isEmpty property="updateDate" prepend=",">
+			update_date = now()
+		</isEmpty>
+		<isNotEmpty property="updateBy" prepend=",">
+			update_by =
+			#updateBy#
+		</isNotEmpty>
+		<isEmpty property="updateBy" prepend=",">
+			update_by = ''
+		</isEmpty>
+
+		where
+		order_num=#orderNum#
+
+	</update>
+
+
+	<select id="getOrderItemList" parameterClass="java.util.HashMap" resultMap="compOrderItem">
+
+		select t1.*,t2.first_prodimg as whereimg from ( SELECT
+		order_num,
+		prod_num,
+		prod_name,
+		differ_name,
+		unit,
+		std_price,
+		cust_price,
+		std_price_total,
+		cust_price_total,
+		cases,
+		pieces
+		FROM
+		order_item where order_num = #orderNum# ) t1,product
+		t2 where t2.prod_num = t1.prod_num
+
+
+
+	</select>
+
+	<select id="getOrderItemListWithOrder" resultMap="compOrderItem">
+
+		SELECT
+		ord.order_num,ord.prod_num,ord.prod_name,ord.differ_name,ord.unit,ord.std_price,ord.cust_price,ord.std_price_total,
+		ord.cust_price_total,ord.cases,ord.pieces
+		,pro.first_prodimg as
+		whereimg
+		FROM (select * from order_item where order_num = #order_num#)
+		ord,
+		product pro
+		where ord.prod_num = pro.prod_num
+
+	</select>
+
+	<insert id="createOrderItem" parameterClass="ORDERITEM">
+		insert into
+		order_item
+		(
+		order_num,
+		prod_num,
+		prod_name,
+		differ_name,
+		unit,
+		std_price,
+		cust_price,
+		std_price_total,
+		cust_price_total,
+		cases,
+		pieces
+		)
+		values(
+		#orderNum#,
+		#prodNum#,
+		#prodName#,
+		#differName#,
+		#unit#,
+		#stdProdPrice#,
+		#custProdPrice#,
+		#stdProdPriceTotal#,
+		#custProdPriceTotal#,
+		#cases#,
+		#pieces#
+		)
+
+	</insert>
+
+	<!-- 删除订单信息 -->
+	<statement id="deleteOrder" parameterClass="java.util.HashMap">
+		DELETE
+		FROM
+		`order`
+		where order_num = #orderNum#;
+		DELETE
+		FROM
+		order_item where order_num =
+		#orderNum#;
+
+	</statement>
+
+	<delete id="deleteOrderItem" parameterClass="java.util.HashMap">
+		DELETE
+		FROM
+		order_item where order_num = #orderNum#
+		<isNotEmpty property="prodNum" prepend="and">
+			prod_num = #prodNum#
+		</isNotEmpty>
+		<isNotEmpty property="cases" prepend="and">
+			cases = #cases#
+		</isNotEmpty>
+		<isNotEmpty property="pieces" prepend="and">
+			pieces = #pieces#
+		</isNotEmpty>
+
+	</delete>
+
+	<statement id="reCalcOrderPriceTotal" parameterClass="java.util.HashMap">
+		UPDATE order_item
+		SET std_price_total = std_price*cases,
+		cust_price_total = cust_price*cases
+		where order_num = #orderNum#;
+
+		UPDATE `order`
+		SET std_price_total = IFNULL((SELECT
+		SUM(std_price_total)
+		price_total
+		FROM order_item WHERE order_num =
+		#orderNum#),0),
+		cust_price_total =
+		IFNULL((SELECT SUM(cust_price_total)
+		price_total FROM order_item WHERE
+		order_num = #orderNum#),0)
+		where
+		order_num =
+		#orderNum#
+		<dynamic>
+			<isNotEmpty property="updateBy" prepend="and">
+				update_by =
+				#updateBy#
+			</isNotEmpty>
+		</dynamic>
+		;
+
+		UPDATE `order`
+		set real_price_total = cust_price_total
+		where order_num
+		= #orderNum#;
+
+	</statement>
+
+	<select id="getOrder" parameterClass="java.util.HashMap" resultMap="order">
+		SELECT
+		order_num,
+		deliver_location,
+		cust_num,
+		cust_name,
+		owner_num,
+		std_price_total,
+		real_price_total,
+		cust_price_total,
+		deliver_addr,
+		deliver_status,
+		deliver_date,
+		deliver_by,
+		settle_status,
+		settle_date,
+		settle_by,
+		cash_type,
+		cash_status,
+		cash_date,
+		cash_by,
+		original_order_num,
+		create_from,
+		remark,
+		create_date,
+		create_by,
+		update_date,
+		update_by
+		FROM
+		`order` where order_num = #orderNum#
+
+	</select>
+
+	<select id="getOrderItemCount" parameterClass="java.util.HashMap" resultClass="java.lang.Integer">
+
+		SELECT
+		count(1)
+		FROM
+		order_item where 1=1
+		<dynamic>
+			<isNotEmpty property="prodNum" prepend="and">
+				prod_num =
+				#prodNum#
+			</isNotEmpty>
+			<isNotEmpty property="orderNum" prepend="and">
+				order_num =
+				#orderNum#
+			</isNotEmpty>
+
+		</dynamic>
+
+	</select>
+
+
+	<select id="getOrderItem" parameterClass="java.util.HashMap" resultMap="orderItem">
+
+		SELECT
+		order_num,
+		prod_num,
+		prod_name,
+		differ_name,
+		unit,
+		std_price,
+		cust_price,
+		std_price_total,
+		cust_price_total,
+		cases,
+		pieces
+		FROM
+		order_item
+		where
+		order_num = #orderNum# and prod_num = #prodNum#
+
+	</select>
+
+
+	<update id="updateOrderItemByMap" parameterClass="java.util.HashMap">
+		update order_item set
+		<isNotEmpty property="custProdPrice">
+			cust_price = #custProdPrice#
+		</isNotEmpty>
+		<isEmpty property="custProdPrice">
+			cust_price = cust_price
+		</isEmpty>
+		<isNotEqual property="cases" compareValue="0" prepend=",">
+			cases = #cases#
+		</isNotEqual>
+		<isNotEqual property="pieces" compareValue="0" prepend=",">
+			pieces = #pieces#
+		</isNotEqual>
+		where order_num = #orderNum# and prod_num = #prodNum#
+
+	</update>
+
+	<update id="updateOrderItemUnitPrice" parameterClass="java.util.HashMap">
+		update
+		order_item INNER JOIN
+		(select
+		t1.prod_num,t1.std_price from
+		product t1,
+		(select owner_num from `order` where order_num =
+		#orderNum#) t2
+		where t1.owner_num=t2.owner_num) t7
+		ON
+		order_item.prod_num=t7.prod_num
+		set
+		order_item.std_price = t7.std_price,
+		order_item.cust_price =
+		t7.std_price
+		where order_item.order_num = #orderNum#
+
+	</update>
+
+	<update id="updateOrderItemPriceTotal" parameterClass="java.util.HashMap">
+		update order_item set
+		cust_price_total = cust_price*cases
+		where
+		order_num = #orderNum#
+		<dynamic>
+			<isNotEmpty property="prodNum" prepend="and">
+				prod_num =
+				#prodNum#
+			</isNotEmpty>
+		</dynamic>
+
+	</update>
+
+	<statement id="sumOrderPriceTotal" parameterClass="java.util.HashMap">
+		UPDATE `order`
+		SET std_price_total = (SELECT SUM(std_price_total)
+		price_total FROM
+		order_item WHERE order_num = #orderNum#),
+		real_price_total = (SELECT SUM(real_price_total) price_total FROM
+		order_item
+		WHERE
+		order_num = #orderNum#),
+		where order_num = #orderNum#;
+		UPDATE `order`
+		set adj_price_total = real_price_total
+		where order_num =
+		#orderNum#
+		<dynamic>
+			<isNotEmpty property="updateBy" prepend="and">
+				update_by =
+				#updateBy#
+			</isNotEmpty>
+		</dynamic>
+		;
+
+	</statement>
+
+
+
+	<select id="minusDeliverInvNRetInv" parameterClass="java.util.HashMap" resultMap="prodQty">
+		SELECT t7.prod_num,t7.prod_name,t7.differ_name,t7.unit,t7.cases,t7.pieces
+		FROM (SELECT t3.prod_num,
+		t3.prod_name,
+		t3.differ_name,
+		t3.unit,
+		t3.cases-IFNULL(t6.cases,0) cases,
+		t3.pieces-IFNULL(t6.pieces,0) pieces
+		FROM
+		(
+		SELECT deliver_num,
+		prod_num,
+		prod_name,
+		differ_name,
+		unit,
+		cases,
+		pieces
+		FROM
+		deliver_invoice_item t1
+		where exists(SELECT 1 FROM
+		(SELECT
+		deliver_num
+		FROM
+		deliver_invoice where refer_order_num = #orderNum#) t2
+		where
+		t1.deliver_num = t2.deliver_num) ) t3 left outer join
+		(
+		SELECT ret_num,
+		prod_num,
+		differ_name,
+		cases,
+		pieces
+		FROM returned_invoice_item t4
+		where
+		exists
+		(SELECT 1 FROM (SELECT
+		ret_num
+		FROM
+		returned_invoice where
+		refer_order_num = #orderNum#) t5
+		where t4.ret_num = t5.ret_num) ) t6
+		on
+		t3.prod_num = t6.prod_num and t3.differ_name = t6.differ_name) t7
+		WHERE t7.cases>0
+
+	</select>
+</sqlMap>

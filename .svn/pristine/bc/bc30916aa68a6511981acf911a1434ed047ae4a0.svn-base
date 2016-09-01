@@ -1,0 +1,134 @@
+<%@ page language="java" errorPage="/error.jsp" pageEncoding="UTF-8" contentType="text/html;charset=utf-8" %>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /> 
+<title>微网站消息列表</title> 
+<%@ include file="/owner/common/owner-sc.jsp"%>
+<script src="${ctx}/owner/js/layout.js" type="text/javascript"></script>
+<script src="${ctx}/js/ligerui/plugins/ligerDateEditor.js" type="text/javascript"></script>
+</head>  
+<body style="padding:6px; overflow:hidden;">
+    <div id="searchbar" style="overflow:hidden">
+                <ul>
+                    <li>
+                         <i class="i-spacing-first">
+                    消息类型：
+                        </i>
+                        <i class="i-spacing-follow">
+                            <input type="text" id="messageType" />
+                        </i>
+                        <i class="i-spacing-follow">
+                            <input id="searchWechatMessage" type="button" value="搜索" style="width:65px;height:28px;background-color:#e0e4e9;border-radius:5px;" onclick="f_searchWechatMessage()"
+                            />
+                        </i>
+                        <input type="hidden" id="hidMessageType" value="-1" />
+
+                    </li>
+                </ul>
+            </div>
+    <br/>
+    <div id="maingrid" style="margin:0; padding:0">
+    </div>
+    <div style="display:none;">
+        <!-- g data total ttt -->
+    </div>
+</body>
+<script type="text/javascript">
+    var g;
+    $(function() {
+        $.expandAccordionMenu("wechatmenu");
+        $("#messageType").ligerComboBox({
+            data: null,
+            cancelable: false,
+            valueFieldID: 'hidMessageType'
+        });
+        f_initWechatMessageSearchData();
+        f_initWechatMessageDataGrid();
+
+
+
+    }); 
+
+    function f_searchWechatMessage() {
+        var messageType = liger.get("messageType").getValue();
+
+        $("#hidMessageType").val(messageType);
+        $.reloadGridServerData(g, f_getWechatMessageParam());
+    }
+
+    function f_getWechatMessageParam() {
+
+        var messageType = $("#hidMessageType").val();
+
+        var param = {
+            "wechatMessageSearch.messageType": messageType
+        };
+        return param;
+
+    }
+
+    function f_initWechatMessageSearchData() {
+
+        j4tg.ajaxPost("${ctx}/owner/wGetListWechatMessageSearchInitData.action", "json", false, {},
+        function(data) {
+            if (data.status == "S") {
+                //             				alert(JSON.stringify(data));
+                liger.get("messageType").setData($.transformMap2ComboBoxData(data.respData.messageType, -1));
+
+            }
+        },
+        function(data) {
+
+		});
+
+    }
+    function f_select() {
+        return g.getSelectedRow();
+    }
+    function f_initWechatMessageDataGrid() {
+
+        g = manager = $("#maingrid").ligerGrid({
+            columns: [{
+                display: '消息类型',
+                name: 'messageTypeName',
+                isSort: false,
+                width: 200
+            },
+            {
+                display: '概述',
+                name: 'subject',
+                isSort: false,
+                align: 'left',
+                width: 300
+            },
+            {
+                display: '更新日期',
+                name: 'updateDate',
+                isSort: false,
+                width: 100
+            }],
+            url: "${ctx}/owner/wListWechatMessagesData.action",
+            pagesizeParmName: "wpagingRequest.perPageUnitNum",
+            pageParmName: "wpagingRequest.currentPage",
+            pageSize: 10,
+            method: "post",
+            async: false,
+            enabledSort: false,
+            enabledEdit: false,
+            parms: f_getWechatMessageParam(),
+            dataAction: "server",
+            clickToEdit: false,
+            isScroll: false,
+            frozen: false,
+            pageSizeOptions: [20, 40],
+            showTitle: false,
+            width: 610,
+            columnWidth: 120,
+            allowHideColumn: false
+        });
+
+    }
+
+</script>
+</html>

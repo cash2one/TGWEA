@@ -1,0 +1,122 @@
+package com.etaoguan.wea.vo;
+
+/**
+ * @author cunli 安卓版本管理
+ */
+@SuppressWarnings("serial")
+public class AppAndroidVersion extends BaseVo {
+	private Long versionId;
+	private int versionNum;
+	private String ownerNum;
+	private String versionCode;
+	/**
+	 * 手机上显示的应用的名字
+	 */
+	private String appName;
+	private int activeFlag;
+	private String remark;
+	private String forceUpdate;
+	private String companyName;
+	private String fileName;
+	/**
+	 * 包名 例如 com.etaoguan.wea.app.taoguan
+	 */
+	private String packageName;
+	private String fullPath;
+
+	public String getFullPath() {
+		return fullPath;
+	}
+
+	public void setFullPath(String fullPath) {
+		this.fullPath = fullPath;
+	}
+
+	public String getPackageName() {
+		return packageName;
+	}
+
+	public void setPackageName(String packageName) {
+		this.packageName = packageName;
+	}
+
+	public String getFileName() {
+		return fileName;
+	}
+
+	public void setFileName(String fileName) {
+		this.fileName = fileName;
+	}
+
+	public String getAppName() {
+		return appName;
+	}
+
+	public void setAppName(String appName) {
+		this.appName = appName;
+	}
+
+	public String getCompanyName() {
+		return companyName;
+	}
+
+	public void setCompanyName(String companyName) {
+		this.companyName = companyName;
+	}
+
+	public String getOwnerNum() {
+		return ownerNum;
+	}
+
+	public void setOwnerNum(String ownerNum) {
+		this.ownerNum = ownerNum;
+	}
+
+	public String getForceUpdate() {
+		return forceUpdate;
+	}
+
+	public void setForceUpdate(String forceUpdate) {
+		this.forceUpdate = forceUpdate;
+	}
+
+	public String getRemark() {
+		return remark;
+	}
+
+	public int getVersionNum() {
+		return versionNum;
+	}
+
+	public void setVersionNum(int versionNum) {
+		this.versionNum = versionNum;
+	}
+
+	public String getVersionCode() {
+		return versionCode;
+	}
+
+	public void setVersionCode(String versionCode) {
+		this.versionCode = versionCode;
+	}
+
+	public int getActiveFlag() {
+		return activeFlag;
+	}
+
+	public void setActiveFlag(int activeFlag) {
+		this.activeFlag = activeFlag;
+	}
+
+	public void setRemark(String remark) {
+		this.remark = remark;
+	}
+
+	public Long getVersionId() {
+		return versionId;
+	}
+
+	public void setVersionId(Long versionId) {
+		this.versionId = versionId;
+	}
+}

@@ -1,0 +1,55 @@
+
+<ion-view title="个人中心">
+    <ion-nav-buttons side="left">
+        <button ng-click="back()" class="button button-clear">
+            <i class="ion-ios-arrow-back"></i>
+            <span id="barItemlText">返 回</span>
+        </button>
+    </ion-nav-buttons>
+
+    <ion-nav-buttons side="right">
+        <button ng-click="userLoginOut()" class="button button-clear" style="font-size: 26px;">
+          <span id="barItemrText">注 销</span>
+          <i class="ion-android-exit"></i>
+        </button>
+    </ion-nav-buttons>
+
+    <ion-content>
+        <div class="perHeadImg">
+           <div id="headPortrait-margin">
+                <div id="headPortrait-padding">
+                  <img src="img/picture.png">
+                </div>
+           </div>
+           <p id="userName" ng-bind="useriCompany"></p>
+           <p id="userPhone" ng-bind="useriName"></p>
+           <div class="perBar">
+               <div class="updateBar">
+                   <button class="button button-clear iupdBtn" ng-click="perList(3)" style="color: #ffffff;">修改密码</button>
+                   <span></span>
+                   <button class="button button-clear iupdBtn" ng-click="perList(4)" style="color: #ffffff">修改信息</button>
+               </div>
+           </div>
+        </div>
+        <div class="list list-inset perList">
+            <div  ng-click="perList(0)" class="item item-icon-left item-icon-right perListItem">
+                <i class="icon ion-android-cart" style="color: #365b88;font-size: 30px;"></i>
+                购物车
+                <i class="icon ion-ios-arrow-right" style="color: #838381;font-size: 30px;"></i>
+            </div>
+
+            <div ng-click="perList(1)" class="item item-icon-left item-icon-right perListItem">
+                <i class="icon ion-checkmark-round perItemIcon"  style="color: #365b88;font-size: 30px;"></i>
+                我的订单
+                <i class="icon ion-ios-arrow-right" style="color: #838381;font-size: 30px;"></i>
+            </div>
+
+            <div ng-click="perList(2)" class="item item-icon-left item-icon-right perListItem">
+                <i class="icon ion-ribbon-b perItemIcon"  style="color: #365b88;font-size: 30px;"></i>
+                特供商品
+                <i class="icon ion-ios-arrow-right" style="color: #838381;font-size: 30px;"></i>
+            </div>
+
+        </div>
+    </ion-content>
+</ion-view>

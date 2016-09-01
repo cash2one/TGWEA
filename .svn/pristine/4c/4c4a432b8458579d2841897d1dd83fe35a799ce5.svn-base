@@ -1,0 +1,11 @@
+package com.etaoguan.wea.service;
+
+import com.etaoguan.wea.vo.AlipayWapPayResult;
+
+public interface IAlipayWapPayResultService {
+	/**
+	 * @param alipayWapPayResult 保存微信的返回结果
+	 */
+	public int saveAlipayWapPayResult(AlipayWapPayResult alipayWapPayResult);
+
+}

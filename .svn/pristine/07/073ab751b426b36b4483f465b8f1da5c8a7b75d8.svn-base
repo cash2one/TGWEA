@@ -1,0 +1,35 @@
+
+修改账户密码
+
+点击菜单“修改账户密码”转到owner/wEditOwnerAdminPwd.action ————>/owner/edit_adminpwd.jsp
+
+点击 “提交”按钮，转到 /owner/wSaveOwnerAdminPwd.action ，同时把旧密码和新密码都传过去。
+wSaveOwnerAdminPwd.action 获取登录时系统记录的用户信息，如果 当前输入的密码和登录时系统记录的密码相同，就根据管理员id执行更新密码操作;如果不相同就在页面提示信息"旧密码输入错误，修改失败！"
+
+进入OwnerAdmin.ibt.xml 执行 id="updateOwnerAdminByMap" 
+
+
+
+修改企业基本信息
+
+点击菜单“修改企业基本信息”，转到 class WOwnerAction ——————> owner/wEditOwner.action——————>/owner/edit_owner.jsp
+
+edit_owner.jsp 执行 function f_initEditOwnerData() 显示数据，转到 class WOwnerAction ——————> /owner/wGetEditOwnerInitData.action 查询数据，
+wGetEditOwnerInitData.action 根据ownerNum从登录时系统记录的信息中获取管理员信息，返回到页面显示包括行业下拉框和地区下拉框的内容。
+
+点击这个页面中的“上传图片”按钮，执行 function f_saveImg()，f_saveImg() 里面 获取input=file 的val(),如果这个值是空的，或者这个值不是图片文件，就提示：请选择图片文件。
+如果这个值不是空的，并且是图片文件，就执行上传操作$.ajaxFileUpload 转到 /owner/wUploadOwnerImg.action 上传。wUploadOwnerImg.action 用imgFile和imgFileFileName接收图片和图片相关信息。
+保存.tmp格式的图片到图片服务器，并返回图片路径到页面，然后关闭上传图片这个窗口，并提示‘上传成功’，同时把返回的图片路径设置到显示图片的容器里面。
+
+点击这个页面的“保存”按钮，获取页面中的每一个字段的值，提交到 /owner/wSaveEditOwner.action，更改图片后缀，设置图片地址；
+如果ownerNum是空的，就保存这条消息，如果不是空的就根据这个ownerNum更新这条消息。
+
+
+
+
+
+
+
+
+
+

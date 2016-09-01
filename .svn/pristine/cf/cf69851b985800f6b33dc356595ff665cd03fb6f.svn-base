@@ -1,0 +1,245 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+
+<sqlMap>
+
+	<typeAlias alias="WechatPayKeys" type="com.etaoguan.wea.vo.WechatPayKeys" />
+	<typeAlias alias="AlipayKeys" type="com.etaoguan.wea.vo.AlipayKeys" />
+	<typeAlias alias="OrderPayInfo" type="com.etaoguan.wea.vo.OrderPayInfo" />
+	<typeAlias alias="SUPPORTONLINEPAYTYPE" type="com.etaoguan.wea.vo.SupportOnlinePayType" />
+
+	<resultMap id="wechatPayKeysMap" class="WechatPayKeys">
+
+		<result property="ownerNum" column="owner_num" />
+		<result property="appid" column="appid" />
+		<result property="mchId" column="mch_id" />
+
+		<result property="createDate" column="create_date" />
+		<result property="createBy" column="create_by" />
+		<result property="updateDate" column="update_date" />
+		<result property="updateBy" column="update_by" />
+
+	</resultMap>
+	
+	<resultMap id="wechatPayKeysMap2" class="WechatPayKeys">
+
+		<result property="ownerNum" column="owner_num" />
+		<result property="appid" column="appid" />
+		<result property="mchId" column="mch_id" />
+
+		<result property="createDate" column="create_date" />
+		<result property="createBy" column="create_by" />
+		<result property="updateDate" column="update_date" />
+		<result property="updateBy" column="update_by" />
+
+		<result property="companyName" column="company_name" />
+
+	</resultMap>
+
+	<resultMap id="OPIMap" class="OrderPayInfo">
+
+		<result property="orderNum" column="order_num" />
+		<result property="ownerNum" column="owner_num" />
+		<result property="custNum" column="cust_num" />
+		<result property="payType" column="pay_type" />
+		<result property="payTransId" column="pay_trans_id" />
+		<result property="createDate" column="create_date" />
+		<result property="createBy" column="create_by" />
+
+	</resultMap>
+
+
+	<resultMap id="alipayKeysMap" class="AlipayKeys">
+
+		<result property="ownerNum" column="owner_num" />
+		<result property="ownerPartner" column="owner_partner" />
+		<result property="ownerKey" column="owner_key" />
+		<result property="ownerAccountName" column="owner_account_name" />
+		<result property="createDate" column="create_date" />
+
+	</resultMap>
+
+	<resultMap id="alipayKeysMap2" class="AlipayKeys">
+
+		<result property="ownerNum" column="owner_num" />
+		<result property="ownerPartner" column="owner_partner" />
+		<result property="ownerKey" column="owner_key" />
+		<result property="ownerAccountName" column="owner_account_name" />
+		<result property="createDate" column="create_date" />
+
+		<result property="companyName" column="company_name" />
+
+	</resultMap>
+
+	<resultMap id="supportOnlinePayType" class="SUPPORTONLINEPAYTYPE">
+
+		<result property="aliWapPay" column="aliWapPay" />
+		<result property="wechatPay" column="wechatPay" />
+
+	</resultMap>
+
+
+
+	<select id="wechatPayKeysInformation" parameterClass="java.util.HashMap"
+		resultMap="wechatPayKeysMap">
+		SELECT
+		wechat_pay_keys.owner_num,
+		wechat_pay_keys.appid,
+		wechat_pay_keys.mch_id,
+		wechat_pay_keys.create_date,
+		wechat_pay_keys.create_by,
+		wechat_pay_keys.update_date,
+		wechat_pay_keys.update_by
+		FROM
+		wechat_pay_keys
+		where owner_num =
+		#ownerNum#
+	</select>
+
+	<insert id="addWechatPayKeys" parameterClass="WechatPayKeys">
+		INSERT INTO
+		wechat_pay_keys (wechat_pay_keys.owner_num,
+		wechat_pay_keys.appid,
+		wechat_pay_keys.mch_id,
+		wechat_pay_keys.create_date,
+		wechat_pay_keys.create_by,
+		wechat_pay_keys.update_date,
+		wechat_pay_keys.update_by) values
+		(#ownerNum#, #appid#, #mchId#, now(), #createBy#, now(), #updateBy#)
+
+	</insert>
+
+	<delete id="deleteWechatPayKeys" parameterClass="java.util.HashMap">
+		DELETE FROM wechat_pay_keys WHERE owner_num = #ownerNum#
+	</delete>
+
+	<update id="updateWechatPayKeys" parameterClass="java.util.HashMap">
+		UPDATE wechat_pay_keys SET
+		appid=#appid#,mch_id=#mchId#,update_date=now(),update_by=#updateBy#
+		WHERE owner_num = #ownerNum#
+	</update>
+
+	<select id="wechatPayKeysDatSet" parameterClass="java.util.HashMap"
+		resultMap="wechatPayKeysMap2">
+		SELECT
+		owner.company_name,
+		wechat_pay_keys.owner_num,
+		wechat_pay_keys.appid,
+		wechat_pay_keys.mch_id,
+		wechat_pay_keys.create_date,
+		wechat_pay_keys.create_by,
+		wechat_pay_keys.update_date,
+		wechat_pay_keys.update_by
+		FROM
+		wechat_pay_keys inner JOIN owner ON wechat_pay_keys.owner_num = owner.owner_num
+
+		where
+		1 = 1
+		<isNotEmpty property="companyName" prepend="and">
+			owner.company_name like
+			CONCAT('%',#companyName#, '%')
+		</isNotEmpty>
+		order by create_date desc limit #limit# offset #offset#
+	</select>
+
+	<select id="wechatPayKeysCount" parameterClass="java.util.HashMap"
+		resultClass="java.lang.Integer">
+		SELECT count(1) FROM wechat_pay_keys inner JOIN owner ON wechat_pay_keys.owner_num = owner.owner_num
+	</select>
+
+
+	<!-- ********** -->
+
+
+	<select id="alipayKeysInformation" parameterClass="java.util.HashMap"
+		resultMap="alipayKeysMap">
+		SELECT
+		alipay_keys.owner_num,
+		alipay_keys.owner_partner,
+		alipay_keys.owner_key,
+		alipay_keys.owner_account_name,
+		alipay_keys.create_date
+		FROM
+		alipay_keys
+		where owner_num = #ownerNum#
+	</select>
+
+	<insert id="addAlipayKeys" parameterClass="AlipayKeys">
+		insert into
+		alipay_keys
+		(owner_num,owner_partner,owner_key,create_date,owner_account_name)
+		values (#ownerNum#,#ownerPartner#,#ownerKey#,now(),#ownerAccountName#)
+	</insert>
+
+	<delete id="deleteAlipayKeys" parameterClass="java.util.HashMap">
+		delete from
+		alipay_keys where owner_num = #ownerNum#
+	</delete>
+
+	<update id="updateAlipaykeys" parameterClass="java.util.HashMap">
+		update alipay_keys
+		set owner_partner =
+		#ownerPartner#,owner_key=#ownerKey#,owner_account_name=#ownerAccountName#
+		where owner_num
+		= #ownerNum#
+	</update>
+
+	<select id="alipayKeysDatSet" parameterClass="java.util.HashMap"
+		resultMap="alipayKeysMap2">
+		SELECT
+		owner.company_name,
+		alipay_keys.owner_num,
+		alipay_keys.owner_partner,
+		alipay_keys.owner_key,
+		alipay_keys.owner_account_name,
+		alipay_keys.create_date
+		FROM
+		alipay_keys
+		inner JOIN owner ON alipay_keys.owner_num = owner.owner_num
+		where 1 = 1
+		<isNotEmpty property="companyName" prepend="and">
+			owner.company_name like
+			CONCAT('%',#companyName#, '%')
+		</isNotEmpty>
+		order by create_date desc limit #limit# offset #offset#
+	</select>
+
+	<select id="alipayKeysCount" parameterClass="java.util.HashMap"
+		resultClass="java.lang.Integer">
+		SELECT count(1) FROM alipay_keys inner JOIN owner ON
+		alipay_keys.owner_num = owner.owner_num
+	</select>
+
+	<insert id="saveOrderPayInfoDao" parameterClass="OrderPayInfo">
+		INSERT INTO
+		order_pay_info (order_pay_info.order_num,
+		order_pay_info.owner_num,
+		order_pay_info.cust_num,
+		order_pay_info.pay_type,
+		order_pay_info.pay_trans_id,
+		order_pay_info.create_date,
+		order_pay_info.create_by)
+		select #orderNum# order_num,
+		owner_num,
+		cust_num ,
+		#payType# payT_type,
+		#payTransId# pay_trans_id,
+		NOW()
+		create_date,
+		#createBy# create_by
+		from `order` where order_num =
+		#orderNum#
+
+	</insert>
+
+	<select id="getSupportOnlinePayType" parameterClass="java.util.HashMap"
+		resultMap="supportOnlinePayType">
+		SELECT if(aliWapPay>0,'Y','N')
+		aliWapPay,if(wechatPay>0,'Y','N') wechatPay FROM
+		(select count(1)
+		aliWapPay,0 wechatPay FROM alipay_keys
+		where owner_num = #ownerNum#) t1
+
+	</select>
+
+</sqlMap>

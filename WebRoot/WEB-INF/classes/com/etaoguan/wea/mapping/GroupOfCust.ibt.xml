@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+
+<sqlMap>
+
+	<typeAlias alias="GroupOfCust" type="com.etaoguan.wea.vo.GroupOfCust"/>
+	<typeAlias alias="PUSHGROUPCUSTREF" type="com.etaoguan.wea.vo.PushGroupCustRef"/>
+
+	<resultMap id="GOC" class="GroupOfCust">
+		<result property="id" column="id"/>
+		<result property="ownerNum" column="owner_num"/>
+		<result property="groupNum" column="group_num"/>
+		<result property="groupName" column="group_name"/>
+		<result property="custId" column="cust_id"/>
+		<result property="memo" column="memo"/>
+		<result property="createDate" column="createtime"/>
+		<result property="updateDate" column="updatetime"/>
+	</resultMap>
+	
+	<resultMap id="compPushGroupCustRef" class="PUSHGROUPCUSTREF">
+		<result property="custNum" column="cust_num"/>
+	</resultMap>
+	
+	<select id="nameOfGroup" parameterClass="java.util.HashMap"  resultMap="GOC">
+select id,group_num,group_name,cust_id,memo,createtime,updatetime,owner_num from group_of_cust where cust_id = #custId# 
+	</select>
+	
+	<select id="getGroupInfo" parameterClass="java.util.HashMap"  resultMap="GOC">
+select id,group_num,group_name,cust_id,memo,createtime,updatetime,owner_num from group_of_cust where group_num = #groupNum#
+	</select>
+	
+	<delete id="deleteGroup" parameterClass="java.util.HashMap">
+		delete from group_of_cust where group_num = #groupNum#
+	</delete>
+	
+ 	<insert id="createGroupOfCust"  parameterClass="GroupOfCust">
+	 insert into group_of_cust (owner_num,group_num,group_name,cust_id,memo,createtime) values (#ownerNum#,#groupNum#,#groupName#,#custId#,#memo#,#createDate#)
+	</insert>
+	
+	<statement id="deleteGroupOfCust" parameterClass="java.util.HashMap">
+		delete from group_of_cust where id = #id# ;
+		delete from special_prod_cust_ref where cust_num = #id# 
+	</statement>
+	
+	<select id="getGroupOfCustDatSet" parameterClass="java.util.HashMap"  resultMap="GOC">
+		select *, count(distinct group_name) from group_of_cust where owner_num = #ownerNum# group by group_name order by createtime desc
+	</select>
+	
+			
+	
+</sqlMap>

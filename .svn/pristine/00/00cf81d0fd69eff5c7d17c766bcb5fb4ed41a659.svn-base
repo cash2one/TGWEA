@@ -1,0 +1,10 @@
+package com.etaoguan.wea.service;
+
+import java.util.Map;
+
+public interface IAlipayWapPaymentService extends IPaymentService{
+	
+	@SuppressWarnings("rawtypes")
+	public String processAlipayWapResp(Map requestParams);
+
+}

@@ -1,0 +1,131 @@
+package com.etaoguan.wea.constant;
+
+import java.io.Serializable;
+
+public class WeaConstant implements Serializable{
+
+	private static final long serialVersionUID = 1L;
+	public static final String REDTFW = "redtfw";
+	public static final String NEWREQUEST = "newrequest";
+	public static final String SESSIONPAGETRACK = "pagetrack";
+	
+	public static final String CUROWNERADMIN = "CURRENT_OWNERADMIN";
+	public static final String CURCUST = "CURRENT_CUST";
+	public static final String CURADMIN = "CURRENT_ADMIN";
+	
+	public static final String OWNERADMINLOGINPAGE = "owneradmin_login_page";
+	public static final String CUSTLOGINPAGE = "cust_login_page";
+	public static final String ADMINLOGINPAGE = "admin_login_page";
+	public static final String FORBIDDENINPAGE = "forbidden_page";
+	
+	
+	
+	public static final String JSONRESPONSE = "jsonresponse";
+	public static final String HTMLEXCEPTIONRESPONSE = "htmlexception";
+	public static final String RESPONSEROOT = "weaResponse";
+	
+	public static final int WEACOMMONKEYLEN = 10;
+	public static final int WEAMINKEYLEN = 6;
+	
+	public static final String CLIENTSHOPNUM = "shopNum";
+	
+	public final static String WECHAT_MSGTYPE_TEXT = "text";
+	public final static String WECHAT_MSGTYPE_EVENT = "event";
+	public final static String WECHAT_MSGTYPE_MUSIC = "music";
+	public final static String WECHAT_MSGTYPE_NEWS = "news";
+	public final static String WECHAT_MSGTYPE_TRANSFER_CUSTOMER_SERVICE = "transfer_customer_service";
+	public final static String WECHAT_SUBSCRIBE_INDEX = "subscribe";
+	
+	//WEA KEY常量
+	public static final String CUSTKEYNAME = "cust_key";
+	public static final String CUSTKEYPREFIX = "CT";
+	
+	public static final String OWNERKEYNAME = "owner_key";
+	public static final String OWNERKEYPREFIX = "BO";
+	
+	public static final String PRODKEYNAME = "prod_key";
+	public static final String PRODKEYPREFIX = "PD";
+	
+	public static final String ORDERKEYNAME = "order_key";
+	public static final String ORDERKEYPREFIX = "OR";
+	
+	public static final String DELIVERINVKEYNAME = "deliverinv_key";
+	public static final String DELIVERINVKEYPREFIX = "DR";
+	
+	public static final String ORIGORDERKEYNAME = "origorder_key";
+	public static final String ORIGORDERKEYPREFIX = "OO";
+	
+	public static final String RETINVKEYNAME = "retinv_key";
+	public static final String RETINVKEYPREFIX = "RT";
+	
+	public static final String WHKEYNAME = "warehouse_key";
+	public static final String WHKEYPREFIX = "WH";
+	
+	public static final String CASHKEYNAME = "cash_key";
+	public static final String CASHKEYPREFIX = "CH";
+	
+	public static final String PRODCATKEYNAME = "prodcat_key";
+	public static final String PRODCATKEYPREFIX = "PC";
+	
+	public static final String TRADEKEYNAME = "trade_key";
+	public static final String TRADEKEYPREFIX = "TD";
+	
+	public static final String GODOWNKEYNAME = "godown_key";
+	public static final String GODOWNKEYPREFIX = "GD";
+	
+	public static final String STKALLOCKEYNAME = "stkalloc_key";
+	public static final String STKALLOCKEYPREFIX = "SA";
+	
+	public static final String PUSHGROUPEYNAME = "pushgroup_key";
+	public static final String PUSHGROUPKEYPREFIX = "PG";
+	
+	public static final String MODULE_DELIVER = "deliver";
+	public static final String MODULE_GODOWN = "godown";
+	public static final String MODULE_STKALLOC = "stkalloc";
+	public static final String MODULE_CASH = "cash";
+	public static final String MODULE_RETURNED = "returned";
+	
+	public static final String OWNER_RES = "wea_owner_res";
+
+	public static final String APPSETTING_REGION_SETTING = "region_setting";
+	public static final String APPSETTING_ALLOW_PUSH_MESSAGE = "allow_push_message";
+	public static final String APPSETTING_ALLOW_IMAGE_LIMIT = "allow_image_limit";
+	
+	public static final String OWNERSETTING_FORCE_TO_LOCAL = "force_to_local";
+	public static final String OWNERSETTING_ALLOW_WECHAT = "allow_wechat";
+	public static final String OWNERSETTING_PUSHMESSAGE_LIMIT = "pushmessage_limit";
+
+	public static final int SYS_ROLE_ADMIN = 1;
+	public static final int SYS_ROLE_OWNER = 2;
+	public static final int SYS_ROLE_CUST = 3;
+	
+	public static final String DEFAULT_CUSTPWD = "888888";
+	public static final String DEFAULT_OWNERADMINPWD = "888888";
+	
+	public static final int DELIVERINV_PUTONSTATUS_UNPUTON = 0;
+	public static final int DELIVERINV_PUTONSTATUS_PUTON = 1;
+	public static final int GODOWNINV_PUTINSTATUS_UNPUTIN = 0;
+	public static final int GODOWNINV_PUTINSTATUS_PUTIN = 1;
+	public static final int RETURNEDINV_PUTINSTATUS_UNPUTIN = 0;
+	public static final int RETURNEDINV_PUTINSTATUS_PUTIN = 1;
+	public static final int ORDER_DELIVERSTATUS_UNDELIVERED = 0;
+	public static final int ORDER_DELIVERSTATUS_UNPUTON = 1;
+	public static final int ORDER_DELIVERSTATUS_PUTON = 2;
+	public static final int ORDER_CASHSTATUS_UNCASHED = 0;
+	public static final int ORDER_CASHSTATUS_CASHED = 1;
+	public static final int ORDER_SETTLESTATUS_UNSETTLED = 0;
+	public static final int ORDER_SETTLESTATUS_SETTLED = 1;
+	
+	
+	public static final String CLIENT_TYPE_WEB = "web";
+	public static final String CLIENT_TYPE_MOBILE = "mobile";
+	
+	public static final int IMG_WIDTH = 600;
+	public static final int IMG_HEIGHT = 600;
+	public static final int BANNER_WIDTH= 600;
+	public static final int BANNER_HEIGHT= 300;
+	
+	public static final String PAY_ALIPAY_WAP = "alipay_wap";
+	public static final String PAY_WECHAT = "wechat_pay";
+
+}

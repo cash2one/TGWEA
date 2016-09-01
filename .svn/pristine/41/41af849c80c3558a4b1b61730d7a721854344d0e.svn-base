@@ -1,0 +1,145 @@
+package com.etaoguan.wea.client.web.service.impl;
+
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
+
+import javax.imageio.ImageIO;
+
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.etaoguan.wea.client.vo.SortParam;
+import com.etaoguan.wea.client.web.service.IWFileUploadService;
+import com.etaoguan.wea.client.web.service.IWOwnerAdminService;
+import com.etaoguan.wea.client.web.service.IWOwnerService;
+import com.etaoguan.wea.client.web.vo.ImgNode;
+import com.etaoguan.wea.client.web.vo.OwnerSearch;
+import com.etaoguan.wea.client.web.vo.WPage;
+import com.etaoguan.wea.client.web.vo.WPagingRequest;
+import com.etaoguan.wea.common.DataCriteria;
+import com.etaoguan.wea.common.DataSet;
+import com.etaoguan.wea.common.FileGenRequest;
+import com.etaoguan.wea.common.FileGenResult;
+import com.etaoguan.wea.common.OffsetRequest;
+import com.etaoguan.wea.common.WeaDataCache;
+import com.etaoguan.wea.constant.WeaConstant;
+import com.etaoguan.wea.service.impl.OwnerService;
+import com.etaoguan.wea.vo.Owner;
+
+@Service("wownerService")
+public class WOwnerService extends OwnerService implements IWOwnerService{
+
+	@Autowired
+	IWFileUploadService iWFileUploadService;
+	
+	@Autowired
+	IWOwnerAdminService iWOwnerAdminService;
+	
+	/* (non-Javadoc)根据ownerNum从登录时系统记录的信息中获取管理员信息
+	 * @see com.etaoguan.wea.client.web.service.IWOwnerService#getEditOwnerInitData(java.lang.String)
+	 */
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	public Map getEditOwnerInitData(String ownerNum) {
+		Map dataMap = new HashMap();
+		dataMap.put("owner",getOwner(ownerNum));
+		dataMap.put("trades",WeaDataCache.getCache().getTradeList());
+		dataMap.put("regionCodes",WeaDataCache.getCache().getProvRegionList());
+		return dataMap;
+	}
+
+	/* (non-Javadoc) 上传图片
+	 * @see com.etaoguan.wea.client.web.service.IWOwnerService#genOwnerTmpImgFile(com.etaoguan.wea.common.FileGenRequest, java.lang.String)
+	 */
+	@SuppressWarnings("unused")
+	public ImgNode genOwnerTmpImgFile(FileGenRequest fileGenRequest,
+			String ownerNum) throws IOException {
+		BufferedImage image=ImageIO.read(fileGenRequest.getUploadFile());
+		
+		checkUploadImg(fileGenRequest, image,WeaConstant.IMG_WIDTH,WeaConstant.IMG_HEIGHT);//对图片进行限制
+		
+		int w=image.getWidth();
+		StringBuffer relativefileDir = new StringBuffer();
+		relativefileDir.append(WeaConstant.OWNER_RES);
+		relativefileDir.append(File.separator);
+		relativefileDir.append(ownerNum);
+		FileGenResult tmpFileGenResult = iWFileUploadService.save2TmpFile(relativefileDir.toString(),fileGenRequest);
+		ImgNode imgNode = new ImgNode();
+		imgNode.setImgUrl(iWFileUploadService.formatFilePath2WebPath(tmpFileGenResult.getFileFullPath()));
+		return imgNode;
+	}
+	
+	/* (non-Javadoc)保存或更新企业基本信息
+	 * @see com.etaoguan.wea.client.web.service.IWOwnerService#saveOrUpdateOwner(com.etaoguan.wea.vo.Owner, com.etaoguan.wea.client.web.vo.ImgNode)
+	 */
+	public void saveOrUpdateOwner(Owner owner,ImgNode imgNode){
+		if(imgNode.isAddImg()&&StringUtils.isNotEmpty(imgNode.getImgUrl())){
+			
+			/*更改图片后缀*/
+			FileGenResult targetImgFileGenResult = iWFileUploadService.rename2TargetFile(iWFileUploadService.formatWebPath2FilePath(imgNode.getImgUrl()));
+			
+			/*设置图片地址*/
+			owner.setOwnerImg(iWFileUploadService.formatFilePath2WebPath(targetImgFileGenResult.getFileFullPath()));
+		}else{
+			/*设置图片地址*/
+			owner.setOwnerImg(imgNode.getImgUrl());
+		}
+
+		if(StringUtils.isEmpty(owner.getOwnerNum())){
+			String ownerNum = addOwner(owner);
+			owner = getOwner(ownerNum);
+			WeaDataCache.getCache().getOwnerShopNumMap().put(owner.getShopNum(), owner.getOwnerNum());
+			iWOwnerAdminService.saveInitOwnerAdmin(ownerNum);//保存企业基本信息
+		}else{
+			updateOwner(owner);//更新企业基本信息
+		}
+	}
+	
+	@SuppressWarnings("rawtypes")
+	public WPage listSearchOwners(OwnerSearch ownerSearch,SortParam sortParam, WPagingRequest wpagingRequest) {
+		OffsetRequest offsetRequest = wpagingRequest.format2OffsetRequest();
+		DataCriteria dataCriteria = new DataCriteria();
+		dataCriteria.setParam("companyName", ownerSearch.getCompanyName());
+		dataCriteria.setParam("contactPerson", ownerSearch.getContactPerson());
+		DataSet dataSet = listOwners(dataCriteria, offsetRequest);
+		
+		return new WPage(wpagingRequest,dataSet);
+	}
+	
+	@SuppressWarnings("rawtypes")
+	public WPage listOwners(OwnerSearch ownerSearch,SortParam sortParam, WPagingRequest wpagingRequest) {
+		OffsetRequest offsetRequest = wpagingRequest.format2OffsetRequest();
+		DataCriteria dataCriteria = new DataCriteria();
+		dataCriteria.setParam("companyName", ownerSearch.getCompanyName());
+		dataCriteria.setParam("contactPerson", ownerSearch.getContactPerson());
+		dataCriteria.setParam("phoneNum", ownerSearch.getPhoneNum());
+		dataCriteria.setParam("regionCodes", ownerSearch.getRegionCodes());;
+		dataCriteria.setParam("delFlag", ownerSearch.getDelFlag());;
+		DataSet dataSet = listOwners(dataCriteria, offsetRequest);
+		
+		return new WPage(wpagingRequest,dataSet);
+	}
+	
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	public Map getListOwnersSearchInitData(){
+		
+		Map dataMap = new HashMap();
+		dataMap.put("regionCodes", WeaDataCache.getCache().getProvRegionList());
+		return dataMap;
+	}
+	
+	public void updateBatchSuspendOwner(String[] ownerNums) {
+		for(String ownerNum:ownerNums){
+			updateOwner2InactiveStatus(ownerNum);
+		}
+	}
+
+	public void delBatchOwner(String[] ownerNums) {
+		for(String ownerNum:ownerNums){
+			updateOwner2delStatus(ownerNum);
+		}
+	}
+}

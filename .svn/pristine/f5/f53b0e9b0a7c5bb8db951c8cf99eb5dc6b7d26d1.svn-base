@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+
+<!-- author 刘卿 -->
+<!-- 感谢ibatis的持久层框架 -->
+
+<sqlMap>
+
+
+	<typeAlias alias="TRADE" type="com.etaoguan.wea.vo.Trade"/>
+	
+	<resultMap id="trade" class="TRADE">
+		<result property="tradeId" column="trade_id"/>
+		<result property="tradeName" column="trade_name"/>
+		<result property="parentTradeId" column="parent_trade_id"/>
+	</resultMap>
+
+
+	
+	<select id="getTrades" parameterClass="java.util.HashMap"  resultMap="trade">
+		SELECT 
+		trade_id,
+		trade_name,
+		parent_trade_id
+		FROM
+		trade 
+		where 1=1 
+		<dynamic>
+			<isNotEmpty property="parentTradeId">
+				 parent_trade_id = #parentTradeId#
+			</isNotEmpty>
+		</dynamic>
+	</select>
+	
+	<select id="getTradeIds" parameterClass="java.util.HashMap"  resultClass="java.lang.String">
+		SELECT 
+		trade_id
+		FROM
+		trade 
+		where 1=1 
+		<dynamic>
+			<isNotEmpty property="parentTradeId">
+				 parent_trade_id = #parentTradeId#
+			</isNotEmpty>
+		</dynamic>
+	</select>
+
+
+	<insert id="createTrade"  parameterClass="TRADE">
+		insert into trade 
+		(
+			trade_id,
+			trade_name,
+			parent_trade_id
+		)
+		values(
+				#tradeId#,		
+				#tradeName#
+			<isNotEmpty property="parentTradeId" prepend=",">
+				#parentTradeId#
+			</isNotEmpty>
+			<isEmpty property="parentTradeId" prepend=",">
+				'TD000000'
+			</isEmpty>						
+			
+		)
+
+	</insert>	
+	
+</sqlMap>

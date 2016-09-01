@@ -1,0 +1,66 @@
+package com.etaoguan.wea.service.impl;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.etaoguan.wea.common.DataCriteria;
+import com.etaoguan.wea.common.DataSet;
+import com.etaoguan.wea.common.OffsetRequest;
+import com.etaoguan.wea.dao.IAlipayKeysDao;
+import com.etaoguan.wea.service.IAlipayKeysService;
+import com.etaoguan.wea.vo.AlipayKeys;
+
+/**
+ * @author cunli 客户支付宝的key
+ *
+ */
+@Service("alipayKeysService")
+public class AlipayKeysService extends BaseService implements IAlipayKeysService{
+
+	@Autowired
+	private IAlipayKeysDao iAlipayKeysDao;
+	
+	/* (non-Javadoc)添加客户支付宝的key
+	 * @see com.etaoguan.wea.service.IAlipayKeysService#addAlipayKeys(com.etaoguan.wea.vo.AlipayKeys)
+	 */
+	@Override
+	public void addAlipayKeys(AlipayKeys alipayKeys) {
+		iAlipayKeysDao.addAlipayKeys(alipayKeys);
+	}
+
+	/* (non-Javadoc)删除客户支付宝的key
+	 * @see com.etaoguan.wea.service.IAlipayKeysService#deleteAlipayKeys(int)
+	 */
+	@Override
+	public void deleteAlipayKeys(int id) {
+		DataCriteria dataCriteria = new DataCriteria();
+		dataCriteria.setParam("id",id);
+		iAlipayKeysDao.deleteAlipayKeys(dataCriteria);
+	}
+
+	/* (non-Javadoc)修改客户支付宝的key
+	 * @see com.etaoguan.wea.service.IAlipayKeysService#updateAlipaykeys(com.etaoguan.wea.vo.AlipayKeys)
+	 */
+	@Override
+	public void updateAlipaykeys(AlipayKeys alipayKeys) {
+		DataCriteria dataCriteria = new DataCriteria();
+		dataCriteria.setParam("id",alipayKeys.getId());
+		dataCriteria.setParam("userKey",alipayKeys.getUserKey());
+		dataCriteria.setParam("userPartner",alipayKeys.getUserPartner());
+		
+		iAlipayKeysDao.updateAlipaykeys(dataCriteria);
+		
+	}
+
+	/* (non-Javadoc)客户支付宝的key的列表
+	 * @see com.etaoguan.wea.service.IAlipayKeysService#alipayKeysDataSet(com.etaoguan.wea.common.DataCriteria, com.etaoguan.wea.common.OffsetRequest)
+	 */
+	@SuppressWarnings("rawtypes")
+	@Override
+	public DataSet alipayKeysDataSet(DataCriteria dataCriteria, OffsetRequest offsetRequest) {
+		return iAlipayKeysDao.alipayKeysDataSet(dataCriteria, offsetRequest);
+	}
+
+
+
+}

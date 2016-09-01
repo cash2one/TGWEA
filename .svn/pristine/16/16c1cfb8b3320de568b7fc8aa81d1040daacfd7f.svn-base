@@ -1,0 +1,95 @@
+<%@ page language="java" pageEncoding="UTF-8" contentType="text/html;charset=utf-8" %>
+ <div id="leftmenu">
+    <div id="authmenu" title="权限管理">
+        <div style=" height:7px;">
+        </div>
+        <a class="l-link" href="${ctx}/admin/wListAdmins.action">
+            账户管理
+        </a>
+        <a class="l-link" href="${ctx}/admin/wListRoles.action">
+            角色管理
+        </a>
+        <a class="l-link" href="${ctx}/admin/wListGroups.action">
+            组管理
+        </a>
+    </div>
+    <div id="enterprise" title="企业管理">
+        <div style=" height:7px;">
+        </div>
+        <a class="l-link" href="${ctx}/admin/wListOwners.action">
+            企业管理
+        </a>
+        <a class="l-link" href="${ctx}/admin/wOwnerAuthority.action">
+            企业权限管理
+        </a>
+    </div>
+    <div id="upgrademenu" title="应用升级信息管理">
+        <div style=" height:7px;">
+        </div>
+       <!--  <a class="l-link" href="#">
+            苹果APP信息管理
+        </a> -->
+        <a class="l-link" href="${ctx}/admin/wAppleInformation.action">
+            苹果APP版本管理
+        </a>
+        <a class="l-link" href="${ctx}/admin/wAndroidversion.action">
+            安卓APP版本管理
+        </a>
+        <a class="l-link" href="${ctx}/admin/wRelease.action">
+	 APP发布管理
+        </a>
+    </div>
+    <div id="configmenu" title="系统配置">
+        <div style=" height:7px;">
+        </div>
+        <a class="l-link" href="${ctx}/admin/wListTableCodeNames.action">
+            表字段值设置
+        </a>
+
+        <a class="l-link" href="${ctx}/admin/wListAppSettings.action">
+            系统参数设置
+        </a>
+        <a class="l-link" href="${ctx}/admin/wListOwnerSettings.action">
+            企业参数设置
+        </a>
+
+        <a class="l-link" href="${ctx}/admin/wListSysCfgLoadItems.action">
+            系统配置加载
+        </a>
+   		<a class="l-link" href="${ctx}/admin/wListFileCacheItems.action">
+            静态数据缓存
+        </a>     
+    </div>
+    <div id="pushmenu" title="推送管理">
+        <div style=" height:7px;">
+        </div>
+        <a class="l-link" href="${ctx}/admin/wListJpushKeys.action">
+            基础资料管理
+        </a>
+    </div>
+    <div id="wechatmenu" title="微站管理">
+        <div style=" height:7px;">
+        </div>
+        <a class="l-link" href="${ctx}/admin/wListWechatKeys.action">
+            基础资料管理
+        </a>
+    </div>
+    <div id="paymenu" title="支付信息管理">
+        <div style=" height:7px;">
+        </div>
+        <a class="l-link" href="${ctx}/admin/wListAlipaykeys.action">
+          企业支付宝信息
+        </a>
+        <a class="l-link" href="${ctx}/admin/wListWechatPayKeys.action">
+          微支付信息
+        </a>
+    </div>
+    <div id="othermenu" title="其他">
+        <div style=" height:7px;">
+        </div>
+        <a class="l-link" href="${ctx}/admin/wCreateInviteCode.action">
+            生成邀请码
+        </a>
+    </div>
+</div>
+

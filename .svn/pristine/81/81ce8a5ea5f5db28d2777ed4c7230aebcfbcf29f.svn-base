@@ -1,0 +1,309 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+
+<sqlMap>
+	<typeAlias alias="MemberInfo" type="com.etaoguan.wea.e688.vo.MemberInfo"/>
+	<typeAlias alias="OfferDetailInfo" type="com.etaoguan.wea.e688.vo.OfferDetailInfo"/>
+	<typeAlias alias="OfferImageInfo" type="com.etaoguan.wea.e688.vo.OfferImageInfo"/>
+	<typeAlias alias="ProductFeatureInfo" type="com.etaoguan.wea.e688.vo.ProductFeatureInfo"/>
+	<typeAlias alias="ProductCategory" type="com.etaoguan.wea.e688.vo.ProductCategory"/>
+	<typeAlias alias="PriceRangeInfo" type="com.etaoguan.wea.e688.vo.PriceRangeInfo"/>
+	<typeAlias alias="ProductDiffer" type="com.etaoguan.wea.e688.vo.ProductDiffer"/>
+	<!-- 会员信息之SQL映射-->
+	<resultMap id="memberInfo" class="MemberInfo">
+		<result property="id" column="id"/>
+		<result property="memberId" column="member_id"/>
+		<result property="isTP" column="isTP"/>
+		<result property="isPersonalTP" column="isPersonalTP"/>
+		<result property="isEnterpriseTP" column="isEnterpriseTP"/>
+		<result property="winportAddress" column="winport_address"/>
+		<result property="createTime" column="createTime"/>
+		<result property="companyName" column="companyName"/>
+		<result property="industry" column="industry"/>
+		<result property="product" column="product"/>
+		<result property="homepageUrl" column="homepageUrl"/>
+		<result property="sellerName" column="sellerName"/>
+		<result property="sex" column="sex"/>
+		<result property="department" column="department"/>
+		<result property="openJobTitle" column="openJobTitle"/>
+		<result property="email" column="email"/>
+		<result property="telephone" column="telephone"/>
+		<result property="fax" column="fax"/>
+		<result property="mobilePhone" column="mobilePhone"/>
+		<result property="addressLocation" column="addressLocation"/>
+		<result property="region" column="region"/>
+	</resultMap> 
+	<!-- 产品详细信息之SQL映射-->
+	<resultMap id="offerDetailInfo" class="OfferDetailInfo">
+	<result property="id" column="id"/>
+	<result property="offerId" column="offer_id"/>
+	<result property="datailsUrl" column="datails_url"/>
+	<result property="type" column="type"/>
+	<result property="tradeType" column="trade_type"/>
+	<result property="postCategryId" column="post_categry_id"/>
+	<result property="offerStatus" column="offer_status"/>
+	<result property="memberId" column="member_id"/>
+	<result property="subject" column="subject"/>
+	<result property="details" column="details"/>
+	<result property="unit" column="unit"/>
+	<result property="amount" column="amount"/>
+	<result property="amountOnSale" column="amountOnSale"/>
+	<result property="saledCount" column="sale_count"/>
+	<result property="retailPrice" column="retail_price"/>
+	<result property="unitPrice" column="unitprice"/>
+	<result property="termOfferProcess" column="term_offer_process"/>
+	<result property="gmtApproved" column="gmt_approved"/>
+	<result property="gmtExpire" column="gmt_expire"/>
+	</resultMap>
+    <!-- 产品图片信息之SQL映射-->
+	<resultMap id="offerImageInfo" class="OfferImageInfo">
+		<result property="id" column="id" />
+		<result property="offerId" column="offer_id" />
+		<result property="offerUrl" column="offer_url" />
+	</resultMap>
+    <!-- 产品特性信息之SQL映射-->
+	<resultMap id="productFeatureInfo" class="ProductFeatureInfo">
+		<result property="id" column="id" />
+		<result property="propId" column="prop_id" />
+		<result property="propName" column="prop_name" />
+		<result property="propValueId" column="prop_value_id" />
+		<result property="propValue" column="prop_value" />
+		<result property="offerId" column="offer_id" />
+	</resultMap>
+    <!-- 企业分类信息之SQL映射-->
+	<resultMap id="productCategory" class="ProductCategory">
+		<result property="id" column="id" />
+		<result property="catsId" column="cats_id" />
+		<result property="catsName" column="cats_name" />
+		<result property="parentCatsId" column="parent_cats_id" />
+		<result property="order" column="order" />
+		<result property="iconUrl" column="icon_url" />
+		<result property="isSelfCategory" column="is_self_category" />
+	</resultMap>
+    <!-- 产品价格区间信息SQL映射-->
+	<resultMap id="priceRangeInfo" class="PriceRangeInfo">
+		<result property="id" column="id" />
+		<result property="offerId" column="offer_id" />
+		<result property="rang" column="rang" />
+		<result property="price" column="price" />
+	</resultMap>
+	
+	  <!-- 产品不同颜色信息SQL映射  -->
+	<resultMap id="productDiffer" class="ProductDiffer">
+		<result property="offerId" column="offer_id" />
+		<result property="differId" column="differ_id" />
+		<result property="differName" column="differ_name" />
+	</resultMap>
+	
+	
+	<!-- 保存会员信息 -->
+	<insert id="createMemberInfo"  parameterClass="MemberInfo">
+		insert into 1688_member_info 
+		(
+		   member_id,
+		   status,
+		   isTP,
+		   isPersonalTP,
+		   isEnterpriseTP,
+		   winport_address,
+		   createTime,   
+		   companyName,
+		   industry,
+		   product,
+		   homepageUrl,
+		   sellerName,
+		   sex,
+		   department,
+		   openJobTitle,
+		   email,
+		   telephone,
+		   fax,
+		   mobilePhone,
+		   addressLocation,
+		   region 
+		)
+		values(
+				#memberId#,		
+				#status#,
+				#isTP#,		
+				#isPersonalTP#,		
+				#isEnterpriseTP#,		
+				#winportAddress#,		
+				#createTime#,		
+				#companyName#,		
+				#industry#,		
+				#product#,		
+				#homepageUrl#,		
+				#sellerName#,		
+				#sex#,		
+				#department#,		
+				#openJobTitle#,		
+				#email#,		
+				#telephone#,		
+				#fax#,		
+				#mobilePhone#,		
+				#addressLocation#,		
+				#region#		
+		)
+
+	</insert>
+	<!-- 保存产品详细信息 -->
+	<insert id="createOfferDetailInfo" parameterClass="OfferDetailInfo">
+	insert into 1688_offer_detail_info
+	(
+	       offer_id,
+	       datails_url,
+	       type,
+	       trade_type,
+	       post_categry_id,
+	       offer_status,
+	       member_id,
+	       subject,
+	       details,
+	       unit,
+	       amount,
+	       amountOnSale,
+	       sale_count,
+	       retail_price,
+	       unitprice,
+	       term_offer_process,
+	       gmt_approved,
+	       gmt_expire
+	)
+	values
+	(
+             #offerId#,
+             #datailsUrl#,
+             #type#,
+             #tradeType#,
+             #postCategryId#,
+             #offerStatus#,
+             #memberId#,
+             #subject#,
+             #details#,
+             #unit#,
+             #amount#,
+             #amountOnSale#,
+             #saledCount#,
+             #retailPrice#,
+             #unitPrice#,
+             #termOfferProcess#,
+             #gmtApproved#,
+             #gmtExpire#
+	)
+
+	</insert>
+	<!-- 保存商品图片详细信息 -->
+	<insert id="createOfferImageInfo" parameterClass="OfferImageInfo">
+	insert into 1688_offer_image_info
+	(
+	       offer_id,
+	       offer_url
+	)
+	values(
+	       #offerId#,
+	       #offerUrl#
+	)
+	</insert>
+	<!-- 保存商品特性信息 -->
+	<insert id="createProductFeatureInfo" parameterClass="ProductFeatureInfo">
+	insert into 1688_product_feature_info
+	(
+	       prop_id,
+	       prop_name,
+	       prop_value_id,
+	       prop_value,
+	       offer_id
+	)
+	values(
+	       #propId#,
+	       #propName#,
+	       #propValueId#,
+	       #propValue#,
+	       #offerId#
+	)
+	</insert>
+	<!-- 保存企业分类信息 -->
+	<insert id="createProductCategory" parameterClass="ProductCategory">
+	insert into 1688_enterprise_category
+	(
+	       cats_id,
+	       member_id,
+	       cats_name,
+	       parent_cats_id,
+	       `order`,
+	       icon_url,
+	       is_self_category
+	)
+	values(
+	       #catsId#,
+	       #memberId#,
+	       #catsName#,
+	       #parentCatsId#,
+	       #order#,
+	       #iconUrl#,
+	       #isSelfCategory#
+	)
+	</insert>
+	<!-- 根据会员id查询商品的类目id -->
+	<select id="getOfferCategoryId" parameterClass="java.util.HashMap" resultClass="java.lang.Integer">
+	SELECT DISTINCT post_categry_id from 1688_offer_detail_info  where 1=1
+	<dynamic>
+	        <isNotEmpty property="memberId" prepend="and">
+			    member_id = #memberId#
+			</isNotEmpty>
+	</dynamic>
+	</select>
+	
+	<!-- 保存价格区间信息 -->
+	<insert id="createPriceRangeInfo" parameterClass="PriceRangeInfo">
+	insert into 1688_price_range_info
+	(
+	       offer_id,
+	       rang,
+	       price
+	)
+	values(
+	       #offerId#,
+	       #rang#,
+	       #price#
+	)
+	</insert>
+	<!-- 保存商品不同颜色信息 -->
+	<insert id="createProductDiffer" parameterClass="ProductDiffer">
+	insert into 1688_product_differ
+	(
+	      offer_id,
+         differ_id,
+         differ_name,
+         differ_price,
+         default_flag
+	)
+	values(
+	       #offerId#,
+	       #differId#,
+	       #differName#
+	       <isNotEmpty property="differPrice" prepend=",">
+				#differPrice#
+			</isNotEmpty>
+			<isEmpty property="differPrice" prepend=",">
+				0
+			</isEmpty>	
+	       <isNotEmpty property="defaultFlag" prepend=",">
+				#defaultFlag#
+			</isNotEmpty>
+			<isEmpty property="defaultFlag" prepend=",">
+				0
+			</isEmpty>	
+	)
+	</insert>
+	<!-- 调用存储过程删除中间表1688数据 -->
+	<procedure id="deleteE688Data" parameterClass="java.util.Map">
+	{call delete_ali(#memberId#)}
+	</procedure> 
+	<!--  调用存储过程copy中间表1688数据 to企业数据库 -->
+	<procedure id="syncE688Data2Wea" parameterClass="java.util.Map">
+	{call syn_ali_to_enterprise(#memberId#)}
+	</procedure>
+	
+</sqlMap>

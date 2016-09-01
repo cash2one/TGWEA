@@ -1,0 +1,16 @@
+package com.etaoguan.wea.service;
+
+import com.etaoguan.wea.wechat.vo.WechatpayRequest;
+
+/**
+ * @author cunli 发送微信的信息
+ *
+ */
+public interface IWechatpayRequestService {
+
+	/**
+	 * @param wechatpayResult 保存发送微信的信息
+	 */
+	public void saveWechatpayRequest(WechatpayRequest wechatpayRequest);
+	
+}

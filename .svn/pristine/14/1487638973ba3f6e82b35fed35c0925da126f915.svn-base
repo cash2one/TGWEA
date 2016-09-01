@@ -1,0 +1,14 @@
+package com.etaoguan.wea.test;
+
+import java.io.File;
+
+public class TestClass {
+
+	public static void main(String[] args) throws Exception{
+		File file = new File("D:\\test.jpg");
+		System.out.println(file.getName());
+		
+		String test = ",909";
+		System.out.println(test.split(",").length);
+	}
+}

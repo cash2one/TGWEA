@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+
+<sqlMap>
+
+	<typeAlias alias="AlipayWapPayResult" type="com.etaoguan.wea.vo.AlipayWapPayResult" />
+
+	<resultMap id="AWPRMap" class="AlipayWapPayResult">
+
+		<result property="alipaywapResultId" column="alipaywap_result_id" />
+		<result property="notifyNotifyData" column="notify_notify_data" />
+		<result property="buyerEmail" column="buyer_email" />
+		<result property="gmtCreate" column="gmt_create" />
+		<result property="outTradeNo" column="out_trade_no" />
+		<result property="notifyTime" column="notify_time" />
+		<result property="tradeStatus" column="trade_status" />
+		<result property="totalFee" column="total_fee" />
+		<result property="gmtPayment" column="gmt_payment" />
+		<result property="createDate" column="create_date" />
+
+	</resultMap>
+
+	<insert id="saveAlipayWapPayResult" parameterClass="AlipayWapPayResult">
+		INSERT INTO alipay_wap_pay_result 
+		(alipay_wap_pay_result.notify_notify_data,
+			alipay_wap_pay_result.buyer_email,
+			alipay_wap_pay_result.gmt_create,
+			alipay_wap_pay_result.out_trade_no,
+			alipay_wap_pay_result.notify_time,
+			alipay_wap_pay_result.trade_status,
+			alipay_wap_pay_result.total_fee,
+			alipay_wap_pay_result.gmt_payment,
+			alipay_wap_pay_result.create_date) 
+			VALUE 
+		(#notifyNotifyData#,#buyerEmail#,#gmtCreate#,#outTradeNo#,#notifyTime#,#tradeStatus#,#totalFee#,#gmtPayment#,now());
+		
+		<selectKey resultClass="java.lang.Integer">
+		   SELECT @@IDENTITY AS id
+		</selectKey>
+	</insert>
+
+</sqlMap>

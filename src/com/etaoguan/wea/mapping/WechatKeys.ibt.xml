@@ -1,0 +1,185 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+
+<!-- author 刘卿 -->
+<!-- 感谢ibatis的持久层框架 -->
+
+<sqlMap>
+
+	<typeAlias alias="WECHATKEYS" type="com.etaoguan.wea.vo.WechatKeys"/>
+
+	<resultMap id="wechatKeys" class="WECHATKEYS">
+		<result property="ownerNum" column="owner_num"/>
+		<result property="appId" column="app_id"/>
+		<result property="appSecret" column="app_secret"/>
+		<result property="remark" column="remark"/>
+		<result property="createDate" column="create_date"/>
+		<result property="createBy" column="create_by"/>
+		<result property="updateDate" column="update_date"/>
+		<result property="updateBy" column="update_by"/>
+	</resultMap>
+	
+	<resultMap id="compWechatKeysDataSet" extends = "wechatKeys" class="WECHATKEYS">
+		<result property="owner.companyName" column="company_name"/>
+	</resultMap>
+
+	<select id="getWechatKeysCount" parameterClass="java.util.HashMap" resultClass="java.lang.Integer">
+		SELECT
+		count(1) 
+		FROM
+		wechat_keys where 1=1 
+		<dynamic>
+			<isNotEmpty property="ownerNum" prepend="and">
+			    owner_num = #ownerNum#
+			</isNotEmpty>
+		</dynamic>
+
+	</select>
+	
+	<select id="getWechatKeysDataSet" parameterClass="java.util.HashMap" resultMap="compWechatKeysDataSet">
+		
+		SELECT t1.*,
+		t2.company_name 
+		FROM (SELECT 
+		owner_num,
+		app_id,
+		app_secret,
+		remark,
+		create_date,
+		create_by,
+		update_date,
+		update_by 
+		FROM
+		wechat_keys where 1=1 
+		<dynamic>
+			<isNotEmpty property="ownerNum" prepend="and">
+			    owner_num = #ownerNum#
+			</isNotEmpty>
+		</dynamic>
+		order by create_date asc 
+		
+		limit #limit# offset #offset# 
+		) t1 , owner t2 
+		where t1.owner_num = t2.owner_num
+	</select>
+	
+	<select id="getWechatKeys" parameterClass="java.util.HashMap" resultMap="wechatKeys">
+		
+		SELECT 
+		owner_num,
+		app_id,
+		app_secret,
+		remark,
+		create_date,
+		create_by,
+		update_date,
+		update_by  
+		FROM
+		wechat_keys where owner_num = #ownerNum#
+			
+	</select>
+	
+	<insert id="createWechatKeys"  parameterClass="WECHATKEYS">
+		insert into wechat_keys 
+		(
+		owner_num,
+		app_id,
+		app_secret,
+		remark,
+		create_date,
+		create_by,
+		update_date,
+		update_by  
+		)
+		values(	
+			#ownerNum#,
+			#appId#,
+			#appSecret#,
+			#remark#
+			<isNotEmpty property="createDate" prepend=",">
+				#createDate#
+			</isNotEmpty>
+			<isEmpty property="createDate" prepend=",">
+				now()
+			</isEmpty>			
+			<isNotEmpty property="createBy" prepend=",">
+				#createBy#
+			</isNotEmpty>
+			<isEmpty property="createBy" prepend=",">
+				''
+			</isEmpty>			
+			<isNotEmpty property="updateDate" prepend=",">
+				#updateDate#
+			</isNotEmpty>
+			<isEmpty property="updateDate" prepend=",">
+				now()
+			</isEmpty>			
+			<isNotEmpty property="updateBy" prepend=",">
+				#updateBy#
+			</isNotEmpty>
+			<isEmpty property="updateBy" prepend=",">
+				''
+			</isEmpty>		
+			
+		)
+
+	</insert>
+	
+	<delete id="deleteWechatKeys" parameterClass="java.util.HashMap">
+		DELETE 
+		FROM
+		wechat_keys where owner_num = #ownerNum# 
+
+	</delete>
+	
+	<update id="updateWechatKeys"  parameterClass="WECHATKEYS">
+			update wechat_keys set 
+			
+			app_id = #appId#,
+			app_secret = #appSecret#,
+			remark = #remark#
+			<isNotEmpty property="updateDate" prepend=",">
+				update_date = #updateDate#
+			</isNotEmpty>
+			<isEmpty property="updateDate" prepend=",">
+				update_date = now()
+			</isEmpty>				
+			<isNotEmpty property="updateBy" prepend=",">
+				update_by = #updateBy#
+			</isNotEmpty> 
+			<isEmpty property="updateBy" prepend=",">
+				update_by = ''
+			</isEmpty>
+			
+			where owner_num = #ownerNum# 
+			
+	</update>
+	
+	<update id="updateWechatKeysByMap"  parameterClass="java.util.HashMap">
+			update wechat_keys set 
+			
+			<isNotEmpty property="appId">
+				app_id = #appId#
+			</isNotEmpty>
+			<isEmpty property="appId">
+				app_id = app_id
+			</isEmpty>
+			<isNotEmpty property="appSecret" prepend=",">
+				app_secret = #appSecret#
+			</isNotEmpty>
+			<isNotEmpty property="remark" prepend=",">
+				remark = #remark#
+			</isNotEmpty>
+			<isNotEmpty property="updateDate" prepend=",">
+				update_date = #updateDate#
+			</isNotEmpty>
+			<isEmpty property="updateDate" prepend=",">
+				update_date = now()
+			</isEmpty>				
+			<isNotEmpty property="updateBy" prepend=",">
+				update_by = #updateBy#
+			</isNotEmpty> 
+			where owner_num = #ownerNum# 
+			
+	</update>
+</sqlMap>

@@ -1,0 +1,78 @@
+package com.etaoguan.wea.client.mobile.service.impl;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.etaoguan.wea.client.mobile.service.IMOrigOrderService;
+import com.etaoguan.wea.client.mobile.service.IMProductService;
+import com.etaoguan.wea.client.mobile.vo.MPage;
+import com.etaoguan.wea.client.mobile.vo.MPagingRequest;
+import com.etaoguan.wea.client.mobile.vo.OrigOrderSearch;
+import com.etaoguan.wea.client.vo.SortParam;
+import com.etaoguan.wea.common.DataCriteria;
+import com.etaoguan.wea.common.DataSet;
+import com.etaoguan.wea.common.OffsetRequest;
+import com.etaoguan.wea.service.impl.OrigOrderService;
+import com.etaoguan.wea.util.JsonUtil;
+import com.etaoguan.wea.vo.Customer;
+import com.etaoguan.wea.vo.OrigOrder;
+import com.etaoguan.wea.vo.OrigOrderItem;
+import com.etaoguan.wea.vo.ProdQty;
+import com.etaoguan.wea.vo.Product;
+
+@Service("morigOrderService")
+public class MOrigOrderService extends OrigOrderService  implements IMOrigOrderService{
+	
+	@Autowired
+	IMProductService iMProductService;
+	
+	@SuppressWarnings("unchecked")
+	public void addOrigOrder(String jsonProdQtys, Customer cust,
+			String ownerNum) {
+		List<ProdQty> prodQtyList = JsonUtil.getDTOList(jsonProdQtys, ProdQty.class);
+		List<String> prodNums = new ArrayList<String>();
+		for(ProdQty prodQty:prodQtyList){
+			prodNums.add(prodQty.getProdNum());
+		}
+		List<Product> prodList = iMProductService.getProducts(prodNums);
+		List<OrigOrderItem> origOrderItemList = new ArrayList<OrigOrderItem>();
+		for(ProdQty prodQty:prodQtyList){
+			for(Product product:prodList){
+				if(prodQty.getProdNum().equals(product.getProdNum())){
+					OrigOrderItem origOrderItem = new OrigOrderItem();
+					origOrderItem.setProdNum(product.getProdNum());
+					origOrderItem.setProdName(product.getProdName());
+					origOrderItem.setUnit(product.getUnit());
+					origOrderItem.setCases(prodQty.getCases());
+					origOrderItem.setPieces(prodQty.getPieces());
+					origOrderItemList.add(origOrderItem);
+				}
+			}
+		}
+		
+		OrigOrder origOrder = new OrigOrder();
+		origOrder.setOrigOrderItemList(origOrderItemList);
+		origOrder.setOwnerNum(ownerNum);
+		origOrder.setCustNum(cust.getCustNum());
+		addOrigOrder(origOrder);
+		
+	}
+
+	/* (non-Javadoc)未审核订单列表(移动端)
+	 * @see com.etaoguan.wea.client.mobile.service.IMOrigOrderService#getMOrigOrderList(java.lang.String)
+	 */
+	@SuppressWarnings("rawtypes")
+	public MPage getMOrigOrderList(OrigOrderSearch origOrderSearch,SortParam sortParam,MPagingRequest mpagingRequest) {
+		OffsetRequest offsetRequest = mpagingRequest.format2OffsetRequest();
+		DataCriteria dataCriteria = new DataCriteria();
+		dataCriteria.setParam("ownerNum", origOrderSearch.getOwnerNum());
+		dataCriteria.setParam("custNum", origOrderSearch.getCustNum());
+		DataSet dataSet = GetOrigOrders(dataCriteria, offsetRequest);
+		
+		return new MPage(mpagingRequest,dataSet);
+	}
+	
+}

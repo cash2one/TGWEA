@@ -1,0 +1,793 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+
+<!-- author 刘卿 -->
+<!-- 感谢ibatis的持久层框架 -->
+
+<sqlMap>
+
+	<typeAlias alias="ADMIN" type="com.etaoguan.wea.vo.Admin"/>
+	<typeAlias alias="ROLE" type="com.etaoguan.wea.vo.AdminRole"/>
+	<typeAlias alias="GROUP" type="com.etaoguan.wea.vo.AdminGroup"/>
+	<typeAlias alias="ADMINGROUPREF" type="com.etaoguan.wea.vo.AdminGroupRef"/>
+	<typeAlias alias="ADMINGROUPROLEREF" type="com.etaoguan.wea.vo.AdminGroupRoleRef"/>
+	<typeAlias alias="ADMINROLEOPERATIONREF" type="com.etaoguan.wea.vo.AdminRoleOperationRef"/>
+	<typeAlias alias="ACCESSOPERATION" type="com.etaoguan.wea.vo.AccessOperation"/>
+
+
+	<resultMap id="admin" class="ADMIN">
+		<result property="adminId" column="admin_id"/>
+		<result property="adminName" column="admin_name"/>
+		<result property="adminPwd" column="admin_pwd"/>
+		<result property="loginDate" column="login_date"/>
+		<result property="reserveFlag" column="reserve_flag"/>
+		<result property="remark" column="remark"/>
+		<result property="createDate" column="create_date"/>
+		<result property="createBy" column="create_by"/>
+		<result property="updateDate" column="update_date"/>
+		<result property="updateBy" column="update_by"/>
+	</resultMap>
+	
+	<resultMap id="role" class="ROLE">
+		<result property="roleId" column="role_id"/>
+		<result property="roleName" column="role_name"/>
+		<result property="remark" column="remark"/>
+		<result property="createDate" column="create_date"/>
+		<result property="createBy" column="create_by"/>
+		<result property="updateDate" column="update_date"/>
+		<result property="updateBy" column="update_by"/>
+	</resultMap>
+	
+	<resultMap id="group" class="GROUP">
+		<result property="groupId" column="group_id"/>
+		<result property="groupName" column="group_name"/>
+		<result property="remark" column="remark"/>
+		<result property="createDate" column="create_date"/>
+		<result property="createBy" column="create_by"/>
+		<result property="updateDate" column="update_date"/>
+		<result property="updateBy" column="update_by"/>
+	</resultMap>
+	
+	<resultMap id="adminGroupRef" class="ADMINGROUPREF">
+		<result property="adminId" column="admin_id"/>
+		<result property="groupId" column="group_id"/>
+		<result property="createDate" column="create_date"/>
+		<result property="createBy" column="create_by"/>
+		<result property="updateDate" column="update_date"/>
+		<result property="updateBy" column="update_by"/>
+	</resultMap>
+	
+	<resultMap id="adminGroupRoleRef" class="ADMINGROUPROLEREF">
+		<result property="roleId" column="role_id"/>
+		<result property="groupId" column="group_id"/>
+		<result property="createDate" column="create_date"/>
+		<result property="createBy" column="create_by"/>
+		<result property="updateDate" column="update_date"/>
+		<result property="updateBy" column="update_by"/>
+	</resultMap>
+	
+	<resultMap id="adminRoleOperationRef" class="ADMINROLEOPERATIONREF">
+		<result property="roleId" column="role_id"/>
+		<result property="moduleName" column="module_name"/>
+		<result property="operationName" column="operation_name"/>
+		<result property="createDate" column="create_date"/>
+		<result property="createBy" column="create_by"/>
+		<result property="updateDate" column="update_date"/>
+		<result property="updateBy" column="update_by"/>
+	</resultMap>
+	
+	<resultMap id="accessOperation" class="ACCESSOPERATION">
+		<result property="moduleName" column="module_name"/>
+		<result property="operationName" column="operation_name"/>
+		<result property="affectRole" column="affect_role"/>
+	</resultMap>
+	
+	
+	<select id="getAdmins" parameterClass="java.util.HashMap"  resultMap="admin">
+		SELECT
+		admin_id,
+		admin_name,
+		admin_pwd,
+		login_date,
+		reserve_flag,
+		remark,
+		create_date,
+		create_by,
+		update_date,
+		update_by 
+		FROM 
+		admin 
+
+	</select>
+	
+	<select id="getGroupAdmins" parameterClass="java.util.HashMap"  resultMap="admin">
+		SELECT
+		t1.admin_id,
+		t1.admin_name,
+		t1.admin_pwd,
+		t1.remark,
+		t1.login_date,
+		t1.reserve_flag,
+		t1.create_date,
+		t1.create_by,
+		t1.update_date,
+		t1.update_by 
+		FROM 
+		admin t1,
+		(select admin_id from admin_group_ref 
+		where group_id=#groupId#) t2
+		where t1.admin_id = t2.admin_id
+	</select>
+	
+	<select id="getNoGroupAdmins" parameterClass="java.util.HashMap"  resultMap="admin">
+		SELECT
+		t1.admin_id,
+		t1.admin_name,
+		t1.admin_pwd,
+		t1.login_date,
+		t1.reserve_flag,
+		t1.remark,
+		t1.create_date,
+		t1.create_by,
+		t1.update_date,
+		t1.update_by 
+		FROM 
+		admin t1 left outer join 
+		(select admin_id from admin_group_ref 
+		where group_id=#groupId#) t2
+		on t1.admin_id = t2.admin_id 
+		where t2.admin_id is null 
+	</select>
+	
+	<select id="getLoginAdmin" parameterClass="java.util.HashMap"  resultMap="admin">
+		SELECT  
+		admin_id,
+		admin_name,
+		admin_pwd,
+		login_date,
+		remark,
+		reserve_flag,
+		create_date,
+		create_by,
+		update_date,
+		update_by   
+		FROM 
+		admin 
+		where admin_name = #adminName# 
+		and admin_pwd = #adminPwd#
+	</select>
+	
+	<select id="getAdmin" parameterClass="java.util.HashMap"  resultMap="admin">
+		SELECT  
+		admin_id,
+		admin_name,
+		admin_pwd,
+		login_date,
+		remark,
+		reserve_flag,
+		create_date,
+		create_by,
+		update_date,
+		update_by   
+		FROM 
+		admin 
+		where admin_id = #adminId# 
+	</select>
+	
+	<insert id="createAdmin" parameterClass="ADMIN">
+		insert into admin 
+		(
+		admin_name,
+		admin_pwd,
+		remark,
+		reserve_flag,
+		create_date,
+		create_by,
+		update_date,
+		update_by 
+		)
+		values(
+			#adminName#,
+			#adminPwd#,
+			#remark#,
+			#reserveFlag#	
+			<isNotEmpty property="createDate" prepend=",">
+				#createDate#
+			</isNotEmpty>
+			<isEmpty property="createDate" prepend=",">
+				now()
+			</isEmpty>			
+			<isNotEmpty property="createBy" prepend=",">
+				#createBy#
+			</isNotEmpty>
+			<isEmpty property="createBy" prepend=",">
+				''
+			</isEmpty>			
+			<isNotEmpty property="updateDate" prepend=",">
+				#updateDate#
+			</isNotEmpty>
+			<isEmpty property="updateDate" prepend=",">
+				now()
+			</isEmpty>			
+			<isNotEmpty property="updateBy" prepend=",">
+				#updateBy#
+			</isNotEmpty>
+			<isEmpty property="updateBy" prepend=",">
+				''
+			</isEmpty>	
+		)
+		
+		<selectKey resultClass="java.lang.Integer">
+		   SELECT @@IDENTITY AS id
+		</selectKey>
+	</insert>
+	
+	<insert id="createAdminGroupRef" parameterClass="ADMINGROUPREF">
+		insert into admin_group_ref 
+		(
+		admin_id,
+		group_id,
+		create_date,
+		create_by,
+		update_date,
+		update_by 
+		)
+		values(
+			#adminId#,
+			#groupId#	
+			<isNotEmpty property="createDate" prepend=",">
+				#createDate#
+			</isNotEmpty>
+			<isEmpty property="createDate" prepend=",">
+				now()
+			</isEmpty>			
+			<isNotEmpty property="createBy" prepend=",">
+				#createBy#
+			</isNotEmpty>
+			<isEmpty property="createBy" prepend=",">
+				''
+			</isEmpty>			
+			<isNotEmpty property="updateDate" prepend=",">
+				#updateDate#
+			</isNotEmpty>
+			<isEmpty property="updateDate" prepend=",">
+				now()
+			</isEmpty>			
+			<isNotEmpty property="updateBy" prepend=",">
+				#updateBy#
+			</isNotEmpty>
+			<isEmpty property="updateBy" prepend=",">
+				''
+			</isEmpty>	
+		)
+
+	</insert>
+	
+	<delete id="delAdminGroupRef" parameterClass="java.util.HashMap">
+		DELETE 
+		FROM 
+		admin_group_ref where admin_id = #adminId#
+		<isNotEmpty property="groupId" prepend="and">
+				group_id = #groupId#
+		</isNotEmpty>
+
+	</delete>
+	
+	
+	<statement id="deleteAdmin" parameterClass="java.util.HashMap">
+		DELETE 
+		FROM
+		admin where admin_id = #adminId#;
+		DELETE FROM 
+		admin_group_ref WHERE admin_id = #adminId#;
+
+	</statement>
+	
+	<update id="updateAdmin"  parameterClass="ADMIN">
+			update admin set 
+			<isNotEmpty property="adminName">
+				admin_name = #adminName#
+			</isNotEmpty>
+			<isEmpty property="adminName">
+				admin_name = admin_name
+			</isEmpty>
+			<isNotEmpty property="adminPwd" prepend=",">
+				admin_pwd = #adminPwd#
+			</isNotEmpty>
+			<isNotEmpty property="loginDate" prepend=",">
+				login_date = #loginDate#
+			</isNotEmpty>
+			,remark = #remark#
+			<isEmpty property="updateDate" prepend=",">
+				update_date = now()
+			</isEmpty>			
+			<isNotEmpty property="updateBy" prepend=",">
+				update_by = #updateBy#
+			</isNotEmpty>
+			<isEmpty property="updateBy" prepend=",">
+				update_by = ''
+			</isEmpty>		
+			where admin_id = #adminId#
+	</update>
+	
+	<update id="updateAdminByMap"  parameterClass="java.util.HashMap">
+			update admin set 
+			<isNotEmpty property="adminName">
+				admin_name = #adminName#
+			</isNotEmpty>
+			<isEmpty property="adminName">
+				admin_name = admin_name
+			</isEmpty>
+			<isNotEmpty property="adminPwd" prepend=",">
+				admin_pwd = #adminPwd#
+			</isNotEmpty>
+			<isNotEmpty property="loginDate" prepend=",">
+				login_date = #loginDate#
+			</isNotEmpty>
+			<isNotEmpty property="remark" prepend=",">
+				remark = #remark#
+			</isNotEmpty>
+			<isEmpty property="updateDate" prepend=",">
+				update_date = now()
+			</isEmpty>			
+			<isNotEmpty property="updateBy" prepend=",">
+				update_by = #updateBy#
+			</isNotEmpty>
+			<isEmpty property="updateBy" prepend=",">
+				update_by = ''
+			</isEmpty>		
+			where admin_id = #adminId#
+	</update>
+	
+	
+	<select id="getRoles" parameterClass="java.util.HashMap"  resultMap="role">
+		SELECT
+		role_id,
+		role_name,
+		remark,
+		create_date,
+		create_by,
+		update_date,
+		update_by 
+		FROM 
+		admin_role 
+
+	</select>
+	
+	<select id="getRole" parameterClass="java.util.HashMap"  resultMap="role">
+		SELECT
+		role_id,
+		role_name,
+		remark,
+		create_date,
+		create_by,
+		update_date,
+		update_by 
+		FROM 
+		admin_role 
+		where role_id = #roleId#
+
+	</select>
+	
+	<select id="getFinalAdminRoles" parameterClass="java.util.HashMap"  resultMap="role">
+		SELECT
+		t3.role_id,
+		t3.role_name,
+		t3.remark,
+		t3.create_date,
+		t3.create_by,
+		t3.update_date,
+		t3.update_by 
+		FROM 
+		admin_role t3 ,
+		(select distinct t1.role_id from 
+		admin_group_role_ref t1 ,
+		(select group_id from admin_group_ref 
+		where admin_id = #adminId#) t2
+		where t1.group_id = t2.group_id ) t4
+		where t3.role_id = t4.role_id
+	</select>
+	
+	<select id="getGroupRoles" parameterClass="java.util.HashMap"  resultMap="role">
+		SELECT
+		t1.role_id,
+		t1.role_name,
+		t1.remark,
+		t1.create_date,
+		t1.create_by,
+		t1.update_date,
+		t1.update_by 
+		FROM 
+		admin_role t1 ,
+		(select role_id from 
+		admin_group_role_ref 
+		where group_id =#groupId#) t2
+		where t1.role_id = t2.role_id
+	</select>
+	
+	<select id="getNoGroupRoles" parameterClass="java.util.HashMap"  resultMap="role">
+		SELECT
+		t1.role_id,
+		t1.role_name,
+		t1.remark,
+		t1.create_date,
+		t1.create_by,
+		t1.update_date,
+		t1.update_by 
+		FROM 
+		admin_role t1 left outer join 
+		(select role_id from 
+		admin_group_role_ref 
+		where group_id =#groupId#) t2
+		on t1.role_id = t2.role_id 
+		where t2.role_id is null 
+	</select>
+	
+	<insert id="createRole" parameterClass="ROLE">
+		insert into admin_role 
+		(
+		role_name,
+		remark,
+		create_date,
+		create_by,
+		update_date,
+		update_by 
+		)
+		values(
+			#roleName#,
+			#remark#
+			<isNotEmpty property="createDate" prepend=",">
+				#createDate#
+			</isNotEmpty>
+			<isEmpty property="createDate" prepend=",">
+				now()
+			</isEmpty>			
+			<isNotEmpty property="createBy" prepend=",">
+				#createBy#
+			</isNotEmpty>
+			<isEmpty property="createBy" prepend=",">
+				''
+			</isEmpty>			
+			<isNotEmpty property="updateDate" prepend=",">
+				#updateDate#
+			</isNotEmpty>
+			<isEmpty property="updateDate" prepend=",">
+				now()
+			</isEmpty>			
+			<isNotEmpty property="updateBy" prepend=",">
+				#updateBy#
+			</isNotEmpty>
+			<isEmpty property="updateBy" prepend=",">
+				''
+			</isEmpty>	
+		)
+		
+		<selectKey resultClass="java.lang.Integer">
+		   SELECT @@IDENTITY AS id
+		</selectKey>
+	</insert>
+	
+	<insert id="createAdminGroupRoleRef" parameterClass="ADMINGROUPROLEREF">
+		insert into admin_group_role_ref 
+		(
+		role_id,
+		group_id,
+		create_date,
+		create_by,
+		update_date,
+		update_by 
+		)
+		values(
+			#roleId#,
+			#groupId#	
+			<isNotEmpty property="createDate" prepend=",">
+				#createDate#
+			</isNotEmpty>
+			<isEmpty property="createDate" prepend=",">
+				now()
+			</isEmpty>			
+			<isNotEmpty property="createBy" prepend=",">
+				#createBy#
+			</isNotEmpty>
+			<isEmpty property="createBy" prepend=",">
+				''
+			</isEmpty>			
+			<isNotEmpty property="updateDate" prepend=",">
+				#updateDate#
+			</isNotEmpty>
+			<isEmpty property="updateDate" prepend=",">
+				now()
+			</isEmpty>			
+			<isNotEmpty property="updateBy" prepend=",">
+				#updateBy#
+			</isNotEmpty>
+			<isEmpty property="updateBy" prepend=",">
+				''
+			</isEmpty>	
+		)
+
+	</insert>
+	
+	<delete id="delAdminGroupRoleRef" parameterClass="java.util.HashMap">
+		DELETE 
+		FROM 
+		admin_group_role_ref where group_id = #groupId#
+		<isNotEmpty property="roleId" prepend="and">
+				role_id = #roleId#
+		</isNotEmpty>
+
+	</delete>
+	
+	
+	<insert id="createAdminRoleOperationRef" parameterClass="ADMINROLEOPERATIONREF">
+		insert into admin_role_operation_ref 
+		(
+		role_id,
+		module_name,
+		operation_name,
+		create_date,
+		create_by,
+		update_date,
+		update_by 
+		)
+		values(
+			#roleId#,
+			#moduleName#,
+			#operationName#
+			<isNotEmpty property="createDate" prepend=",">
+				#createDate#
+			</isNotEmpty>
+			<isEmpty property="createDate" prepend=",">
+				now()
+			</isEmpty>			
+			<isNotEmpty property="createBy" prepend=",">
+				#createBy#
+			</isNotEmpty>
+			<isEmpty property="createBy" prepend=",">
+				''
+			</isEmpty>			
+			<isNotEmpty property="updateDate" prepend=",">
+				#updateDate#
+			</isNotEmpty>
+			<isEmpty property="updateDate" prepend=",">
+				now()
+			</isEmpty>			
+			<isNotEmpty property="updateBy" prepend=",">
+				#updateBy#
+			</isNotEmpty>
+			<isEmpty property="updateBy" prepend=",">
+				''
+			</isEmpty>	
+		)
+
+	</insert>
+	
+	<delete id="delAdminRoleOperationRef" parameterClass="java.util.HashMap">
+		DELETE 
+		FROM 
+		admin_role_operation_ref where role_id = #roleId#
+		<isNotEmpty property="moduleName" prepend="and">
+				module_name = #moduleName#
+		</isNotEmpty>
+		<isNotEmpty property="operationName" prepend="and">
+				operation_name = #operationName#
+		</isNotEmpty>
+
+	</delete>
+	
+	
+	<statement id="deleteRole" parameterClass="java.util.HashMap">
+		DELETE 
+		FROM
+		admin_role where role_id = #roleId#;
+		DELETE FROM 
+		admin_group_role_ref WHERE role_id = #roleId#;
+		DELETE FROM 
+		admin_role_operation_ref WHERE role_id = #roleId#;
+
+	</statement>
+	
+	<update id="updateRole"  parameterClass="ROLE">
+			update admin_role set 
+			role_name = #roleName#
+			,remark = #remark#
+			<isEmpty property="updateDate" prepend=",">
+				update_date = now()
+			</isEmpty>			
+			<isNotEmpty property="updateBy" prepend=",">
+				update_by = #updateBy#
+			</isNotEmpty>
+			<isEmpty property="updateBy" prepend=",">
+				update_by = ''
+			</isEmpty>		
+			where role_id = #roleId#
+	</update>
+	
+	
+	<select id="getGroups" parameterClass="java.util.HashMap"  resultMap="group">
+		SELECT
+		group_id,
+		group_name,
+		remark,
+		create_date,
+		create_by,
+		update_date,
+		update_by 
+		FROM  
+		admin_group 
+
+	</select>
+	
+	<select id="getGroup" parameterClass="java.util.HashMap"  resultMap="group">
+		SELECT
+		group_id,
+		group_name,
+		remark,
+		create_date,
+		create_by,
+		update_date,
+		update_by 
+		FROM  
+		admin_group 
+		where group_id = #groupId#
+
+	</select>
+	
+	<insert id="createGroup" parameterClass="GROUP">
+		insert into admin_group 
+		(
+		group_name,
+		remark,
+		create_date,
+		create_by,
+		update_date,
+		update_by 
+		)
+		values(
+			#groupName#,
+			#remark#
+			<isNotEmpty property="createDate" prepend=",">
+				#createDate#
+			</isNotEmpty>
+			<isEmpty property="createDate" prepend=",">
+				now()
+			</isEmpty>			
+			<isNotEmpty property="createBy" prepend=",">
+				#createBy#
+			</isNotEmpty>
+			<isEmpty property="createBy" prepend=",">
+				''
+			</isEmpty>			
+			<isNotEmpty property="updateDate" prepend=",">
+				#updateDate#
+			</isNotEmpty>
+			<isEmpty property="updateDate" prepend=",">
+				now()
+			</isEmpty>			
+			<isNotEmpty property="updateBy" prepend=",">
+				#updateBy#
+			</isNotEmpty>
+			<isEmpty property="updateBy" prepend=",">
+				''
+			</isEmpty>	
+		)
+
+		<selectKey resultClass="java.lang.Integer">
+		   SELECT @@IDENTITY AS id
+		</selectKey>
+	</insert>
+	
+	
+
+	
+	<statement id="deleteGroup" parameterClass="java.util.HashMap">
+		DELETE 
+		FROM
+		admin_group where group_id = #groupId#;
+		DELETE 
+		FROM
+		admin_group_ref where group_id = #groupId#;
+		DELETE 
+		FROM
+		admin_group_role_ref where group_id = #groupId#;
+
+	</statement>
+	
+	<update id="updateGroup"  parameterClass="GROUP">
+			update admin_group set 
+			<isNotEmpty property="groupName">
+				group_name = #groupName#
+			</isNotEmpty>
+			<isEmpty property="groupName">
+				group_name = group_name
+			</isEmpty>
+			,remark = #remark#
+			<isEmpty property="updateDate" prepend=",">
+				update_date = now()
+			</isEmpty>			
+			<isNotEmpty property="updateBy" prepend=",">
+				update_by = #updateBy#
+			</isNotEmpty>
+			<isEmpty property="updateBy" prepend=",">
+				update_by = ''
+			</isEmpty>		
+			where group_id = #groupId#
+	</update>
+
+
+	<select id="getAdminGroups" parameterClass="java.util.HashMap"  resultMap="group">
+		SELECT
+		t1.group_id,
+		t1.group_name,
+		t1.remark,
+		t1.create_date,
+		t1.create_by,
+		t1.update_date,
+		t1.update_by 
+		FROM 
+		admin_group t1 ,
+		(select group_id from 
+		admin_group_ref 
+		where admin_id =#adminId#) t2
+		where t1.group_id = t2.group_id
+	</select>
+	
+	<select id="getNoAdminGroups" parameterClass="java.util.HashMap"  resultMap="group">
+		SELECT
+		t1.group_id,
+		t1.group_name,
+		t1.remark,
+		t1.create_date,
+		t1.create_by,
+		t1.update_date,
+		t1.update_by 
+		FROM 
+		admin_group t1 left outer join 
+		(select group_id from 
+		admin_group_ref 
+		where admin_id =#adminId#) t2
+		on t1.group_id = t2.group_id 
+		where t2.group_id is null 
+	</select>
+	
+	
+	<select id="getAccessOperations" parameterClass="java.util.HashMap"  resultMap="accessOperation">
+		SELECT
+		module_name,
+		operation_name,
+		affect_role  
+		FROM
+		access_operation 
+		where affect_role = 1 
+
+
+	</select>
+	
+	<select id="getRoleAccessOperations" parameterClass="java.util.HashMap"  resultMap="accessOperation">
+	
+		SELECT 
+		t2.module_name,
+		t2.operation_name,
+		t2.affect_role  FROM 
+		(SELECT
+		role_id,
+		module_name,
+		operation_name 
+		FROM
+		admin_role_operation_ref 
+		where role_id = #roleId#) t1,
+		(SELECT
+		module_name,
+		operation_name,
+		affect_role  
+		FROM
+		access_operation 
+		where affect_role = 1) t2 
+		where t1.module_name = t2.module_name 
+		and t1.operation_name = t2.operation_name 
+
+
+
+	</select>
+	
+</sqlMap>

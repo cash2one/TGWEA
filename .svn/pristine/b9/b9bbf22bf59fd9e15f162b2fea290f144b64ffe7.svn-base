@@ -1,0 +1,302 @@
+package com.etaoguan.wea.client.web.action.admin;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.Map;
+
+import javax.annotation.Resource;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.apache.struts2.convention.annotation.Action;
+import org.apache.struts2.convention.annotation.Result;
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Service;
+
+import com.etaoguan.wea.annotation.WeaFunction;
+import com.etaoguan.wea.annotation.WeaModule;
+import com.etaoguan.wea.client.web.action.WCommonBaseAction;
+import com.etaoguan.wea.client.web.service.IWGenerateProjectService;
+import com.etaoguan.wea.client.web.service.IWOwnerService;
+import com.etaoguan.wea.client.web.vo.ImgNode;
+import com.etaoguan.wea.client.web.vo.OwnerSearch;
+import com.etaoguan.wea.client.web.vo.WPage;
+import com.etaoguan.wea.common.FileGenRequest;
+import com.etaoguan.wea.util.CopyProjectUtils;
+import com.etaoguan.wea.vo.OwnerMobileGeneration;
+import com.etaoguan.wea.vo.Owner;
+
+@WeaModule(mname="企业管理")
+@Service("adminWOwnerAction") @Scope("prototype")
+public class WOwnerAction extends WCommonBaseAction{
+	
+	private static final long serialVersionUID = 3686911166400899579L;
+	
+	@Resource(name="wownerService")
+	private IWOwnerService iwOwnerService;
+	
+	private Owner owner;
+
+	private OwnerSearch ownerSearch = new OwnerSearch();
+	
+	private ImgNode imgNode;
+	
+	private File imgFile; 
+	
+	private String imgFileFileContentType;  
+	
+    private String imgFileFileName;  
+
+    private String[] ownerNums;
+    private String shopNum;
+    private String companyName;
+    private String ownerNum;
+    
+    public String getOwnerNum() {
+		return ownerNum;
+	}
+
+
+	public void setOwnerNum(String ownerNum) {
+		this.ownerNum = ownerNum;
+	}
+
+
+	public String getShopNum() {
+		return shopNum;
+	}
+
+
+	public void setShopNum(String shopNum) {
+		this.shopNum = shopNum;
+	}
+
+
+	public String getCompanyName() {
+		return companyName;
+	}
+
+
+	public void setCompanyName(String companyName) {
+		this.companyName = companyName;
+	}
+    
+	@Resource(name="wgenerateProjectService")
+	private IWGenerateProjectService iwGenerateProjectService;
+	
+	@SuppressWarnings("unused")
+	private final static Log logger = LogFactory.getLog(WOwnerAction.class);
+	
+	/**
+	 * @return 恢复已删除的企业
+	 * @throws IOException
+	 */
+	@Action(value="wRecycle")
+	public String recycle() throws IOException {
+		owner.setTradeId(-1);
+		iwOwnerService.updateOwner(owner);
+		return JSONRESPONSE;
+	}
+	
+	@WeaFunction(fname="企业回收站",oname=WeaFunction.Operation.READ)
+	@Action(value="wOwnerRecycle",results = { @Result(name = "success", type = "dispatcher",location="/admin/recycle.jsp")})
+	public String ownerRecycle() throws IOException {
+		return SUCCESS;
+	}
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	@Action(value="wBatchGenerate")
+	public String batchGenerate() throws IOException {
+    	
+    	String[] shop = shopNum.split(",");
+    	String[] company = companyName.split(",");
+    	String[] owner = ownerNum.split(",");
+		
+    	for (int i = 0; i < shop.length; i++) {
+    		
+    		String shopNum = String.valueOf(shop[i]);
+        	String companyName = company[i];
+        	String oNum = owner[i];
+        	
+        	CopyProjectUtils.copySubject(shopNum, companyName);
+        	
+        	OwnerMobileGeneration generateProject = new OwnerMobileGeneration();
+    		generateProject.setOwnerNum(oNum);
+    		generateProject.setCreateBy(getCurrentAdmin().getAdminName());
+    		generateProject.setUpdateBy(getCurrentAdmin().getAdminName());
+    		iwGenerateProjectService.addGenerateProject(generateProject);
+    		
+		}
+    	
+		return JSONRESPONSE;
+	}
+    
+	
+    @Action(value="wGenerateProject")
+    public String generateProject() throws IOException{
+    	
+    	String shopNum = owner.getShopNum();
+    	String companyName = owner.getCompanyName();
+    	String ownerNum = owner.getOwnerNum();
+    	
+    	CopyProjectUtils.copySubject(shopNum, companyName);
+    	
+    	OwnerMobileGeneration generateProject = new OwnerMobileGeneration();
+		generateProject.setOwnerNum(ownerNum);
+		generateProject.setCreateBy(getCurrentAdmin().getAdminName());
+		generateProject.setUpdateBy(getCurrentAdmin().getAdminName());
+		iwGenerateProjectService.addGenerateProject(generateProject);
+    	
+    	return JSONRESPONSE;
+    }
+    
+    @WeaFunction(fname="修改店铺名",oname=WeaFunction.Operation.UPDATE)
+	@Action(value="wSaveEditShopNumSetting")
+	public String saveEditShopNumSetting() throws IOException {
+		iwOwnerService.updateOwnerShopNum(owner.getOwnerNum(),owner.getShopNum());
+		return JSONRESPONSE;
+	}
+    
+	@WeaFunction(fname="搜索选择企业",oname=WeaFunction.Operation.READ)
+	@Action(value="wListSearchOwners",results = { @Result(name = "success", type = "dispatcher",location="/admin/select_owner.jsp")})
+	public String listSearchOwners() throws IOException {
+		return SUCCESS;
+	}
+	@SuppressWarnings("rawtypes")
+	@WeaFunction(fname="搜索选择企业",oname=WeaFunction.Operation.READ)
+	@Action(value="wListSearchOwnersData")
+	public String listSearchOwnersData() throws IOException {
+		WPage wpage = iwOwnerService.listSearchOwners(ownerSearch, sortParam, wpagingRequest);
+		weaResponse.setRows(wpage.getDataList());
+		weaResponse.setTotal(wpage.getWpagingNavInfo().getTotalRecNum());
+		weaResponse.setRespData(null);
+		return JSONRESPONSE;
+	}
+	
+	
+	@WeaFunction(fname="查看企业列表",oname=WeaFunction.Operation.READ)
+	@Action(value="wListOwners",results = { @Result(name = "success", type = "dispatcher",location="/admin/list_owners.jsp")})
+	public String listOwners() throws IOException {
+		return SUCCESS;
+	}
+	@SuppressWarnings("rawtypes")
+	@WeaFunction(fname="获取企业列表查询条件",oname=WeaFunction.Operation.READ)
+	@Action(value="wGetListOwnersSearchInitData")
+	public String getListOwnersSearchInitData() throws IOException {
+		String trackKey = this.getClass().getName()+".listOwnersData";
+		setPageSearchMap(trackKey);
+		Map initSearchDataMap = iwOwnerService.getListOwnersSearchInitData();
+		weaResponse.setRespData(initSearchDataMap);
+		return JSONRESPONSE;
+	}
+	@SuppressWarnings("rawtypes")
+	@WeaFunction(fname="查看企业列表",oname=WeaFunction.Operation.READ)
+	@Action(value="wListOwnersData")
+	public String listOwnersData() throws IOException {
+		WPage wpage = iwOwnerService.listOwners(ownerSearch, sortParam, wpagingRequest);
+		weaResponse.setRows(wpage.getDataList());
+		weaResponse.setTotal(wpage.getWpagingNavInfo().getTotalRecNum());
+		weaResponse.setRespData(null);
+		return JSONRESPONSE;
+	}
+	
+	@WeaFunction(fname="修改企业",oname=WeaFunction.Operation.UPDATE)
+	@Action(value="wEditOwner",results = { @Result(name = "success", type = "dispatcher",location="/admin/edit_owner.jsp")})
+	public String editOwner() throws IOException {
+		return SUCCESS;
+	}
+	@WeaFunction(fname="修改企业",oname=WeaFunction.Operation.UPDATE)
+	@Action(value="wSaveEditOwner")
+	public String saveEditOwner() throws IOException {
+
+		iwOwnerService.saveOrUpdateOwner(owner,imgNode);
+		return JSONRESPONSE;
+	}
+	@SuppressWarnings("rawtypes")
+	@WeaFunction(fname="获取企业信息",oname=WeaFunction.Operation.READ)
+	@Action(value="wGetEditOwnerInitData")
+	public String getEditOwnerInitData() throws IOException {
+		String ownerNum = getRequestParamValue("ownerNum");
+		Map initOwnerDataMap = iwOwnerService.getEditOwnerInitData(ownerNum);
+		weaResponse.setRespData(initOwnerDataMap);
+		return JSONRESPONSE;
+	}
+	
+	@WeaFunction(fname="上传企业图片",oname=WeaFunction.Operation.UPDATE)
+	@Action(value="wUploadOwnerImg")
+	public String uploadOwnerImg() throws IOException {
+		String ownerNum = getRequestParamValue("ownerNum");
+		FileGenRequest fileGenRequest =  new FileGenRequest(imgFile,imgFileFileName);
+		ImgNode imgNode = iwOwnerService.genOwnerTmpImgFile(fileGenRequest, ownerNum);
+		weaResponse.setRespData(imgNode);
+		return JSONRESPONSE;
+	}
+	
+	
+	@WeaFunction(fname="批量暂停企业服务",oname=WeaFunction.Operation.UPDATE)
+	@Action(value="wBatchSuspendOwner")
+	public String batchSuspendOwner() throws IOException {
+		iwOwnerService.updateBatchSuspendOwner(ownerNums);
+		return JSONRESPONSE;
+	}
+	
+	@WeaFunction(fname="批量删除企业",oname=WeaFunction.Operation.DELETE)
+	@Action(value="wBatchDelOwner")
+	public String batchDelOwner() throws IOException {
+		iwOwnerService.delBatchOwner(ownerNums);
+		return JSONRESPONSE;
+	}
+	
+	public Owner getOwner() {
+		return owner;
+	}
+	public void setOwner(Owner owner) {
+		this.owner = owner;
+	}
+	public OwnerSearch getOwnerSearch() {
+		return ownerSearch;
+	}
+	public void setOwnerSearch(OwnerSearch ownerSearch) {
+		this.ownerSearch = ownerSearch;
+	}
+	public ImgNode getImgNode() {
+		return imgNode;
+	}
+	public void setImgNode(ImgNode imgNode) {
+		this.imgNode = imgNode;
+	}
+	public File getImgFile() {
+		return imgFile;
+	}
+	public void setImgFile(File imgFile) {
+		this.imgFile = imgFile;
+	}
+	public String getImgFileFileContentType() {
+		return imgFileFileContentType;
+	}
+	public void setImgFileFileContentType(String imgFileFileContentType) {
+		this.imgFileFileContentType = imgFileFileContentType;
+	}
+	public String getImgFileFileName() {
+		return imgFileFileName;
+	}
+	public void setImgFileFileName(String imgFileFileName) {
+		this.imgFileFileName = imgFileFileName;
+	}
+	public String[] getOwnerNums() {
+		return ownerNums;
+	}
+	public void setOwnerNums(String[] ownerNums) {
+		this.ownerNums = ownerNums;
+	}
+
+	
+
+}

@@ -1,0 +1,709 @@
+package com.etaoguan.wea.service.impl;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import org.apache.commons.lang.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.alibaba.openapi.client.AlibabaClient;
+import com.alibaba.openapi.client.Request;
+import com.alibaba.openapi.client.auth.AuthorizationToken;
+import com.alibaba.openapi.client.policy.RequestPolicy;
+import com.etaoguan.wea.common.DataCriteria;
+import com.etaoguan.wea.dao.IE688Dao;
+import com.etaoguan.wea.e688.crawl.HttpAliClient;
+import com.etaoguan.wea.e688.crawl.HttpAliResponse;
+import com.etaoguan.wea.e688.crawl.HttpUtils;
+import com.etaoguan.wea.e688.vo.MemberInfo;
+import com.etaoguan.wea.e688.vo.OfferDescription;
+import com.etaoguan.wea.e688.vo.OfferDetailInfo;
+import com.etaoguan.wea.e688.vo.OfferImageInfo;
+import com.etaoguan.wea.e688.vo.PriceRangeInfo;
+import com.etaoguan.wea.e688.vo.ProductCategory;
+import com.etaoguan.wea.e688.vo.ProductDiffer;
+import com.etaoguan.wea.e688.vo.ProductFeatureInfo;
+import com.etaoguan.wea.service.IE688Service;
+
+@SuppressWarnings("deprecation")
+@Service("e688Service")
+public class E688Service implements IE688Service{
+
+	@Autowired
+	IE688Dao e688Dao;
+	
+	private final static Log logger = LogFactory.getLog(E688Service.class);
+	
+	public void deleteE688Data(String memberId) {
+		DataCriteria dataCriteria = new DataCriteria();
+		dataCriteria.setParam("memberId", memberId);
+		e688Dao.deleteE688Data(dataCriteria);
+		
+	}
+
+	@SuppressWarnings("rawtypes")
+	public List getCategoryIdByOfferDatailInfo(String memberId) {
+		DataCriteria dataCriteria = new DataCriteria();
+		dataCriteria.setParam("memberId", memberId);
+		List list=e688Dao.getCategoryIdByOfferDatailInfo(dataCriteria);
+		return list;
+	}
+
+	/* (non-Javadoc)获取会员编号
+	 * @see com.etaoguan.wea.service.IE688Service#getMemberIdByLoginId(com.alibaba.openapi.client.AlibabaClient, com.alibaba.openapi.client.policy.RequestPolicy, java.lang.String)
+	 */
+	@Override
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	public String getMemberIdByLoginId(AlibabaClient client,
+			RequestPolicy basePolicy, String loginId) throws Exception {
+		RequestPolicy noAuthPolicy = basePolicy.clone();
+		//result = client.send(new Request("system", "currentTime"),null,noAuthPolicy);
+		//由登陆的id得到会员的id
+		Request apiRequestconvertMemberIdsByLoginIds = new Request("cn.alibaba.open", "convertMemberIdsByLoginIds",1);
+		List loginIds=new ArrayList();
+		loginIds.add(loginId);
+		apiRequestconvertMemberIdsByLoginIds.setParam("loginIds", loginIds);
+		Map loginToMemberIdMap=client.send(apiRequestconvertMemberIdsByLoginIds, null, noAuthPolicy);
+		String memberId=(String)loginToMemberIdMap.get(loginId);
+		return memberId;
+	}
+
+	@Override
+	@SuppressWarnings("rawtypes")
+	public MemberInfo getMemberInfo(AlibabaClient client,
+			RequestPolicy basePolicy, String memberId) throws Exception {
+		//调用开放数据，无需授权
+		RequestPolicy noAuthPolicy = basePolicy.clone();
+		//获取会员信息
+		Request apiRequestN = new Request("cn.alibaba.open", "member.get",1);
+		apiRequestN.setParam("memberId", memberId);
+		apiRequestN.setParam("returnFields", "memberId,status,isTP,isPersonalTP,isEnterpriseTP,winportAddress,createTime,companyName,industry,product,homepageUrl,sellerName,sex,department,openJobTitle,email,telephone,fax,mobilePhone,addressLocation");
+		LinkedHashMap memberInfoTotalMap=client.send(apiRequestN, null, noAuthPolicy);
+		Map memberInfoMap=(Map) memberInfoTotalMap.get("result");
+		List memberInfoList=(List) memberInfoMap.get("toReturn");
+		Map memberInfo=(Map)memberInfoList.get(0);
+//		String memberId=(String)memberInfo.get("memberId");
+		String status=(String)memberInfo.get("status");
+		Boolean isTP=(Boolean)memberInfo.get("isTP");
+		Boolean isPersonalTP=(Boolean)memberInfo.get("isPersonalTP");
+		Boolean isEnterpriseTP=(Boolean)memberInfo.get("isEnterpriseTP");
+		String winportAddress=(String)memberInfo.get("winportAddress");
+		String createTime=(String)memberInfo.get("createTime");
+		String companyName=(String)memberInfo.get("companyName");
+		String industry=(String)memberInfo.get("industry");
+		String product=(String)memberInfo.get("product");
+		String homepageUrl=(String)memberInfo.get("homepageUrl");
+		String sellerName=(String)memberInfo.get("sellerName");
+		String sex=(String)memberInfo.get("sex");
+		String department=(String)memberInfo.get("department");
+		String openJobTitle=(String)memberInfo.get("openJobTitle");
+		String email=(String)memberInfo.get("email");
+		String telephone=(String)memberInfo.get("telephone");
+		String fax=(String)memberInfo.get("fax");
+		String mobilePhone=(String)memberInfo.get("mobilePhone");
+		//LinkedHashMap addressLocation=(LinkedHashMap)memberInfo.get("addressLocation");
+		//String province=(String)addressLocation.get("province");
+		//String city=(String)addressLocation.get("city");
+		//String address=(String)addressLocation.get("address");
+		//String addressLocation1=province+city+address;
+
+		MemberInfo memberInfo1=new MemberInfo();
+		memberInfo1.setMemberId(memberId);
+		memberInfo1.setStatus(status);
+		memberInfo1.setIsTP(isTP);
+		memberInfo1.setIsPersonalTP(isPersonalTP);
+		memberInfo1.setIsEnterpriseTP(isEnterpriseTP);
+		memberInfo1.setWinportAddress(winportAddress);
+		memberInfo1.setCreateTime(createTime);
+		memberInfo1.setCompanyName(companyName);
+		memberInfo1.setIndustry(industry);
+		memberInfo1.setProduct(product);
+		memberInfo1.setHomepageUrl(homepageUrl);
+		memberInfo1.setSellerName(sellerName);
+		memberInfo1.setSex(sex);
+		memberInfo1.setDepartment(department);
+		memberInfo1.setOpenJobTitle(openJobTitle);
+		memberInfo1.setEmail(email);
+		memberInfo1.setTelephone(telephone);
+		memberInfo1.setFax(fax);
+		memberInfo1.setMobilePhone(mobilePhone);
+		//memberInfo1.setAddressLocation(addressLocation1);
+		//memberInfo1.setRegion(city);
+		return memberInfo1;
+	}
+
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	public void saveE688StandardProductCategory(String catIds,
+			AlibabaClient client, RequestPolicy noAuthPolicy, String memberId,
+			HashMap<String, Integer> orderById,List<ProductCategory> enterpriseCategorys,Map noMuptiParentsMap) throws Exception {
+		Request apiRequestSysCat = new Request("cn.alibaba.open", "category.getPostCatList",1);
+		apiRequestSysCat.setParam("catIDs", catIds);
+		Map productCategoryResultSysCat=null;
+				productCategoryResultSysCat = client.send(apiRequestSysCat, null, noAuthPolicy);
+			
+		Map productCategoryResultSysCatResult=(Map)productCategoryResultSysCat.get("result");
+		List productCategoryResultSysCatToReturn=(List)productCategoryResultSysCatResult.get("toReturn");
+		Set<Integer> parentCatsIds=new HashSet<Integer>();
+		
+		for(int i=0;i<productCategoryResultSysCatToReturn.size();i++){
+			Map productCategoryResultSysCatToReturnMap=(Map)productCategoryResultSysCatToReturn.get(i);
+			Integer catsId=(Integer)productCategoryResultSysCatToReturnMap.get("catsId");
+			String catsName=(String)productCategoryResultSysCatToReturnMap.get("catsName");
+			List parentCats=(List)productCategoryResultSysCatToReturnMap.get("parentCats");
+			ProductCategory productCategory=new ProductCategory();
+			if(parentCats.size()!=0){
+				Map parentCatsMap=(Map)parentCats.get(0);
+				Integer parentCatsId=(Integer)parentCatsMap.get("parentCatsId");
+				Integer order=(Integer)parentCatsMap.get("order");
+				if(!noMuptiParentsMap.containsKey(parentCatsId)){
+					noMuptiParentsMap.put(parentCatsId, "");
+					parentCatsIds.add(parentCatsId);
+				}
+				orderById.put(String.valueOf(parentCatsId), order);
+				productCategory.setParentCatsId(parentCatsId);
+				if(orderById.get(String.valueOf(catsId))!=null){
+					productCategory.setOrder(orderById.get(String.valueOf(catsId)));
+				}
+			}
+			productCategory.setCatsId(catsId);
+			productCategory.setCatsName(catsName);
+			productCategory.setMemberId(memberId);
+			productCategory.setIsSelfCategory("false");
+			enterpriseCategorys.add(productCategory);
+			//saveProductCategory(productCategory);
+		}
+		if(parentCatsIds.size()!=0){
+			String parentCatsIdsStr="";
+			for(Integer parentCatsId:parentCatsIds){
+				parentCatsIdsStr=parentCatsIdsStr+String.valueOf(parentCatsId)+",";
+			}
+			parentCatsIdsStr=parentCatsIdsStr.substring(0, parentCatsIdsStr.length()-1);
+			String parentCatsIdString=parentCatsIdsStr;
+			//处理返回的父类中有0的情况
+			String[]parentCatsIdsArray= parentCatsIdsStr.split(",");
+			if(parentCatsIdsArray.length>1){
+				StringBuffer parentCatsIdsSb=new StringBuffer();
+				for(String str:parentCatsIdsArray){
+					if(!"0".equals(str)){
+						parentCatsIdsSb.append(str);
+						parentCatsIdsSb.append(",");
+					}
+				}
+				parentCatsIdString=parentCatsIdsSb.toString().substring(0, parentCatsIdsSb.toString().length()-1);
+			}
+			//递归调用访求获取父类目
+			if(!"0".equals(parentCatsIdString)){
+				saveE688StandardProductCategory(parentCatsIdString,client,noAuthPolicy,memberId,orderById,enterpriseCategorys,noMuptiParentsMap);
+			}
+		}
+		
+	}
+
+	@SuppressWarnings("rawtypes")
+	public void saveE688UserDefinedProductCategory(List list, String memberId,List<ProductCategory> enterpriseCategorys) {
+		if(list.size()!=0){
+			for(int i=0;i<list.size();i++){
+				Map productCategoryC=(Map)list.get(i);
+				Integer id=(Integer)productCategoryC.get("id");
+				String name=(String)productCategoryC.get("name");
+				Integer pid=null;
+				if(productCategoryC.get("pid")!=null){
+					pid=(Integer)productCategoryC.get("pid");
+				}
+				Integer ordering=(Integer)productCategoryC.get("ordering");
+				String iconUrl=null;
+				if(productCategoryC.get("iconUrl")!=null){
+					iconUrl=(String)productCategoryC.get("iconUrl");
+				}
+				ProductCategory productCategory=new ProductCategory();
+				productCategory.setCatsId(id);
+				productCategory.setCatsName(name);
+				productCategory.setParentCatsId(pid);
+				productCategory.setOrder(ordering);
+				productCategory.setIsSelfCategory("true");
+				productCategory.setIconUrl(iconUrl);
+				productCategory.setMemberId(memberId);
+				//保存数据到数据库
+				//saveProductCategory(productCategory);
+				enterpriseCategorys.add(productCategory);
+				List childrens=(List)productCategoryC.get("children");
+				if(childrens.size()!=0){
+					saveE688UserDefinedProductCategory(childrens,memberId,enterpriseCategorys);
+				}
+			}
+		}
+		
+	}
+
+	public void saveProductCategory(List<ProductCategory> productCategorys) {
+		e688Dao.saveEnterpriseCategory(productCategorys);
+		
+	}
+
+	public void saveMemberInfo(MemberInfo memberInfo) {
+		e688Dao.saveMemberInfo(memberInfo);
+		
+	}
+
+	public void saveOfferDetailInfo(List<OfferDetailInfo> offerDetailInfos) {
+		e688Dao.saveOfferDetailInfo(offerDetailInfos);
+		
+	}
+
+	public void saveOfferImageInfo(List<OfferImageInfo> OfferImageInfos) {
+		e688Dao.saveOfferImageInfo(OfferImageInfos);
+		
+	}
+
+	public void savePriceRangeInfo(List<PriceRangeInfo> priceRangeInfos) {
+		e688Dao.savePriceRangeInfo(priceRangeInfos);
+		
+	}
+
+	public void saveProductFeatureInfo(List<ProductFeatureInfo> productFeatureInfos) {
+		e688Dao.saveProductFeatureInfo(productFeatureInfos);
+		
+	}
+	public void saveProductDiffer(List<ProductDiffer> productDifferList) {
+		// TODO Auto-generated method stub
+		e688Dao.saveProductDiffer(productDifferList);
+	}
+	public void saveOfferDescription(List<OfferDescription> offerDescriptionList) {
+		// TODO Auto-generated method stub
+		e688Dao.saveOfferDescription(offerDescriptionList);
+	}
+
+	/**
+	 * @param memberId 调用存储过程copy中间表1688数据 to企业数据库
+	 */
+	public void syncE688Data2Wea(String memberId) {
+		DataCriteria dataCriteria = new DataCriteria();
+		dataCriteria.setParam("memberId", memberId);
+		e688Dao.syncE688Data2Wea(dataCriteria);
+		
+	}
+
+	@SuppressWarnings("rawtypes")
+	public void syncMemberProductCategory(AlibabaClient client,
+			RequestPolicy basePolicy, String memberId,HashMap<String,Integer> orderById,
+			List<OfferDetailInfo>offerDetailInfoList,AuthorizationToken authorizationToken,
+			List<ProductCategory> enterpriseCategorys,
+			Map<Integer,OfferDetailInfo>offerDetailInfoMap) throws Exception {
+		RequestPolicy noAuthPolicy = basePolicy.clone();
+		RequestPolicy testPolicy =  basePolicy.clone();
+		testPolicy.setNeedAuthorization(true).setUseSignture(true);
+		//获取分类信息
+		Request apiRequestOpen = new Request("cn.alibaba.open", "offerGroup.hasOpened",1);
+		apiRequestOpen.setParam("memberId", memberId);
+		LinkedHashMap offercatsInfoTotalMap=client.send(apiRequestOpen, null, noAuthPolicy);
+		Map offercatsInfoMap=(Map)offercatsInfoTotalMap.get("result");
+		List offercatsInfos=(List)offercatsInfoMap.get("toReturn");
+		Map openStatusMap=(Map)offercatsInfos.get(0);
+		Boolean openStatus=(Boolean)openStatusMap.get("isOpened");
+		String isOpen=String.valueOf(openStatus);
+		logger.info("【"+memberId+"】   openStatusMap = "+openStatusMap.toString());
+		
+		//如果企业有自定义分类
+		if("true".equals(isOpen)){
+			Request apiRequestSelfCat = new Request("cn.alibaba.open", "category.getSelfCatlist",1);
+			apiRequestSelfCat.setParam("memberId", memberId);
+			Map productCategoryResult1=client.send(apiRequestSelfCat, null, noAuthPolicy);
+			//result=client.send(apiRequestSelfCat, null, noAuthPolicy);
+			Map productCategoryToResult=(Map)productCategoryResult1.get("result");
+			List toReturn=(List)productCategoryToResult.get("toReturn");
+			Map ProductCategoryM=(Map)toReturn.get(0);
+			List productCategoryList=(List)ProductCategoryM.get("sellerCats");
+			saveE688UserDefinedProductCategory(productCategoryList,memberId,enterpriseCategorys);
+			//取每一个产品的自定义分类，如果一个产品有多个分类，那么我们就取其中一个
+			//根据offerId获取对应产品的自定义分类,一次获取50个商品的自定义分类
+			Integer size=offerDetailInfoList.size()/50;
+			for(int n=0;n<size;n++){//操作50的整数倍数据
+				StringBuffer offerIds=new StringBuffer();
+				for(int x=50*n;x<50+50*n;x++){
+					offerIds.append(String.valueOf(offerDetailInfoList.get(x).getOfferId())+";");
+				}
+				Request apiRequestuserCategory = new Request("cn.alibaba.open", "userCategory.get.offerIds",1);
+				apiRequestuserCategory.setParam("offerIds", offerIds.toString());
+				apiRequestuserCategory.setAccessToken(authorizationToken.getAccess_token());
+				LinkedHashMap userSelfCategoryMap=client.send(apiRequestuserCategory,null,testPolicy);
+				Map userSelfCategoryMapResult=(Map)userSelfCategoryMap.get("result");
+				List userSelfCategoryList=(List)userSelfCategoryMapResult.get("toReturn");
+				HashMap userSelfCategoryListMap=(HashMap) userSelfCategoryList.get(0);
+				/*for(OfferDetailInfo offerDetailInfo:offerDetailInfoList){
+					String offerId=String.valueOf(offerDetailInfo.getOfferId());
+					List multSlefCategory=(List)userSelfCategoryListMap.get("offerID"+offerId);
+					if(multSlefCategory.size()>0){
+						Integer userSelfCategoryIdFrist=(Integer)multSlefCategory.get(0);
+						offerDetailInfo.setPostCategryId(userSelfCategoryIdFrist);
+					}
+				}*/
+				for(int x=50*n;x<50+50*n;x++){
+					String offerId=String.valueOf(offerDetailInfoList.get(x).getOfferId());
+					List multSlefCategory=(List)userSelfCategoryListMap.get("offerID"+offerId);
+					if(multSlefCategory==null){//商品没有自定义分类，不更新产品，选用系统分类
+						continue;
+					}
+					if(multSlefCategory.size()>0){
+						Integer userSelfCategoryIdFrist=(Integer)multSlefCategory.get(0);
+						offerDetailInfoList.get(x).setPostCategryId(userSelfCategoryIdFrist);
+					}
+				}
+			}
+			if(offerDetailInfoList.size()%50>0){//操作不足50倍数的数据
+				StringBuffer offerIds=new StringBuffer();
+				for(int x=50*size;x<offerDetailInfoList.size()%50+50*size;x++){
+					offerIds.append(String.valueOf(offerDetailInfoList.get(x).getOfferId())+";");
+				}
+				Request apiRequestuserCategory = new Request("cn.alibaba.open", "userCategory.get.offerIds",1);
+				apiRequestuserCategory.setParam("offerIds", offerIds.toString());
+				apiRequestuserCategory.setAccessToken(authorizationToken.getAccess_token());
+				LinkedHashMap userSelfCategoryMap=client.send(apiRequestuserCategory,null,testPolicy);
+				Map userSelfCategoryMapResult=(Map)userSelfCategoryMap.get("result");
+				List userSelfCategoryList=(List)userSelfCategoryMapResult.get("toReturn");
+				HashMap userSelfCategoryListMap=(HashMap) userSelfCategoryList.get(0);
+				for(int x=50*size;x<offerDetailInfoList.size()%50+50*size;x++){
+					String offerId=String.valueOf(offerDetailInfoList.get(x).getOfferId());
+					List multSlefCategory=(List)userSelfCategoryListMap.get("offerID"+offerId);
+					if(multSlefCategory==null){//商品没有自定义分类，不更新产品，选用系统分类
+						continue;
+					}
+					if(multSlefCategory.size()>0){
+						Integer userSelfCategoryIdFrist=(Integer)multSlefCategory.get(0);
+						offerDetailInfoList.get(x).setPostCategryId(userSelfCategoryIdFrist);
+					}
+				}
+			}
+		}else{
+			//企业没有自定义分类
+			Set postcategoryIdSet=offerDetailInfoMap.keySet();
+			if(postcategoryIdSet.size()==0){
+				throw new Exception("企业没有产品信息");
+			}
+			String catIds="";
+			for (Object postcategoryId : postcategoryIdSet) {  
+			      catIds=catIds+String.valueOf(postcategoryId)+",";
+			} 
+			logger.info("【"+memberId+"】  System CategoryId Size = "+postcategoryIdSet.size());
+			catIds=catIds.substring(0, catIds.length()-1);
+			Map noMuptiParentsMap=new HashMap();
+			saveE688StandardProductCategory(catIds,client,noAuthPolicy,memberId,orderById,enterpriseCategorys,noMuptiParentsMap);
+			
+			
+		}
+		//保存产品信息
+				/*for(OfferDetailInfo offerDetailInfo:offerDetailInfoList){
+					this.saveOfferDetailInfo(offerDetailInfo);
+				}*/
+		
+	}
+	
+	
+	@SuppressWarnings({ "rawtypes", "unused", "unchecked" })
+	public void syncMemberProducts(AlibabaClient client,
+			RequestPolicy basePolicy, String memberId, String accessToken,List<OfferDetailInfo>offerDetailInfoList,
+			List<PriceRangeInfo>priceRangeInfoList,List<OfferImageInfo>offerImageInfoList,
+			List<ProductFeatureInfo>productFeatureInfoList,List<ProductDiffer>productDifferList,Map<Integer,
+			OfferDetailInfo>offerDetailInfoMap,List<OfferDescription> offerDescriptions) throws Exception {
+		Map offerIdMap=new HashMap();
+		//1、调用开放数据，无需授权
+		RequestPolicy noAuthPolicy = basePolicy.clone();
+		//调用隐私数据，需要用户授权
+		RequestPolicy testPolicy =  basePolicy.clone();
+		testPolicy.setNeedAuthorization(true).setUseSignture(true);
+		//获取企业的产品信息
+		int i=1;
+		Request apiRequest = new Request("cn.alibaba.open", "offer.search",1);
+		apiRequest.setParam("memberId", memberId);
+		apiRequest.setParam("status", "published");
+		//apiRequest.setParam("page", 1);
+		apiRequest.setParam("pageSize", 50);
+		apiRequest.setParam("orderBy", "saledCount:desc");
+		apiRequest.setParam("returnFields", "offerId,detailsUrl,type,tradeType,postCategryId,offerStatus,memberId,subject,details,unit,amount,amountOnSale,saledCount,retailPrice,unitPrice,priceRanges,termOfferProcess,gmtApproved,gmtExpire,imageList,productFeatureList");
+		apiRequest.setAccessToken(accessToken);
+
+		while(true){
+			apiRequest.setParam("pageNo", i);
+			LinkedHashMap sellerCatInfos=client.send(apiRequest,null,testPolicy);
+			Map result=(Map)sellerCatInfos.get("result");
+			Integer porductNum=(Integer)result.get("total");
+			List offers=(List)result.get("toReturn");
+			if(offers.size()==0){
+				break;
+			}
+			for(int j=0;j<offers.size();j++){
+				LinkedHashMap offer=(LinkedHashMap)offers.get(j);
+				Long offerId= new Long(String.valueOf(offer.get("offerId")));
+				//去除重复商品
+				if(offerIdMap.containsKey(offerId)){
+					continue;
+				}else{
+					offerIdMap.put(offerId, "");
+				}
+				String detailsUrl=(String)offer.get("detailsUrl");
+				try{
+					offerDescriptions=getOfferDescriptionByDetailUrl(offerDescriptions,detailsUrl,offerId);
+				}catch(Exception ex){
+					logger.info("offerId为"+offerId+"的商品,获取产品描述信息失败");
+					ex.printStackTrace();
+					continue;
+				}
+				String type=(String)offer.get("type");
+				Integer tradeType= Integer.parseInt(String.valueOf(offer.get("tradeType")));
+				Integer postCategryId= Integer.parseInt(String.valueOf(offer.get("postCategryId")));
+				String offerStatus=(String)offer.get("offerStatus");
+				String memberId1=(String)offer.get("memberId");
+				String subject=(String)offer.get("subject");
+				String details=(String)offer.get("details");
+				String unit=(String)offer.get("unit");
+				Integer amount= Integer.parseInt(String.valueOf(offer.get("amountOnSale")==null?0:offer.get("amountOnSale")));
+				String ans = String.valueOf(offer.get("amountOnSale")).trim();
+				
+				int amountOnSale = 0;
+				
+				try {
+					amountOnSale = Integer.parseInt(ans);
+				} catch (Exception e) {
+					amountOnSale = 9999;//如果当前销量未设置，就设置 当前默认销量为9999
+				}
+				
+				Integer saledCount= Integer.parseInt(String.valueOf(offer.get("saledCount")));
+				Double retailPrice=0.0;
+				if(offer.get("retailPrice")!=null){
+					Map retailPriceMap=(Map)offer.get("retailPrice");
+					retailPrice=(Double)retailPriceMap.get("amount");
+				}
+				Double unitPrice=0.0;
+				if(offer.get("unitPrice")!=null){
+					Map unitPriceMap=(Map)offer.get("unitPrice");
+					unitPrice=(Double)unitPriceMap.get("amount");
+				}
+				List<Double>prices=new ArrayList<Double>();
+				if(offer.get("priceRanges")!=null){
+					List priceRanges=(List)offer.get("priceRanges");
+					for(int m=0;m<priceRanges.size();m++){
+						Map priceRangeMap=(Map)priceRanges.get(m);
+						Double price=new Double(String.valueOf(priceRangeMap.get("price")));
+						prices.add(price);
+						String rang=String.valueOf(priceRangeMap.get("range"));
+						PriceRangeInfo priceRangeInfo=new PriceRangeInfo();
+						priceRangeInfo.setOfferId(offerId);
+						priceRangeInfo.setRang(rang);
+						priceRangeInfo.setPrice(price);
+						//savePriceRangeInfo(priceRangeInfo);
+						priceRangeInfoList.add(priceRangeInfo);
+					}
+				}
+				//取prices集合中的最小价格
+				if(unitPrice==0.0&&prices.size()!=0){
+					Double tem=prices.get(0);
+					for(int n=0;n<prices.size();n++){
+						if(tem>prices.get(n)){
+							tem=prices.get(n);
+						}
+					}
+					unitPrice=tem;
+				}
+				Integer termOfferProcess= Integer.parseInt(String.valueOf(offer.get("termOfferProcess")));
+				String gmtApproved=(String)offer.get("gmtApproved");
+				String gmtExpire=(String)offer.get("gmtExpire");
+				OfferDetailInfo offerDetailInfo=new OfferDetailInfo();
+				//同步imageList
+				List imageList=(List)offer.get("imageList");
+				if(imageList.size()!=0){
+					//Set<OfferImageInfo> offerImageInfosN=new HashSet<OfferImageInfo>();
+					for(int m=0;m<imageList.size();m++){
+						Map imageMap=(Map)imageList.get(m);
+						//保存size310x310URL
+						OfferImageInfo size310x310URL=new OfferImageInfo();
+						String url=(String)imageMap.get("size310x310URL");
+						size310x310URL.setOfferId(offerId);
+						size310x310URL.setOfferUrl(url);
+						offerImageInfoList.add(size310x310URL);
+						//保存summURL
+						/*OfferImageInfo summURL=new OfferImageInfo();
+						url=(String)imageMap.get("summURL");
+						summURL.setOfferId(offerId);
+						summURL.setOfferUrl(url);
+						offerImageInfoList.add(summURL);
+						//保存size64x64URL
+						OfferImageInfo size64x64URL=new OfferImageInfo();
+						url=(String)imageMap.get("size64x64URL");
+						size64x64URL.setOfferId(offerId);
+						size64x64URL.setOfferUrl(url);
+						offerImageInfoList.add(size64x64URL);
+						//保存imageURI
+						OfferImageInfo imageURI=new OfferImageInfo();
+						url=(String)imageMap.get("imageURI");
+						imageURI.setOfferId(offerId);
+						imageURI.setOfferUrl(url);
+						offerImageInfoList.add(imageURI);
+						//保存originalImageURI
+						OfferImageInfo originalImageURI=new OfferImageInfo();
+						url=(String)imageMap.get("originalImageURI");
+						originalImageURI.setOfferId(offerId);
+						originalImageURI.setOfferUrl(url);
+						offerImageInfoList.add(originalImageURI);*/
+					}
+					/*for(OfferImageInfo offerImageInfo:offerImageInfosN){
+						saveOfferImageInfo(offerImageInfo);
+					}*/
+				}
+				//同步productFeatureList
+				List productFeatureList=(List)offer.get("productFeatureList");
+				if(productFeatureList.size()!=0){
+					//Set<ProductFeatureInfo> productFeatureInfoN=new HashSet<ProductFeatureInfo>();
+					for(int m=0;m<productFeatureList.size();m++){
+						ProductFeatureInfo ProductFeatureInfo=new ProductFeatureInfo();
+						Map productFeatureMap=(Map)productFeatureList.get(m);
+						String propName=(String)productFeatureMap.get("name");
+						String propValue=(String)productFeatureMap.get("value");
+						Integer propId=(Integer)productFeatureMap.get("fid");
+						ProductFeatureInfo.setPropName(propName);
+						//过淲propValue中特殊殊字符
+						if(propValue.indexOf(160)!=-1){
+							String newPropValue=propValue.replace((char)160, (char)0);
+							ProductFeatureInfo.setPropValue(newPropValue);
+						}else{
+							ProductFeatureInfo.setPropValue(propValue);
+						}
+						ProductFeatureInfo.setOfferId(offerId);
+						ProductFeatureInfo.setPropId(propId);
+						productFeatureInfoList.add(ProductFeatureInfo);
+					}
+					/*for(ProductFeatureInfo productFeatureInfo:productFeatureInfoN){
+						saveProductFeatureInfo(productFeatureInfo);
+					}*/
+				}
+				//获取每一个产品的SKU属性
+				Request apiRequestSKU = new Request("cn.alibaba.open", "offer.get",1);
+				apiRequestSKU.setParam("offerId", offerId);
+				apiRequestSKU.setParam("returnFields", "skuArray");
+				Map SkuMap=client.send(apiRequestSKU, null, noAuthPolicy);
+				Map mapResult=(Map)SkuMap.get("result");
+				List SkuList=(List)mapResult.get("toReturn");
+				Map toReturnMap=(Map)SkuList.get(0);
+				List skuArray=(List)toReturnMap.get("skuArray");
+				int n=1;
+				for(int x=0;x<skuArray.size();x++){
+					Map skuArrayMap=(Map)skuArray.get(x);
+					String color=(String)skuArrayMap.get("value");
+					if(StringUtils.isNotEmpty(color)){
+						ProductDiffer productDiffer=new ProductDiffer();
+						productDiffer.setOfferId(offerId);
+						productDiffer.setDifferId(n);
+						productDiffer.setDifferName(color);
+						productDifferList.add(productDiffer);
+						n++;
+					}
+				}
+				//保存产品到数据库操作
+				offerDetailInfo.setOfferId(offerId);
+				offerDetailInfo.setDatailsUrl(detailsUrl);
+				offerDetailInfo.setType(type);
+				offerDetailInfo.setTradeType(tradeType);
+				offerDetailInfo.setPostCategryId(postCategryId);
+				offerDetailInfo.setOfferStatus(offerStatus);
+				offerDetailInfo.setMemberId(memberId1);
+				offerDetailInfo.setSubject(subject);
+				offerDetailInfo.setDetails(details);
+				offerDetailInfo.setUnit(unit);
+				offerDetailInfo.setAmount(amount);
+				offerDetailInfo.setAmountOnSale(amountOnSale);
+				offerDetailInfo.setSaledCount(saledCount);
+				offerDetailInfo.setRetailPrice(retailPrice);
+				offerDetailInfo.setUnitPrice(unitPrice);
+				offerDetailInfo.setTermOfferProcess(termOfferProcess);
+				offerDetailInfo.setGmtApproved(gmtApproved);
+				offerDetailInfo.setGmtExpire(gmtExpire);
+				offerDetailInfoList.add(offerDetailInfo);
+				offerDetailInfoMap.put(postCategryId, offerDetailInfo);
+				//saveOfferDetailInfo(offerDetailInfo);
+			}
+			i++;
+		}
+	}
+
+	public void syncE688Data2Wea(AlibabaClient client,
+			RequestPolicy basePolicy, String memberId,
+			AuthorizationToken authorizationToken) throws Exception{
+		List<OfferDetailInfo>offerDetailInfoList=new ArrayList<OfferDetailInfo>();//产品
+		Map<Integer,OfferDetailInfo>offerDetailInfoMap=new HashMap<Integer,OfferDetailInfo>();
+		List<PriceRangeInfo>priceRangeInfoList=new ArrayList<PriceRangeInfo>();
+		List<OfferImageInfo>offerImageInfoList=new ArrayList<OfferImageInfo>();
+		List<ProductFeatureInfo>productFeatureInfoList=new ArrayList<ProductFeatureInfo>();
+		List<ProductCategory> enterpriseCategorys=new ArrayList<ProductCategory>();
+		List<ProductDiffer>productDifferList=new ArrayList<ProductDiffer>();
+		List<OfferDescription> offerDescriptions=new ArrayList<OfferDescription>();
+		MemberInfo memberInfo = getMemberInfo(client, basePolicy, memberId);
+		logger.info("【"+memberId+"】   syncMemberProducts");
+		syncMemberProducts(client, basePolicy, memberId, authorizationToken.getAccess_token(),
+				offerDetailInfoList,priceRangeInfoList,offerImageInfoList,productFeatureInfoList,
+				productDifferList,offerDetailInfoMap,offerDescriptions);
+		HashMap<String,Integer> orderById=new HashMap<String,Integer>();
+		logger.info("【"+memberId+"】   syncMemberProductCategory");
+		syncMemberProductCategory(client, basePolicy, memberId, orderById,offerDetailInfoList,authorizationToken,enterpriseCategorys,offerDetailInfoMap);
+		logger.info("【"+memberId+"】   deleteE688Data");
+		deleteE688Data(memberId);
+		//保存企业分类信息
+		saveProductCategory(enterpriseCategorys);
+		//保存会员信息
+		logger.info("【"+memberId+"】   getMemberInfo");
+		saveMemberInfo(memberInfo);
+		//保存产品信息
+		saveOfferDetailInfo(offerDetailInfoList);
+		//保存价格区间
+		savePriceRangeInfo(priceRangeInfoList);
+		//保存产品图片
+		saveOfferImageInfo(offerImageInfoList);
+		//保存产品特性
+		saveProductFeatureInfo(productFeatureInfoList);
+		//保存产品的SKU信息
+		saveProductDiffer(productDifferList);
+		//保存产品的描述
+		saveOfferDescription(offerDescriptions);
+		syncE688Data2Wea(memberId);//调用存储过程copy中间表1688数据 to企业数据库
+		
+	}
+	public List<OfferDescription> getOfferDescriptionByDetailUrl(
+			List<OfferDescription> offerDescriptions, String detailUrl,long offerId) throws Exception {
+		// TODO Auto-generated method stub
+		DefaultHttpClient httpClient = HttpAliClient.getHttpClient();
+		HttpAliResponse httpAliResponse=null;
+		String returnHtml="";
+			httpAliResponse = HttpUtils.submitGetRequestReturnString(httpClient,detailUrl);
+			returnHtml= httpAliResponse.getResponseHTML();
+		Document doc = Jsoup.parse(returnHtml,"",org.jsoup.parser.Parser.xmlParser());
+		Element element = doc.select("div#desc-lazyload-container").first();
+		String descriptUrl = element.attr("data-tfs-url");
+		httpAliResponse = HttpUtils.submitGetRequestReturnString(httpClient,descriptUrl);
+			returnHtml= httpAliResponse.getResponseHTML();
+			if(returnHtml.indexOf("var desc")==0){
+				returnHtml=returnHtml.substring(returnHtml.indexOf("<p"));
+				returnHtml=returnHtml.substring(0,returnHtml.indexOf("'"));
+			}else if(returnHtml.indexOf("var offer_details")==0){
+				returnHtml=returnHtml.replace("\\\"", "\"");
+				returnHtml=returnHtml.substring(returnHtml.indexOf("<p"));
+				returnHtml=returnHtml.substring(0,returnHtml.indexOf("\"}"));
+			}
+		
+		OfferDescription offerDescription =new OfferDescription();
+		offerDescription.setOfferId(offerId);
+		offerDescription.setDescription(returnHtml);
+		offerDescriptions.add(offerDescription);
+		return offerDescriptions;
+	}
+
+
+}

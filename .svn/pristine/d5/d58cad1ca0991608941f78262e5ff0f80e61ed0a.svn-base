@@ -1,0 +1,38 @@
+
+<ion-view title="联系方式">
+    <ion-nav-buttons side="left">
+        <button ng-click="back()" class="button button-clear button-light ion-ios-arrow-back barIcon"></button>
+    </ion-nav-buttons>
+
+    <ion-content>
+        <div id="contactInfo">
+            <div class="list">
+                <div class="item boder-none">
+                    <i class="ion-card" style="margin-left: 0;"></i>
+                    <div ng-bind="companyName"></div>
+                </div>
+                <div class="item boder-none">
+                    <i class="ion-ios-person-outline" style="margin-left: 1px;font-size: 30px;"></i>
+                    <div ng-bind="contactPerson"></div>
+                </div>
+                <div class="item boder-none item-button-right">
+                    <i class="ion-iphone" style="margin-left: 3px;font-size: 32px;"></i>
+                    <div ng-bind="phoneNum"></div>
+                    <button class="button button-clear button-positive" ng-click="callPhone()">
+                        <i class="ion-android-call"></i>
+                    </button>
+                </div>
+
+                <div class="item boder-none">
+                    <i class="ion-ios-world-outline" style="margin-left: -1px;"></i>
+                    <div ng-bind="webSite"></div>
+                </div>
+                <div class="item boder-none">
+                    <i class="ion-ios-location-outline" style="margin-left: 3px;"></i>
+                    <div ng-bind="address"></div>
+                </div>
+            </div>
+        </div>
+        <div id="contenttexts"></div>
+    </ion-content>
+</ion-view>

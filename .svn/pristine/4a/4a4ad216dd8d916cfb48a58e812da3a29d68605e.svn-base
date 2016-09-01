@@ -1,0 +1,15 @@
+package com.etaoguan.wea.vo;
+
+public class OrderReferVo extends BaseVo{
+
+	private Order order;
+
+	public Order getOrder() {
+		return order;
+	}
+
+	public void setOrder(Order order) {
+		this.order = order;
+	}
+	
+}

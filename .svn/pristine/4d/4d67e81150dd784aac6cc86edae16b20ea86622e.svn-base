@@ -1,0 +1,382 @@
+package com.etaoguan.wea.service.impl;
+
+import java.util.List;
+
+import javax.annotation.Resource;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.etaoguan.wea.common.DataCriteria;
+import com.etaoguan.wea.common.DataSet;
+import com.etaoguan.wea.common.OffsetRequest;
+import com.etaoguan.wea.common.WeaException;
+import com.etaoguan.wea.dao.IProductDao;
+import com.etaoguan.wea.service.IKeyGenService;
+import com.etaoguan.wea.service.IOrderService;
+import com.etaoguan.wea.service.IProdPriceService;
+import com.etaoguan.wea.service.IProductService;
+import com.etaoguan.wea.vo.ProdExternal;
+import com.etaoguan.wea.vo.ProdFeature;
+import com.etaoguan.wea.vo.ProdImg;
+import com.etaoguan.wea.vo.ProdPrice;
+import com.etaoguan.wea.vo.Product;
+
+@Service("productService")
+public class ProductService  extends BaseService implements IProductService {
+
+	@Autowired
+	private IProductDao iProductDao;
+	
+	@Resource(name="prodKeyGenService") 
+	protected IKeyGenService  iKeyGenService;
+	
+	@Resource(name="orderService") 
+	private IOrderService  iOrderService;
+	
+	@Resource(name="prodPriceService") 
+	private IProdPriceService  iProdPriceService;
+	
+	public void addProdImgs(List<ProdImg> prodImgs) {
+
+		for(ProdImg prodImg:prodImgs){
+			iProductDao.addProdImg(prodImg);
+		}
+
+	}
+	
+
+	public void addProdImg(ProdImg prodImg) {
+		iProductDao.addProdImg(prodImg);
+		
+	}
+
+	public void addProduct(Product product) {
+		String prodNum = iKeyGenService.saveNGetKey();
+		product.setProdNum(prodNum);
+		int posSequence = getProdMaxPosSeqence(product.getOwnerNum());
+		product.setPosSeq(posSequence+1);
+		product.setUpdateBy(getCurrentOperator());
+		product.setCreateBy(getCurrentOperator());
+		ProdPrice prodPrice = new ProdPrice();
+		prodPrice.setProdNum(product.getProdNum());
+		prodPrice.setOwnerNum(product.getOwnerNum());
+		prodPrice.setProdPrice(product.getStdPrice());
+		if(iProdPriceService.existsProdPrice(product.getProdNum())){
+			iProdPriceService.updateProdPrice(product.getProdNum(), product.getStdPrice());
+		}else{
+			iProdPriceService.saveProdPrice(prodPrice);
+		}
+		if(product.getProdImgs()!=null&&product.getProdImgs().size()>0){
+			product.setFirstProdImg(product.getProdImgs().get(0).getThumbUrl());
+			for(ProdImg prodImg:product.getProdImgs()){
+				prodImg.setProdNum(prodNum);
+				iProductDao.addProdImg(prodImg);
+			}
+		}
+		
+		if(product.getProdFeatures()!=null&&product.getProdFeatures().size()>0){
+			for(ProdFeature prodFeature:product.getProdFeatures()){
+				prodFeature.setProdNum(prodNum);
+				iProductDao.addProdFeature(prodFeature);
+			}
+		}
+		
+		iProductDao.addProduct(product);
+	}
+
+	public void delProdImg(String prodNum, int imgSeq) {
+		DataCriteria dataCriteria = new DataCriteria();
+		dataCriteria.setParam("prodNum",prodNum);
+		dataCriteria.setParam("imgSeq",imgSeq);
+		iProductDao.delProdImg(dataCriteria);
+	}
+
+	public void delProduct(String prodNum) {
+		if(iOrderService.existsProduct(prodNum)){
+			throw new WeaException("存在产品关联的订单");
+		}
+		DataCriteria dataCriteria = new DataCriteria();
+		dataCriteria.setParam("prodNum",prodNum);
+		iProductDao.delProduct(dataCriteria);
+		iProdPriceService.delProdPrice(prodNum);
+		iProdPriceService.delCustProdPrice(prodNum);
+
+	}
+
+	public synchronized int getProdMaxImgSequence(String prodNum) {
+		DataCriteria dataCriteria = new DataCriteria();
+		dataCriteria.setParam("prodNum",prodNum);
+		return iProductDao.getProdMaxImgSequence(dataCriteria);
+	}
+
+	public synchronized int getProdMaxPosSeqence(String ownerNum) {
+		DataCriteria dataCriteria = new DataCriteria();
+		dataCriteria.setParam("ownerNum",ownerNum);
+		return iProductDao.getProdMaxImgSequence(dataCriteria);
+	}
+
+	public List<ProdImg> listProdImgs(String prodNum) {
+		DataCriteria dataCriteria = new DataCriteria();
+		dataCriteria.setParam("prodNum",prodNum);
+		return iProductDao.getProdImgs(dataCriteria);
+	}
+
+	@SuppressWarnings("rawtypes")
+	public DataSet listProducts(DataCriteria dataCriteria,
+			OffsetRequest offsetRequest) {
+		return iProductDao.getProducts(dataCriteria, offsetRequest);
+	}
+
+	public void updateDispStockBalance(String prodNum, int stockBalance) {
+		DataCriteria dataCriteria = new DataCriteria();
+		dataCriteria.setParam("prodNum",prodNum);
+		dataCriteria.setParam("dispStockBalance",stockBalance);
+		dataCriteria.setParam("updateBy",getCurrentOperator());
+		iProductDao.updateProduct(dataCriteria);
+
+	}
+
+	public void updateHotFlag(String prodNum, int hotFlag) {
+		DataCriteria dataCriteria = new DataCriteria();
+		dataCriteria.setParam("prodNum",prodNum);
+		dataCriteria.setParam("hotFlag",hotFlag);
+		dataCriteria.setParam("updateBy",getCurrentOperator());
+		iProductDao.updateProduct(dataCriteria);
+
+	}
+
+	public void updateImgSeqence(String prodNum, int preProdImgSeq,
+			int prodImgSeq) {
+		DataCriteria dataCriteria = new DataCriteria();
+		dataCriteria.setParam("prodNum",prodNum);
+		dataCriteria.setParam("imgSeq",preProdImgSeq);
+		ProdImg preProdImg = iProductDao.getProdImg(dataCriteria);
+		iProductDao.delProdImg(dataCriteria);
+		dataCriteria.clearParams();
+		dataCriteria.setParam("prodNum",prodNum);
+		dataCriteria.setParam("imgSeq",prodImgSeq);
+		dataCriteria.setParam("newImgSeq",preProdImgSeq);
+		iProductDao.updateProdImg(dataCriteria);
+		preProdImg.setImgSeq(prodImgSeq);
+		iProductDao.addProdImg(preProdImg);
+
+	}
+
+	public void updateNewFlag(String prodNum, int newFlag) {
+		DataCriteria dataCriteria = new DataCriteria();
+		dataCriteria.setParam("prodNum",prodNum);
+		dataCriteria.setParam("newFlag",newFlag);
+		dataCriteria.setParam("updateBy",getCurrentOperator());
+		iProductDao.updateProduct(dataCriteria);
+
+	}
+
+	public void updatePosSeqence(String preProdNum, String prodNum) {
+		DataCriteria dataCriteria = new DataCriteria();
+		dataCriteria.setParam("prodNum",prodNum);
+		Product product = iProductDao.getProduct(dataCriteria);
+		dataCriteria.setParam("prodNum",preProdNum);
+		Product preProduct = iProductDao.getProduct(dataCriteria);
+		dataCriteria.clearParams();
+		dataCriteria.setParam("prodNum",preProdNum);
+		dataCriteria.setParam("posSeq",product.getPosSeq());
+		iProductDao.updateProduct(dataCriteria);
+		dataCriteria.setParam("prodNum",prodNum);
+		dataCriteria.setParam("posSeq",preProduct.getPosSeq());
+		iProductDao.updateProduct(dataCriteria);
+
+	}
+
+	public void updateProduct(Product product) {
+		product.setUpdateBy(getCurrentOperator());
+		ProdPrice prodPrice = new ProdPrice();
+		prodPrice.setProdNum(product.getProdNum());
+		prodPrice.setOwnerNum(product.getOwnerNum());
+		prodPrice.setProdPrice(product.getStdPrice());
+		if(iProdPriceService.existsProdPrice(product.getProdNum())){
+			iProdPriceService.updateProdPrice(product.getProdNum(), product.getStdPrice());
+		}else{
+			iProdPriceService.saveProdPrice(prodPrice);
+		}
+		DataCriteria dataCriteria = new DataCriteria();
+		dataCriteria.setParam("prodNum",product.getProdNum());
+		iProductDao.delProdFeature(dataCriteria);
+		iProductDao.delProdImg(dataCriteria);
+		if(product.getProdImgs()!=null&&product.getProdImgs().size()>0){
+			product.setFirstProdImg(product.getProdImgs().get(0).getThumbUrl());
+			for(ProdImg prodImg:product.getProdImgs()){
+				prodImg.setProdNum(product.getProdNum());
+				iProductDao.addProdImg(prodImg);
+			}
+		}
+		if(product.getProdFeatures()!=null&&product.getProdFeatures().size()>0){
+			for(ProdFeature prodFeature:product.getProdFeatures()){
+				prodFeature.setProdNum(product.getProdNum());
+				iProductDao.addProdFeature(prodFeature);
+			}
+		}
+		iProductDao.updateProduct(product);
+	}
+
+	public void updateShowFlag(String prodNum, int showFlag) {
+		DataCriteria dataCriteria = new DataCriteria();
+		dataCriteria.setParam("prodNum",prodNum);
+		dataCriteria.setParam("showFlag",showFlag);
+		dataCriteria.setParam("updateBy",getCurrentOperator());
+		iProductDao.updateProduct(dataCriteria);
+
+	}
+
+	public void updateTopFlag(String prodNum, int topFlag) {
+		DataCriteria dataCriteria = new DataCriteria();
+		dataCriteria.setParam("prodNum",prodNum);
+		dataCriteria.setParam("topFlag",topFlag);
+		dataCriteria.setParam("updateBy",getCurrentOperator());
+		iProductDao.updateProduct(dataCriteria);
+
+	}
+
+
+	public void addProdFeature(ProdFeature prodFeature) {
+		iProductDao.addProdFeature(prodFeature);
+		
+	}
+
+
+	public void addProdFeatures(List<ProdFeature> prodFeatures) {
+
+		for(ProdFeature prodFeature:prodFeatures){
+			iProductDao.addProdFeature(prodFeature);
+		}
+		
+	}
+
+
+	public void delProdFeature(String prodNum, String featureName) {
+		DataCriteria dataCriteria = new DataCriteria();
+		dataCriteria.setParam("prodNum",prodNum);
+		dataCriteria.setParam("featureName",featureName);
+		iProductDao.delProdFeature(dataCriteria);
+		
+	}
+
+
+	public List<ProdFeature> listProdFeatures(String prodNum) {
+		DataCriteria dataCriteria = new DataCriteria();
+		dataCriteria.setParam("prodNum",prodNum);
+		return iProductDao.getProdFeatures(dataCriteria);
+	}
+
+
+	public void updateProdFeature(ProdFeature prodFeature) {
+		iProductDao.updateProdFeature(prodFeature);
+		
+	}
+
+
+	public void updateProdStdPrice(String prodNum, double stdPrice) {
+		DataCriteria dataCriteria = new DataCriteria();
+		dataCriteria.setParam("prodNum",prodNum);
+		dataCriteria.setParam("stdPrice",stdPrice);
+		dataCriteria.setParam("updateBy",getCurrentOperator());
+		iProductDao.updateProduct(dataCriteria);
+		
+	}
+
+
+	public Product getProduct(String prodNum) {
+		DataCriteria dataCriteria = new DataCriteria();
+		dataCriteria.setParam("prodNum",prodNum);
+		Product product = iProductDao.getProduct(dataCriteria);
+		product.setProdFeatures(iProductDao.getProdFeatures(dataCriteria));
+		product.setProdImgs(iProductDao.getProdImgs(dataCriteria));
+		product.setProdExternals(iProductDao.getProdExternals(dataCriteria));
+		return product;
+	}
+
+
+	public List<Product> getProducts(List<String> prodNums) {
+		DataCriteria dataCriteria = new DataCriteria();
+		dataCriteria.setParam("prodNums",prodNums);
+		return iProductDao.getProducts(dataCriteria);
+	}
+
+
+	public void updateHotFlag(String[] prodNums, int hotFlag) {
+		DataCriteria dataCriteria = new DataCriteria();
+		dataCriteria.setParam("prodNums",prodNums);
+		dataCriteria.setParam("hotFlag",hotFlag);
+		dataCriteria.setParam("updateBy",getCurrentOperator());
+		iProductDao.updateProduct(dataCriteria);
+		
+	}
+	/* (non-Javadoc)公开，隐藏
+	 * @see com.etaoguan.wea.service.IProductService#updateIsPublic(java.lang.String[], int)
+	 */
+	public void updateIsPublic(String[] prodNums, int isPublic) {
+		DataCriteria dataCriteria = new DataCriteria();
+		dataCriteria.setParam("prodNums",prodNums);
+		dataCriteria.setParam("isPublic",isPublic);
+		dataCriteria.setParam("updateBy",getCurrentOperator());
+		iProductDao.updateProduct(dataCriteria);
+		
+	}
+
+
+	public void updateNewFlag(String[] prodNums, int newFlag) {
+		DataCriteria dataCriteria = new DataCriteria();
+		dataCriteria.setParam("prodNums",prodNums);
+		dataCriteria.setParam("newFlag",newFlag);
+		dataCriteria.setParam("updateBy",getCurrentOperator());
+		iProductDao.updateProduct(dataCriteria);
+		
+	}
+
+
+	public void updateShowFlag(String[] prodNums, int showFlag) {
+		DataCriteria dataCriteria = new DataCriteria();
+		dataCriteria.setParam("prodNums",prodNums);
+		dataCriteria.setParam("showFlag",showFlag);
+		dataCriteria.setParam("updateBy",getCurrentOperator());
+		iProductDao.updateProduct(dataCriteria);
+		
+	}
+
+
+	public void updateTopFlag(String[] prodNums, int topFlag) {
+		DataCriteria dataCriteria = new DataCriteria();
+		dataCriteria.setParam("prodNums",prodNums);
+		dataCriteria.setParam("topFlag",topFlag);
+		dataCriteria.setParam("updateBy",getCurrentOperator());
+		iProductDao.updateProduct(dataCriteria);
+		
+	}
+
+
+	public List<ProdExternal> listProdExternals(String prodNum) {
+		DataCriteria dataCriteria = new DataCriteria();
+		dataCriteria.setParam("prodNum",prodNum);
+		return iProductDao.getProdExternals(dataCriteria);
+	}
+
+
+	@SuppressWarnings("rawtypes")
+	public DataSet listCompProducts(DataCriteria dataCriteria,
+			OffsetRequest offsetRequest) {
+		return iProductDao.getCompProducts(dataCriteria, offsetRequest);
+	}
+
+	/* (non-Javadoc)根据用户ID获取产品列表信息
+	 * @see com.etaoguan.wea.service.IProductService#listProductsbyid(com.etaoguan.wea.common.DataCriteria, com.etaoguan.wea.common.OffsetRequest)
+	 */
+	@SuppressWarnings("rawtypes")
+	public DataSet listProductsbyid(DataCriteria dataCriteria,
+			OffsetRequest offsetRequest) {
+		return iProductDao.getProductsBycustNum(dataCriteria, offsetRequest);
+	}
+
+
+
+
+}

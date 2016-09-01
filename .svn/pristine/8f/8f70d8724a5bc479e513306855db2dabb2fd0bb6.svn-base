@@ -1,0 +1,607 @@
+package com.etaoguan.wea.common;
+
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.apache.commons.lang3.StringUtils;
+
+import com.etaoguan.wea.constant.WeaConstant;
+import com.etaoguan.wea.util.AnnoUtil;
+import com.etaoguan.wea.vo.AccessFuncMethod;
+import com.etaoguan.wea.vo.AppSetting;
+import com.etaoguan.wea.vo.MethodLog;
+import com.etaoguan.wea.vo.Owner;
+import com.etaoguan.wea.vo.OwnerSetting;
+import com.etaoguan.wea.vo.ProvRegion;
+import com.etaoguan.wea.vo.TableCodeName;
+import com.etaoguan.wea.vo.Trade;
+
+public class WeaDataCache {
+	
+	private static WeaDataCache dataCache = null;
+	
+	private Map<String,AccessFuncMethod> accessAuthMap;
+	
+	private Map<String,MethodLog> methodLogInfoMap;
+
+	private Map<String, List<String>> tableColumnMap;
+	
+	private Map<String,Map<String,List<TableCodeName>>> tableCodeNameMap;
+	
+	private Map<String,Map<String,String>> ownerSettingMap;
+	
+	private Map<String,String> orderDeliverStatusCodeNameMap;
+	
+	private Map<String,String> orderCashStatusCodeNameMap;
+	
+	private Map<String,String> orderCashTypeNameMap;
+	
+	private Map<String,String> orderSettleStatusCodeNameMap;
+	
+	private Map<String,String> prodShowFlagCodeNameMap;
+	
+	private Map<String,String> godownStatusCodeNameMap;
+	
+	private Map<String,String> returnedReasonCodeNameMap;
+	
+	private Map<String,String> cashTypeCodeNameMap;
+	
+	private Map<String,String> stkAllocStatusCodeNameMap;
+	
+	private Map<String,String> stkTraceReferModuleCodeNameMap;
+	
+	private Map<String,String> pushMessageProcessStatusNameMap;
+	
+	private Map<String,String> pushMessageTargetTypeNameMap;
+	
+	private Map<String,String> pushMessageMessageTypeNameMap;
+	
+	private Map<String,String> pushMessageExtraNameMap;
+	
+	private Map<String,String> pushMessageResultStatusNameMap;
+	
+	private Map<String,String> wechatMessageTypeNameMap;
+	
+	private Map<String,String> appSettingMap;
+	
+	private Map<String,String> custKeyLevelMap;
+	
+	private Map<String,String> custCreditLevelMap;
+	
+	private Map<String,String> ownerShopNumMap;
+	
+	private List<ProvRegion> provRegionList;
+	
+	private Map<String,String> provRegionMap;
+	
+	private List<Trade> tradeList;
+	
+	private Map<String,String> tradeMap;
+	private Map<String,String> wechatTokenMap;
+	
+	public Map<String, String> getWechatTokenMap() {
+		return wechatTokenMap;
+	}
+	public void initDataCache(){
+		initAccessAuthDataCache();
+		initMethodLogInfoCache();
+		initTableColumnDataCache();
+		initTableCodeNameDataCache();
+		initAppSettingDataCache();
+		initOwnerSettingDataCache();
+		initProvRegionDataCache();
+		initTradeDataCache();
+		initOwnerShopNumCache();
+		initWechatToken();
+	}
+	 public void initWechatToken(){
+		 wechatTokenMap = new LinkedHashMap<String, String>();
+	 }
+	 public static synchronized WeaDataCache getCache() {
+	        if(dataCache == null){
+	        	dataCache = new WeaDataCache();
+	        }
+	        return dataCache;
+	}
+
+	 public void initProvRegionDataCache(){
+		
+		provRegionList = WeaApplication.getInstance().getBasicDataService().getAllRegions();
+		String regionSetting  = appSettingMap.get(WeaConstant.APPSETTING_REGION_SETTING);
+		Map<String, String> regionSettingMap = new LinkedHashMap<String, String>();
+		if(StringUtils.isNotEmpty(regionSetting)){
+			String[] regions = StringUtils.split(regionSetting,";");
+			for(String region:regions){
+				String[] regionLevelText = StringUtils.split(region,",");
+				if(regionLevelText.length==2){
+					regionSettingMap.put(regionLevelText[0].trim(), regionLevelText[1].trim());
+				}
+			}
+		}
+
+		if(regionSettingMap.size()>0){ 
+			List<ProvRegion> filterProvRegionList = new ArrayList<ProvRegion>();
+			Map<String,ProvRegion> provMap = new LinkedHashMap<String,ProvRegion>();
+			Map<String,List<ProvRegion>> cityMap = new LinkedHashMap<String,List<ProvRegion>>();
+			Map<String,List<ProvRegion>> areaMap = new LinkedHashMap<String,List<ProvRegion>>();
+			for(ProvRegion provRegion:provRegionList){
+				if("P".equalsIgnoreCase(provRegion.getLevelFlag())){
+					provMap.put(provRegion.getRegionCode(), provRegion);
+				}else if("C".equalsIgnoreCase(provRegion.getLevelFlag())){
+					List<ProvRegion> cityList = cityMap.get(provRegion.getParentRegionCode());
+					if(cityList == null){
+						cityList = new ArrayList<ProvRegion>();
+						cityMap.put(provRegion.getParentRegionCode(), cityList);
+					}
+					cityList.add(provRegion);
+				}else if("T".equalsIgnoreCase(provRegion.getLevelFlag())){
+					List<ProvRegion> areaList = areaMap.get(provRegion.getParentRegionCode());
+					if(areaList == null){
+						areaList = new ArrayList<ProvRegion>();
+						areaMap.put(provRegion.getParentRegionCode(), areaList);
+					}
+					areaList.add(provRegion);
+				}
+			}
+			for(String key : regionSettingMap.keySet()){  
+				String regionLevel = regionSettingMap.get(key);  
+				ProvRegion prov =  provMap.get(key);
+				if(prov!=null){
+					filterProvRegionList.add(prov);
+					if("P".equalsIgnoreCase(regionLevel)&&!"*".equalsIgnoreCase(regionLevel)){
+						continue;
+					}
+					List<ProvRegion> cityList = cityMap.get(prov.getRegionCode());
+					if(cityList!=null){
+						filterProvRegionList.addAll(cityList);
+						if("C".equalsIgnoreCase(regionLevel)&&!"*".equalsIgnoreCase(regionLevel)){
+							continue;
+						}
+						
+						for(ProvRegion city:cityList){
+							List<ProvRegion> areaList = areaMap.get(city.getRegionCode());
+							if(areaList!=null){
+								filterProvRegionList.addAll(areaList);
+							}
+						}
+					}
+				}				  
+			}  
+			provRegionList = filterProvRegionList;
+			provRegionMap = new LinkedHashMap<String,String>();
+			for(ProvRegion provRegion:provRegionList){
+				provRegionMap.put(provRegion.getRegionCode(), provRegion.getRegionName());
+			}
+		}
+		
+
+		
+	} 
+
+	public void initTradeDataCache(){
+		
+		tradeList = WeaApplication.getInstance().getBasicDataService().getAllTrades();
+		tradeMap = new LinkedHashMap<String, String>();
+		for(Trade trade:tradeList){
+			tradeMap.put(trade.getTradeId(),trade.getTradeName());
+		}
+		
+	} 
+
+	
+	public void initAppSettingDataCache(){
+		
+		List<AppSetting> appSettings = WeaApplication.getInstance().getAppSettingService().getAllAppSettingList();
+		appSettingMap = new LinkedHashMap<String, String>();
+		for(AppSetting appSetting:appSettings){
+			appSettingMap.put(appSetting.getParamName(), appSetting.getParamValue());
+		}
+		
+	} 
+	
+	public boolean getAppSettingAllowPushMessage(){
+		if("off".equalsIgnoreCase(appSettingMap.get(WeaConstant.APPSETTING_ALLOW_PUSH_MESSAGE))){
+			return false;
+		}
+		return true;
+	}
+	
+	public boolean getAppSettingAllowImageLimit(){
+		if("off".equalsIgnoreCase(appSettingMap.get(WeaConstant.APPSETTING_ALLOW_IMAGE_LIMIT))){
+			return false;
+		}
+		return true;
+	}
+	
+	
+	public boolean getOwnerSettingForceToLocal(String ownerNum){
+		Map<String,String> param = ownerSettingMap.get(ownerNum);
+		if(param!=null&&"on".equalsIgnoreCase(param.get(WeaConstant.OWNERSETTING_FORCE_TO_LOCAL))){
+			return true;
+		}
+		return false;
+	}
+	
+	public boolean getOwnerSettingAllowWechat(String ownerNum){
+		Map<String,String> param = ownerSettingMap.get(ownerNum);
+		if(param!=null&&"on".equalsIgnoreCase(param.get(WeaConstant.OWNERSETTING_ALLOW_WECHAT))){
+			return true;
+		}
+		return false;
+	}
+	
+	public int getOwnerSettingPushMessageCount(String ownerNum){
+		Map<String,String> param = ownerSettingMap.get(ownerNum);
+		if(param!=null&&StringUtils.isNotEmpty(param.get(WeaConstant.OWNERSETTING_PUSHMESSAGE_LIMIT))){
+			return Integer.parseInt(param.get(WeaConstant.OWNERSETTING_PUSHMESSAGE_LIMIT).trim());
+		}
+		return 10;
+	}
+	
+	
+	public void initAccessAuthDataCache(){
+		accessAuthMap = AnnoUtil.getAccessAuthMap();
+	}
+	public void initMethodLogInfoCache(){
+		methodLogInfoMap = AnnoUtil.getMethodLogInfo();
+	}
+	
+	public void initTableColumnDataCache() {
+		tableColumnMap = new LinkedHashMap<String, List<String>>();
+		List<String> tableNames = WeaApplication.getInstance().getBasicDataService().getAllTables();
+		for(String tableName:tableNames){
+			List<String> columns = WeaApplication.getInstance().getBasicDataService().getColumnsByTableName(tableName);
+			tableColumnMap.put(tableName, columns);
+		}
+	}
+	
+	public void initOwnerSettingDataCache() {
+		ownerSettingMap = new LinkedHashMap<String,Map<String,String>>();
+		List<OwnerSetting> ownerSettingList = WeaApplication.getInstance().getOwnerSettingService().getAllOwnerSettingList();
+		for(OwnerSetting ownerSetting:ownerSettingList){
+			Map<String,String> paramMap =  ownerSettingMap.get(ownerSetting.getOwnerNum());
+			if(paramMap == null){
+				paramMap = new LinkedHashMap<String,String>();
+				ownerSettingMap.put(ownerSetting.getOwnerNum(), paramMap);
+			}
+			paramMap.put(ownerSetting.getParamName(), ownerSetting.getParamValue());
+		}
+	}
+	
+	public void initTableCodeNameDataCache() {
+		tableCodeNameMap = new LinkedHashMap<String,Map<String,List<TableCodeName>>>();
+		List<TableCodeName> tableCodeNameList = WeaApplication.getInstance().getTableCodeNameService().getAllTableCodeNameList();
+		for(TableCodeName tableCodeName:tableCodeNameList){
+			Map<String,List<TableCodeName>> columnCodeMap =  tableCodeNameMap.get(tableCodeName.getTableName());
+			if(columnCodeMap == null){
+				columnCodeMap = new LinkedHashMap<String,List<TableCodeName>>();
+				tableCodeNameMap.put(tableCodeName.getTableName(), columnCodeMap);
+			}
+			List<TableCodeName>  codeList = columnCodeMap.get(tableCodeName.getColumnName());
+			if(codeList == null){
+				codeList = new ArrayList<TableCodeName>();
+				columnCodeMap.put(tableCodeName.getColumnName(), codeList);
+			}
+			codeList.add(tableCodeName);
+		}
+		initOrderDeliverStatusCodeNameMap();
+		initOrderCashStatusCodeNameMap();
+		initOrderCashTypeNameMap();
+		initOrderSettleStatusCodeNameMap();
+		initOrderShowStatusCodeNameMap();
+		initCustKeyLevelMap();
+		initCustCreditLevelMap();
+		initGodownStatusCodeNameMap();
+		initStkAllocStatusCodeNameMap();
+		initStkTraceReferModuleCodeNameMap();
+		initReturnedReasonCodeNameMap();
+		initCashTypeCodeNameMap();
+		initPushMessageProcessStatusNameMap();
+		initPushMessageTargetTypeNameMap();
+		initPushMessageMessageTypeNameMap();
+		initPushMessageExtraNameMap();		
+		initPushMessageResultStatusNameMap();	
+		initWechatMessageTypeNameMap();	
+		
+	}
+
+
+	private void initOwnerShopNumCache() {
+		ownerShopNumMap = new LinkedHashMap<String,String>();
+		List<Owner> ownerList = WeaApplication.getInstance().getOwnerService().getAllOwner();
+		for(Owner owner:ownerList){
+			ownerShopNumMap.put(owner.getShopNum(),owner.getOwnerNum());	
+		}
+
+	}
+	
+
+	public Map<String, AccessFuncMethod> getAccessAuthMap() {
+		return accessAuthMap;
+	}
+	
+	public Map<String, MethodLog> getMethodLogInfoMap() {
+		return methodLogInfoMap;
+	}
+		
+	public Map<String, List<String>> getTableColumnMap() {
+		return tableColumnMap;
+	}
+	
+	private void initWechatMessageTypeNameMap() {
+		wechatMessageTypeNameMap = new LinkedHashMap<String,String>();
+		Map<String,List<TableCodeName>> wechatMessageTypeTableCodeNameMap = tableCodeNameMap.get("wechat_message");
+		if(wechatMessageTypeTableCodeNameMap!=null&&wechatMessageTypeTableCodeNameMap.get("message_type")!=null){
+			for(TableCodeName tableCodeName:wechatMessageTypeTableCodeNameMap.get("message_type")){
+				wechatMessageTypeNameMap.put(tableCodeName.getColumnCode(), tableCodeName.getNameCh());
+			}
+		}
+
+	}
+	
+	private void initPushMessageResultStatusNameMap() {
+		pushMessageResultStatusNameMap = new LinkedHashMap<String,String>();
+		Map<String,List<TableCodeName>> pushMessageResultTableCodeNameMap = tableCodeNameMap.get("push_message_result");
+		if(pushMessageResultTableCodeNameMap!=null&&pushMessageResultTableCodeNameMap.get("result_status")!=null){
+			for(TableCodeName tableCodeName:pushMessageResultTableCodeNameMap.get("result_status")){
+				pushMessageResultStatusNameMap.put(tableCodeName.getColumnCode(), tableCodeName.getNameCh());
+			}
+		}
+
+	}
+	
+	private void initPushMessageExtraNameMap() {
+		pushMessageExtraNameMap = new LinkedHashMap<String,String>();
+		Map<String,List<TableCodeName>> pushMessageExtrasTableCodeNameMap = tableCodeNameMap.get("push_message_extras");
+		if(pushMessageExtrasTableCodeNameMap!=null&&pushMessageExtrasTableCodeNameMap.get("extra_name")!=null){
+			for(TableCodeName tableCodeName:pushMessageExtrasTableCodeNameMap.get("extra_name")){
+				pushMessageExtraNameMap.put(tableCodeName.getColumnCode(), tableCodeName.getNameCh());
+			}
+		}
+
+	}
+	
+	private void initPushMessageProcessStatusNameMap() {
+		pushMessageProcessStatusNameMap = new LinkedHashMap<String,String>();
+		Map<String,List<TableCodeName>> pushMessageTableCodeNameMap = tableCodeNameMap.get("push_message");
+		if(pushMessageTableCodeNameMap!=null&&pushMessageTableCodeNameMap.get("process_status")!=null){
+			for(TableCodeName tableCodeName:pushMessageTableCodeNameMap.get("process_status")){
+				pushMessageProcessStatusNameMap.put(tableCodeName.getColumnCode(), tableCodeName.getNameCh());
+			}
+		}
+
+	}
+	
+	private void initPushMessageTargetTypeNameMap() {
+		pushMessageTargetTypeNameMap = new LinkedHashMap<String,String>();
+		Map<String,List<TableCodeName>> pushMessageTableCodeNameMap = tableCodeNameMap.get("push_message");
+		if(pushMessageTableCodeNameMap!=null&&pushMessageTableCodeNameMap.get("target_type")!=null){
+			for(TableCodeName tableCodeName:pushMessageTableCodeNameMap.get("target_type")){
+				pushMessageTargetTypeNameMap.put(tableCodeName.getColumnCode(), tableCodeName.getNameCh());
+			}
+		}
+
+	}
+	
+	private void initPushMessageMessageTypeNameMap() {
+		pushMessageMessageTypeNameMap = new LinkedHashMap<String,String>();
+		Map<String,List<TableCodeName>> pushMessageTableCodeNameMap = tableCodeNameMap.get("push_message");
+		if(pushMessageTableCodeNameMap!=null&&pushMessageTableCodeNameMap.get("message_type")!=null){
+			for(TableCodeName tableCodeName:pushMessageTableCodeNameMap.get("message_type")){
+				pushMessageMessageTypeNameMap.put(tableCodeName.getColumnCode(), tableCodeName.getNameCh());
+			}
+		}
+
+	}
+	
+	private void initCashTypeCodeNameMap() {
+		cashTypeCodeNameMap = new LinkedHashMap<String,String>();
+		Map<String,List<TableCodeName>> cashTableCodeNameMap = tableCodeNameMap.get("cash_invoice");
+		if(cashTableCodeNameMap!=null&&cashTableCodeNameMap.get("cash_type")!=null){
+			for(TableCodeName tableCodeName:cashTableCodeNameMap.get("cash_type")){
+				cashTypeCodeNameMap.put(tableCodeName.getColumnCode(), tableCodeName.getNameCh());
+			}
+		}
+
+	}
+	
+	
+	private void initReturnedReasonCodeNameMap() {
+		returnedReasonCodeNameMap = new LinkedHashMap<String,String>();
+		Map<String,List<TableCodeName>> returnedTableCodeNameMap = tableCodeNameMap.get("returned_invoice");
+		if(returnedTableCodeNameMap!=null&&returnedTableCodeNameMap.get("ret_reason")!=null){
+			for(TableCodeName tableCodeName:returnedTableCodeNameMap.get("ret_reason")){
+				returnedReasonCodeNameMap.put(tableCodeName.getColumnCode(), tableCodeName.getNameCh());
+			}
+		}
+
+	}
+	
+	
+	private void initStkTraceReferModuleCodeNameMap() {
+		stkTraceReferModuleCodeNameMap = new LinkedHashMap<String,String>();
+		Map<String,List<TableCodeName>> stockTraceTableCodeNameMap = tableCodeNameMap.get("stock_trace");
+		if(stockTraceTableCodeNameMap!=null&&stockTraceTableCodeNameMap.get("refer_module")!=null){
+			for(TableCodeName tableCodeName:stockTraceTableCodeNameMap.get("refer_module")){
+				stkTraceReferModuleCodeNameMap.put(tableCodeName.getColumnCode(), tableCodeName.getNameCh());
+			}
+		}
+
+	}
+	
+	private void initGodownStatusCodeNameMap() {
+		godownStatusCodeNameMap = new LinkedHashMap<String,String>();
+		Map<String,List<TableCodeName>> godownTableCodeNameMap = tableCodeNameMap.get("godown_invoice");
+		if(godownTableCodeNameMap!=null&&godownTableCodeNameMap.get("gd_status")!=null){
+			for(TableCodeName tableCodeName:godownTableCodeNameMap.get("gd_status")){
+				godownStatusCodeNameMap.put(tableCodeName.getColumnCode(), tableCodeName.getNameCh());
+			}
+		}
+
+	}
+	
+	private void initStkAllocStatusCodeNameMap() {
+		stkAllocStatusCodeNameMap = new LinkedHashMap<String,String>();
+		Map<String,List<TableCodeName>> stkAllocTableCodeNameMap = tableCodeNameMap.get("stock_allocate_invoice");
+		if(stkAllocTableCodeNameMap!=null&&stkAllocTableCodeNameMap.get("stkalloc_status")!=null){
+			for(TableCodeName tableCodeName:stkAllocTableCodeNameMap.get("stkalloc_status")){
+				stkAllocStatusCodeNameMap.put(tableCodeName.getColumnCode(), tableCodeName.getNameCh());
+			}
+		}
+
+	}
+	
+	private void initCustKeyLevelMap() {
+		custKeyLevelMap = new LinkedHashMap<String,String>();
+		Map<String,List<TableCodeName>> custKeyLevelTableCodeNameMap = tableCodeNameMap.get("customer");
+		if(custKeyLevelTableCodeNameMap!=null&&custKeyLevelTableCodeNameMap.get("key_level")!=null){
+			for(TableCodeName tableCodeName:custKeyLevelTableCodeNameMap.get("key_level")){
+				custKeyLevelMap.put(tableCodeName.getColumnCode(), tableCodeName.getNameCh());
+			}
+		}
+
+	}
+	
+	private void initCustCreditLevelMap() {
+		custCreditLevelMap = new LinkedHashMap<String,String>();
+		Map<String,List<TableCodeName>> custCreditLevelTableCodeNameMap = tableCodeNameMap.get("customer");
+		if(custCreditLevelTableCodeNameMap!=null&&custCreditLevelTableCodeNameMap.get("credit_level")!=null){
+			for(TableCodeName tableCodeName:custCreditLevelTableCodeNameMap.get("credit_level")){
+				custCreditLevelMap.put(tableCodeName.getColumnCode(), tableCodeName.getNameCh());
+			}
+		}
+
+	}
+
+	private void initOrderDeliverStatusCodeNameMap() {
+		orderDeliverStatusCodeNameMap = new LinkedHashMap<String,String>();
+		Map<String,List<TableCodeName>> deliverStatusTableCodeNameMap = tableCodeNameMap.get("order");
+		if(deliverStatusTableCodeNameMap!=null&&deliverStatusTableCodeNameMap.get("deliver_status")!=null){
+			for(TableCodeName tableCodeName:deliverStatusTableCodeNameMap.get("deliver_status")){
+				orderDeliverStatusCodeNameMap.put(tableCodeName.getColumnCode(), tableCodeName.getNameCh());
+			}
+		}
+
+	}
+	
+	private void initOrderCashStatusCodeNameMap() {
+		orderCashStatusCodeNameMap = new LinkedHashMap<String,String>();
+		Map<String,List<TableCodeName>> cashStatusTableCodeNameMap = tableCodeNameMap.get("order");
+		if(cashStatusTableCodeNameMap!=null&&cashStatusTableCodeNameMap.get("cash_status")!=null){
+			for(TableCodeName tableCodeName:cashStatusTableCodeNameMap.get("cash_status")){
+				orderCashStatusCodeNameMap.put(tableCodeName.getColumnCode(), tableCodeName.getNameCh());
+			}
+		}
+
+	}
+	
+	private void initOrderShowStatusCodeNameMap() {
+		prodShowFlagCodeNameMap = new LinkedHashMap<String,String>();
+		Map<String,List<TableCodeName>> showStatusTableCodeNameMap = tableCodeNameMap.get("product");
+		if(showStatusTableCodeNameMap!=null&&showStatusTableCodeNameMap.get("show_flag")!=null){
+			for(TableCodeName tableCodeName:showStatusTableCodeNameMap.get("show_flag")){
+				prodShowFlagCodeNameMap.put(tableCodeName.getColumnCode(), tableCodeName.getNameCh());
+			}
+		}
+
+	}
+	
+	private void initOrderSettleStatusCodeNameMap() {
+		orderSettleStatusCodeNameMap = new LinkedHashMap<String,String>();
+		Map<String,List<TableCodeName>> settleStatusTableCodeNameMap = tableCodeNameMap.get("order");
+		if(settleStatusTableCodeNameMap!=null&&settleStatusTableCodeNameMap.get("settle_status")!=null){
+			for(TableCodeName tableCodeName:settleStatusTableCodeNameMap.get("settle_status")){
+				orderSettleStatusCodeNameMap.put(tableCodeName.getColumnCode(), tableCodeName.getNameCh());
+			}
+		}
+
+	}
+
+	
+	private void initOrderCashTypeNameMap() {
+		orderCashTypeNameMap = new LinkedHashMap<String,String>();
+		Map<String,List<TableCodeName>> cashTypeTableCodeNameMap = tableCodeNameMap.get("order");
+		if(cashTypeTableCodeNameMap!=null&&cashTypeTableCodeNameMap.get("cash_type")!=null){
+			for(TableCodeName tableCodeName:cashTypeTableCodeNameMap.get("cash_type")){
+				orderCashTypeNameMap.put(tableCodeName.getColumnCode(), tableCodeName.getNameCh());
+			}
+		}
+
+	}
+	
+	public Map<String, String> getOrderDeliverStatusCodeNameMap() {
+		return orderDeliverStatusCodeNameMap;
+	}
+	public Map<String, String> getOrderCashStatusCodeNameMap() {
+		return orderCashStatusCodeNameMap;
+	}
+	public Map<String, String> getOrderSettleStatusCodeNameMap() {
+		return orderSettleStatusCodeNameMap;
+	}
+	public Map<String, String> getAppSettingMap() {
+		return appSettingMap;
+	}
+	public List<ProvRegion> getProvRegionList() {
+		return provRegionList;
+	}
+	public Map<String, String> getProvRegionMap() {
+		return provRegionMap;
+	}
+	public Map<String, String> getOrderCashTypeNameMap() {
+		return orderCashTypeNameMap;
+	}
+	public Map<String, String> getTradeMap() {
+		return tradeMap;
+	}
+	public Map<String, String> getCustKeyLevelMap() {
+		return custKeyLevelMap;
+	}
+	public Map<String, String> getCustCreditLevelMap() {
+		return custCreditLevelMap;
+	}
+	public List<Trade> getTradeList() {
+		return tradeList;
+	}
+	public Map<String, String> getProdShowFlagCodeNameMap() {
+		return prodShowFlagCodeNameMap;
+	}
+	public Map<String, String> getGodownStatusCodeNameMap() {
+		return godownStatusCodeNameMap;
+	}
+	public Map<String, String> getStkAllocStatusCodeNameMap() {
+		return stkAllocStatusCodeNameMap;
+	}
+	public Map<String, String> getStkTraceReferModuleCodeNameMap() {
+		return stkTraceReferModuleCodeNameMap;
+	}
+	public Map<String, String> getReturnedReasonCodeNameMap() {
+		return returnedReasonCodeNameMap;
+	}
+	public Map<String, String> getCashTypeCodeNameMap() {
+		return cashTypeCodeNameMap;
+	}
+	public Map<String, String> getPushMessageProcessStatusNameMap() {
+		return pushMessageProcessStatusNameMap;
+	}
+	public Map<String, String> getPushMessageTargetTypeNameMap() {
+		return pushMessageTargetTypeNameMap;
+	}
+	public Map<String, String> getPushMessageMessageTypeNameMap() {
+		return pushMessageMessageTypeNameMap;
+	}
+	public Map<String, String> getPushMessageExtraNameMap() {
+		return pushMessageExtraNameMap;
+	}
+	public Map<String, String> getPushMessageResultStatusNameMap() {
+		return pushMessageResultStatusNameMap;
+	}
+	public Map<String, String> getWechatMessageTypeNameMap() {
+		return wechatMessageTypeNameMap;
+	}
+	public Map<String, String> getOwnerShopNumMap() {
+		return ownerShopNumMap;
+	}
+
+}

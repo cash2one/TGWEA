@@ -1,0 +1,21 @@
+package com.etaoguan.wea.client.mobile.service;
+
+import javax.servlet.http.HttpServletRequest;
+
+import com.etaoguan.wea.service.IPaymentInfoService;
+
+
+public interface IMPaymentInfoService extends IPaymentInfoService{
+	
+	/**
+	 * @param orderNum 订单编号
+	 * @return 组合授权地址
+	 */
+	public String mAssembleUrl(String orderNum,String domainBaseUrl);
+	
+	/**
+	 * @param wechatOrder 创建微信订单
+	 */
+	public String addMWechatOrder(String code,String state,HttpServletRequest request,String domainBaseUrl);
+
+}

@@ -1,0 +1,28 @@
+package com.etaoguan.wea.dao.impl;
+
+import javax.annotation.Resource;
+
+import org.springframework.stereotype.Repository;
+
+import com.etaoguan.wea.dao.IWechatOrderDao;
+import com.etaoguan.wea.vo.WechatOrder;
+import com.ibatis.sqlmap.client.SqlMapClient;
+
+/**
+ * @author cunli
+ * 微信订单
+ */
+@Repository
+public class WechatOrderDao extends SpringBaseDao implements IWechatOrderDao {
+
+	@Override
+	@Resource(name = "wechatOrderSqlMapClient")
+	public void setSbiSqlMapClient(SqlMapClient sqlMapClient) {
+		super.setSqlMapClient(sqlMapClient);
+	}
+
+	public void createWechatOrder(WechatOrder wechatOrder) {
+		this.getSqlMapClientTemplate().insert("createWechatOrder", wechatOrder);
+	}
+
+}

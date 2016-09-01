@@ -1,0 +1,98 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>淘冠科技APP下载</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0" />
+
+<style>
+* {
+	font-family: "微软雅黑";
+}
+
+.bradius {
+	border-radius: 0.5rem;
+}
+
+.bd {
+	margin: auto;
+	padding-top: 4rem;
+	padding-left: 3rem;
+	padding-bottom: 2rem;
+	padding-right: 1.5rem;
+	background-color: #e7eaef;
+	width: 22rem;
+}
+
+.fleft {
+	float: left;
+}
+
+.tit {
+	font-size: 16px;
+}
+
+.tcenter {
+	text-align: center;
+}
+
+.dbg {
+	background-image: url(/images/download/bgbtn.png);
+	width: 152px;
+	height: 55px;
+}
+
+.clear {
+	clear: both;
+}
+
+.rightdiv {
+	margin-left: 3rem;
+}
+
+.leftimg {
+	margin-top: 2.5rem;
+}
+.apps{
+}
+</style>
+</head>
+
+<body>
+
+	<div class="bd bradius">
+
+		<div class="fleft leftimg"><img src='/images/download/imgphone.png'/></div>
+		<div class="fleft rightdiv">
+			<div class="tit tcenter">APP下载</div>
+			<div style="margin-top:1rem;">
+				Ipone版 ###appleVersion###<br />发布时间：###appleDate###
+			</div>
+			<div>
+				<div class="dbg" style="margin-top:0.5rem;">
+					<div class="fleft" style="padding-top:0.6rem;padding-left:0.5rem;"><img src='/images/download/apple.png'/></div>
+				<a href="###bundleId###" target="_blank"><div class="fleft" style="padding-top:1rem;padding-left:0.2rem;font-size:14px;">App Store下载</div></a>
+				</div>
+				<div class="dbg">
+					<div class="fleft" style="padding-top:0.6rem;padding-left:0.5rem;">
+						<img src='/images/download/escape.png'/>
+					</div>
+					<a href="###apple###" target="_blank"><div class="fleft" style="padding-top:1rem;padding-left:1rem;font-size:14px;">越狱版下载</div></a>
+				</div>
+			</div>
+			<div style="margin-top:0.5rem;">
+				Android版 ###androidVersion###<br />发布时间：###androidDate###
+			</div>
+			<div class="dbg" style="margin-top:0.5rem;">
+				<div class="fleft" style="padding-top:0.6rem;padding-left:0.5rem;">
+					<img src='/images/download/android.png'/>
+				</div>
+				<a href="###android###" target="_blank"><div class="fleft" style="padding-top:1rem;padding-left:0.1rem;font-size:14px;">Android版下载</div></a>
+			</div>
+
+		</div>
+		<div class="clear"></div>
+	</div>
+
+</body>
+</html>

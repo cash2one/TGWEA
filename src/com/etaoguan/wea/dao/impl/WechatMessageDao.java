@@ -1,0 +1,104 @@
+package com.etaoguan.wea.dao.impl;
+
+import java.util.List;
+import java.util.Map;
+
+import javax.annotation.Resource;
+
+import org.springframework.stereotype.Repository;
+
+import com.etaoguan.wea.common.DataCriteria;
+import com.etaoguan.wea.common.DataSet;
+import com.etaoguan.wea.common.OffsetRequest;
+import com.etaoguan.wea.dao.IWechatMessageDao;
+import com.etaoguan.wea.vo.WechatMessageData;
+import com.etaoguan.wea.vo.WechatMessage;
+import com.ibatis.sqlmap.client.SqlMapClient;
+
+@Repository
+public class WechatMessageDao  extends SpringBaseDao implements IWechatMessageDao{
+
+	
+	@Override
+	@Resource(name="wechatSqlMapClient")
+	public void setSbiSqlMapClient(SqlMapClient sqlMapClient){
+		super.setSqlMapClient(sqlMapClient);
+	}
+
+	/* (non-Javadoc)检查消息要不要转发给多客服
+	 * @see com.etaoguan.wea.dao.IWechatMessageDao#checkManyCustomerMsg(com.etaoguan.wea.vo.WechatMessage)
+	 */
+	@Override
+	public int getWechatMsgCount(DataCriteria dataCriteria) {
+		return (Integer)this.getSqlMapClientTemplate().queryForObject("checkManyCustomerMsg", dataCriteria.getParams());
+	}
+	
+	@Override
+	public long addWechatMessage(WechatMessage wechatMessage) {
+		
+		return (Long)this.getSqlMapClientTemplate().insert("createWechatMessage",wechatMessage);
+	}
+
+	@Override
+	public void delWechatMessage(DataCriteria dataCriteria) {
+		this.getSqlMapClientTemplate().delete("deleteWechatMessage", dataCriteria.getParams());
+		
+	}
+
+	@Override
+	public int getMaxWechatMessageDataItemNum(DataCriteria dataCriteria) {
+		
+		return (Integer)this.getSqlMapClientTemplate().queryForObject("getMaxWechatMessageDataItemNum", dataCriteria.getParams());
+	}
+
+	@Override
+	public WechatMessage getWechatMessage(DataCriteria dataCriteria) {
+
+		return (WechatMessage)this.getSqlMapClientTemplate().queryForObject("getWechatMessage", dataCriteria.getParams());
+	}
+
+	@Override
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	public DataSet getWechatMessages(DataCriteria dataCriteria,
+			OffsetRequest offsetRequest) {
+		Map params = dataCriteria.getParams();
+		
+		Integer count=(Integer) this.getSqlMapClientTemplate().queryForObject("getWechatMessageCount", params);
+		
+		params.put("limit", offsetRequest.getPerUnitNum());
+		params.put("offset", offsetRequest.getOffset());
+		List<WechatMessage> wechatMessageList = this.getSqlMapClientTemplate().queryForList("getWechatMessageDataSet", params);
+		
+		DataSet<WechatMessage> dataSet = new DataSet<WechatMessage>();
+		dataSet.setTotalRecNum(count);
+		dataSet.setDataList(wechatMessageList);
+		return dataSet;
+	}
+
+	@Override
+	public void updateWechatMessage(WechatMessage wechatMessage) {
+		this.getSqlMapClientTemplate().update("updateWechatMessage", wechatMessage);
+		
+	}
+
+	@Override
+	public void updateWechatMessage(DataCriteria dataCriteria) {
+		this.getSqlMapClientTemplate().update("updateWechatMessageByMap", dataCriteria.getParams());
+		
+	}
+
+	@Override
+	public void addWechatMessageData(WechatMessageData wechatMessageData) {
+		
+		this.getSqlMapClientTemplate().insert("createWechatMessageData",wechatMessageData);
+	}
+
+	@Override
+	public void delWechatMessageData(DataCriteria dataCriteria) {
+		this.getSqlMapClientTemplate().delete("deleteWechatMessageData", dataCriteria.getParams());
+		
+	}
+
+
+
+}

@@ -1,0 +1,645 @@
+package com.etaoguan.wea.util;
+
+import java.awt.Color;
+import java.awt.GridBagConstraints;
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.security.MessageDigest;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.StringTokenizer;
+import java.util.regex.Pattern;
+
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
+public class StringUtil {
+	
+	private final static Log log = LogFactory.getLog(StringUtil.class);
+	
+	public static final char[] digital = "0123456789ABCDEF".toCharArray();
+	
+	public static final String CHARSET_NAME_UTF8 = "UTF-8";
+	
+	public static boolean isNotEmpty(String str){
+		if(str == null || "".equals(str.trim()))
+			return false;
+		return true;
+	}
+	
+	/**
+     * Encode a string using algorithm specified in web.xml and return the
+     * resulting encrypted password. If exception, the plain credentials
+     * string is returned
+     *
+     * @param password Password or other credentials to use in authenticating
+     *        this username
+     * @param algorithm Algorithm used to do the digest
+     *
+     * @return encypted password based on the algorithm.
+     */
+    public static String encodePassword(String password, String algorithm) {
+        byte[] unencodedPassword = password.getBytes();
+
+        MessageDigest md = null;
+
+        try {
+            // first create an instance, given the provider
+            md = MessageDigest.getInstance(algorithm);
+        } catch (Exception e) {
+            log.error("Exception: " + e);
+
+            return password;
+        }
+
+        md.reset();
+
+        // call the update method one or more times
+        // (useful when you don't know the size of your data, eg. stream)
+        md.update(unencodedPassword);
+
+        // now calculate the hash
+        byte[] encodedPassword = md.digest();
+
+        StringBuffer buf = new StringBuffer();
+
+        for (int i = 0; i < encodedPassword.length; i++) {
+            if ((encodedPassword[i] & 0xff) < 0x10) {
+                buf.append("0");
+            }
+
+            buf.append(Long.toString(encodedPassword[i] & 0xff, 16));
+        }
+
+        return buf.toString();
+    }
+
+    /**
+     * Encode a string using Base64 encoding. Used when storing passwords
+     * as cookies.
+     *
+     * This is weak encoding in that anyone can use the decodeString
+     * routine to reverse the encoding.
+     *
+     * @param str
+     * @return String
+     */
+    public static String encodeString(String str)  {
+        sun.misc.BASE64Encoder encoder = new sun.misc.BASE64Encoder();
+        return encoder.encodeBuffer(str.getBytes()).trim();
+    }
+
+    /**
+     * Decode a string using Base64 encoding.
+     *
+     * @param str
+     * @return String
+     */
+    public static String decodeString(String str) {
+        sun.misc.BASE64Decoder dec = new sun.misc.BASE64Decoder();
+        try {
+            return new String(dec.decodeBuffer(str));
+        } catch (IOException io) {
+        	throw new RuntimeException(io.getMessage(), io.getCause());
+        }
+    }
+    
+
+
+    /**
+     * make the front string to be ok .
+     *
+     * @param str
+     * @return String
+     */
+    public static String strNotChange(String str) {
+        String retStr = str;
+        retStr = retStr.replaceAll("#60001", "&lt;"); //<
+        retStr = retStr.replaceAll("#60002", "&gt;");//>
+        retStr = retStr.replaceAll("#60003", "&nbsp;"); //space
+        retStr = retStr.replaceAll("#60004", "&amp;");// &
+        retStr = retStr.replaceAll("#60005", "<br />");//\r\n
+        retStr = retStr.replaceAll("#60006", "<");//
+        retStr = retStr.replaceAll("#60007", ">");//
+        retStr = retStr.replaceAll("#60008", "\"");
+        return retStr;
+    }
+
+    /**
+     * make the front string to be ok .
+     *
+     * @param str
+     * @return String
+     */
+    public static String reverseStrNotChange(String str) {
+        String retStr = str;
+        retStr = retStr.replaceAll("&lt;","#60001"); //<
+        retStr = retStr.replaceAll("&gt;","#60002");//>
+        retStr = retStr.replaceAll("&nbsp;","#60003"); //space
+        retStr = retStr.replaceAll("&amp;","#60004");// &
+        retStr = retStr.replaceAll("<br />","#60005");//\r\n
+        retStr = retStr.replaceAll("<","#60006");//<
+        retStr = retStr.replaceAll(">","#60007");//>
+        retStr = retStr.replaceAll("\"", "#60008");
+        return retStr;
+    }
+    
+
+
+    public static String removeAll(String s, String s1)
+    {
+        StringBuffer stringbuffer = new StringBuffer(s);
+        int i = stringbuffer.indexOf(s1);
+        int j = s1.length();
+        for(; i >= 0; i = stringbuffer.indexOf(s1))
+            stringbuffer.delete(i, i + j);
+
+        return stringbuffer.toString();
+    }
+
+    public static String replaceAll(String s, String s1, String s2)
+    {
+        if(s1.equals(s2))
+            return s;
+        StringBuffer stringbuffer = new StringBuffer(s);
+        int i = stringbuffer.indexOf(s1);
+        int j = s1.length();
+        for(; i >= 0; i = stringbuffer.indexOf(s1))
+            stringbuffer.replace(i, i + j, s2);
+
+        return stringbuffer.toString();
+    }
+
+    public static String stackTraceToString(StackTraceElement astacktraceelement[])
+    {
+        StringBuffer stringbuffer = new StringBuffer();
+        for(int i = 0; i < astacktraceelement.length; i++)
+            stringbuffer.append("\t" + astacktraceelement[i] + "\n");
+
+        return stringbuffer.toString();
+    }
+
+    public static String throwableToString(Throwable throwable)
+    {
+        return throwable + "\n" + stackTraceToString(throwable.getStackTrace());
+    }
+
+    public static String insertFormatedString(String s, String s1)
+    {
+        String s2 = s;
+        int i = s2.indexOf("%s");
+        if(i >= 0)
+        {
+            StringBuffer stringbuffer = new StringBuffer(delete(s2, i, 2));
+            stringbuffer.insert(i, s1);
+            s2 = stringbuffer.toString();
+        }
+        return s2;
+    }
+
+    public static String delete(String s, int i, int j)
+    {
+        char ac[] = s.toCharArray();
+        int k = s.length();
+        if(i < 0)
+            return new String(s);
+        if(i + j > k)
+            j = k - i;
+        if(j > 0)
+        {
+            System.arraycopy(ac, i + j, ac, i, k - i - j);
+            return new String(ac, 0, k - j);
+        } else
+        {
+            return new String(ac);
+        }
+    }
+
+    public static int parseInt(String s)
+    {
+        return parseInt(s, 0);
+    }
+
+    public static int parseInt(String s, int i)
+    {
+        return Integer.parseInt(s);
+
+    }
+
+    public static String dateToString(Date date)
+    {
+        SimpleDateFormat simpledateformat = new SimpleDateFormat("dd.MM.yyyy, kk:mm:ss");
+        return simpledateformat.format(date);
+  
+    }
+
+    public static long parseLong(String s)
+    {
+        return parseLong(s, 0L);
+    }
+
+    public static long parseLong(String s, long l)
+    {
+        return Long.parseLong(s);
+
+    }
+
+    public static int[] parseIPAddress(String s)
+    {
+        StringTokenizer stringtokenizer = new StringTokenizer(s, ".", false);
+        if(stringtokenizer.countTokens() == 4)
+        {
+            int ai[] = new int[4];
+            int i = 0;
+            while(stringtokenizer.hasMoreTokens()) 
+                ai[i++] = parseInt(stringtokenizer.nextToken());
+            return ai;
+        } else
+        {
+            return null;
+        }
+    }
+
+    public static boolean isIPAddress(String s)
+    {
+        return parseIPAddress(s) != null;
+    }
+
+    @SuppressWarnings("rawtypes")
+	public static String getClassName(Class class1)
+    {
+        String s = class1.getName();
+        int i = s.lastIndexOf(".");
+        if(i >= 0 && s.length() > i + 1)
+            s = s.substring(i + 1, s.length());
+        return s;
+    }
+
+    public static String getCommonSubString(String s, String s1)
+    {
+        StringBuffer stringbuffer = new StringBuffer(s);
+        int i = 0;
+        do
+        {
+            if(i >= s.length() || i >= s1.length())
+                break;
+            if(s.charAt(i) != s1.charAt(i))
+            {
+                stringbuffer.delete(i, stringbuffer.length());
+                break;
+            }
+            i++;
+        } while(true);
+        return stringbuffer.toString();
+    }
+
+    public static String arrayToString(Object aobj[])
+    {
+        return arrayToString(aobj, ",");
+    }
+
+    public static String arrayToString(Object aobj[], String s)
+    {
+        StringBuffer stringbuffer = new StringBuffer();
+        for(int i = 0; i < aobj.length; i++)
+        {
+            if(stringbuffer.length() > 0)
+                stringbuffer.append(s);
+            stringbuffer.append(aobj[i]);
+        }
+
+        return stringbuffer.toString();
+    }
+
+    public static String arrayToString(int ai[])
+    {
+        return arrayToString(ai, ",");
+    }
+
+    public static String arrayToString(int ai[], String s)
+    {
+        StringBuffer stringbuffer = new StringBuffer();
+        for(int i = 0; i < ai.length; i++)
+        {
+            if(stringbuffer.length() > 0)
+                stringbuffer.append(s);
+            stringbuffer.append(ai[i]);
+        }
+
+        return stringbuffer.toString();
+    }
+
+    public static String gridBagConstraintsToString(GridBagConstraints gridbagconstraints)
+    {
+        StringBuffer stringbuffer = new StringBuffer("X=");
+        stringbuffer.append(gridbagconstraints.gridx);
+        stringbuffer.append(", Y=");
+        stringbuffer.append(gridbagconstraints.gridy);
+        stringbuffer.append(", WX=");
+        stringbuffer.append(gridbagconstraints.weightx);
+        stringbuffer.append(", WY=");
+        stringbuffer.append(gridbagconstraints.weighty);
+        stringbuffer.append(", Insets=");
+        stringbuffer.append(gridbagconstraints.insets);
+        return stringbuffer.toString();
+    }
+
+    public static long parseHexLong(String s)
+    {
+        return parseHexLong(s, 0L);
+    }
+
+    public static long parseHexLong(String s, long l)
+    {
+        String s1 = "0x";
+        if(s.startsWith(s1))
+            s = s.substring(s1.length());
+        return Long.valueOf(s, 16).longValue();
+
+    }
+
+    public static String removeDirectionFromString(String s)
+    {
+        String s1 = removeAll(s, "Src");
+        s1 = removeAll(s1, "Snk");
+        s1 = replaceAll(s1, "--", "-");
+        return s1.endsWith("-") ? s1.substring(0, s1.length() - 1) : s1;
+    }
+
+    public static String addDecimalNumbers(String s, String s1)
+    {
+        StringBuffer stringbuffer = new StringBuffer();
+        if(s != null && s1 != null)
+        {
+            char ac[] = s.toCharArray();
+            char ac1[] = s1.toCharArray();
+            int i = ac.length - 1;
+            int j = ac1.length - 1;
+            int j1;
+            for(int k = 0; i > -1 || j > -1 || k != 0; k = j1 / 10)
+            {
+                int l = i <= -1 ? 0 : Character.getNumericValue(ac[i--]);
+                int i1 = j <= -1 ? 0 : Character.getNumericValue(ac1[j--]);
+                j1 = l + i1 + k;
+                stringbuffer.insert(0, (char)(48 + j1 % 10));
+            }
+
+        }
+        return stringbuffer.toString();
+    }
+
+    public static String convertToUnsignedLong(long l)
+    {
+        String s = Long.toString(l & 0x7fffffffffffffffL);
+        return l >= 0L ? s : addDecimalNumbers(s, Long.toString(0x8000000000000000L).substring(1));
+    }
+
+    public static String codeColor(Color color)
+    {
+        StringBuffer stringbuffer = new StringBuffer("#");
+        for(int i = 0; i < 3; i++)
+        {
+            int j = 0;
+            switch(i)
+            {
+            case 0: // '\0'
+                j = color.getRed();
+                break;
+
+            case 1: // '\001'
+                j = color.getGreen();
+                break;
+
+            case 2: // '\002'
+                j = color.getBlue();
+                break;
+            }
+            String s = Integer.toHexString(j);
+            if(s.length() < 2)
+                stringbuffer.append("0");
+            stringbuffer.append(s);
+        }
+
+        return stringbuffer.toString();
+    }
+
+	public static String conversionFileSize(long fileLength)
+	{
+		double d = fileLength;
+		int i = 0;
+		while(d >= 1024 && i < 4)
+		{
+			d = d / 1024;
+			i++;
+		}
+		return "" + (long) (d * 100)/100.0 + fileSizeLev[i];
+	}
+	
+	public static String conversionTime(long time)
+	{
+		if(time > 99 * 60 * 60 * 1000)
+			return "99:99:99";
+		
+		int hour = 0;
+		int minute = 0;
+		int second = 0;
+		
+		second = (int)(time / 1000);
+		
+		minute = second / 60;
+		second = second % 60;
+		
+		hour = minute / 60;
+		minute = minute % 60;
+		
+		StringBuffer buffer = new StringBuffer();
+		
+		if(hour < 10)
+			buffer.append("0");
+		buffer.append(hour);
+		buffer.append(":");
+		
+		if(minute < 10)
+			buffer.append("0");
+		buffer.append(minute);
+		buffer.append(":");
+
+		if(second < 10)
+			buffer.append("0");
+		buffer.append(second);
+
+		return buffer.toString();
+	}
+
+    @SuppressWarnings("unused")
+	private static final String _$6120 = "Src";
+    @SuppressWarnings("unused")
+	private static final String _$6121 = "Snk";
+    @SuppressWarnings("unused")
+	private static final String _$6122 = "-";
+    
+	public static String[] fileSizeLev	= new String[] { "B", "KB", "MB", "G"};
+
+	
+	
+	public static String Html2Text(String inputString) {
+        String htmlStr = inputString; //含html标签的字符串
+            String textStr ="";
+      java.util.regex.Pattern p_script;
+      java.util.regex.Matcher m_script;
+      java.util.regex.Pattern p_style;
+      java.util.regex.Matcher m_style;
+      java.util.regex.Pattern p_html;
+      java.util.regex.Matcher m_html;
+   
+      try {
+       String regEx_script = "<[\\s]*?script[^>]*?>[\\s\\S]*?<[\\s]*?\\/[\\s]*?script[\\s]*?>"; //定义script的正则表达式{或<script[^>]*?>[\\s\\S]*?<\\/script> }
+       String regEx_style = "<[\\s]*?style[^>]*?>[\\s\\S]*?<[\\s]*?\\/[\\s]*?style[\\s]*?>"; //定义style的正则表达式{或<style[^>]*?>[\\s\\S]*?<\\/style> }
+          String regEx_html = "<[^>]+>"; //定义HTML标签的正则表达式
+      
+          p_script = Pattern.compile(regEx_script,Pattern.CASE_INSENSITIVE);
+          m_script = p_script.matcher(htmlStr);
+          htmlStr = m_script.replaceAll(""); //过滤script标签
+
+          p_style = Pattern.compile(regEx_style,Pattern.CASE_INSENSITIVE);
+          m_style = p_style.matcher(htmlStr);
+          htmlStr = m_style.replaceAll(""); //过滤style标签
+      
+          p_html = Pattern.compile(regEx_html,Pattern.CASE_INSENSITIVE);
+          m_html = p_html.matcher(htmlStr);
+          htmlStr = m_html.replaceAll(""); //过滤html标签
+      
+       textStr = htmlStr;
+      
+      }catch(Exception e) {
+               System.err.println("Html2Text: " + e.getMessage());
+      }
+   
+      return textStr;//返回文本字符串
+       }   
+
+	public static String getSubString(String str,int length){
+		String result=StringUtils.substring(str, 0,length);
+		return result+"...";
+	}
+	
+	
+	public static String nameSub(String str){
+		String st=null;
+			String[] sep={"-","(\\s+)"};
+			for(int i=0;i<sep.length;i++){
+				String[] result=str.split(sep[i]);
+				if(result.length>=2){
+					st= result[0];
+					break;
+				}
+			}
+		if(StringUtils.isBlank(st)){
+			st=str;	
+		}
+		try {
+			st=SplitString.bSubstring(st, 19);
+		} catch (Exception e) {
+		}
+		
+		
+		return st;
+	}
+	
+    public static String encodeHexStr(final byte[] bytes){
+        if(bytes == null){
+            return null;
+        }
+        char[] result = new char[bytes.length * 2];
+        for (int i = 0; i < bytes.length; i++) {
+            result[i*2] = digital[(bytes[i] & 0xf0) >> 4];
+            result[i*2 + 1] = digital[bytes[i] & 0x0f];
+        }
+        return new String(result);
+    }
+    
+    public static byte[] decodeHexStr(final String str) {
+        if(str == null){
+            return null;
+        }
+        char[] charArray = str.toCharArray();
+        if(charArray.length%2 != 0){
+            throw new RuntimeException("hex str length must can mod 2, str:" + str);
+        }
+        byte[] bytes = new byte[charArray.length/2];
+        for (int i = 0; i < charArray.length; i++) {
+            char c = charArray[i];
+            int b;
+            if(c >= '0' && c <= '9'){
+                b = (c-'0')<<4;
+            }else if(c >= 'A' && c <= 'F'){
+                b = (c-'A'+10)<<4;
+            }else{
+                throw new RuntimeException("unsport hex str:" + str);
+            }
+            c = charArray[++i];
+            if(c >= '0' && c <= '9'){
+                b |= c-'0';
+            }else if(c >= 'A' && c <= 'F'){
+                b |= c-'A'+10;
+            }else{
+                throw new RuntimeException("unsport hex str:" + str);
+            }
+            bytes[i/2] = (byte)b;
+        }
+        return bytes;
+    }
+    
+	public static String md5(String source) {   
+        
+	    StringBuffer sb = new StringBuffer(32);   
+	           
+	    try {   
+	        MessageDigest md    = MessageDigest.getInstance("MD5");   
+	        byte[] array        = md.digest(source.getBytes("utf-8"));   
+	               
+	        for (int i = 0; i < array.length; i++) {   
+	            sb.append(Integer.toHexString((array[i] & 0xFF) | 0x100).toUpperCase().substring(1, 3));   
+	        }   
+	    } catch (Exception e) {   
+	        System.out.println("Can not encode the string '" + source + "' to MD5!");   
+	        return null;   
+	    }   
+	           
+	    return sb.toString();   
+	} 
+	
+    public static String toString(final byte[] bytes) {
+        if (bytes == null) {
+            return null;
+        }
+        try {
+            return new String(bytes, CHARSET_NAME_UTF8);
+        } catch (final UnsupportedEncodingException e) {
+            throw new RuntimeException(e.getMessage(), e);
+        }
+    }
+
+    public static String toString(final byte[] bytes, String charset) {
+        if (bytes == null) {
+            return null;
+        }
+        try {
+            return new String(bytes, charset);
+        } catch (final UnsupportedEncodingException e) {
+            throw new RuntimeException(e.getMessage(), e);
+        }
+    }
+
+    public static byte[] toBytes(final String str) {
+        if (str == null) {
+            return null;
+        }
+        try {
+            return str.getBytes(CHARSET_NAME_UTF8);
+        } catch (final UnsupportedEncodingException e) {
+            throw new RuntimeException(e.getMessage(), e);
+        }
+    }
+}

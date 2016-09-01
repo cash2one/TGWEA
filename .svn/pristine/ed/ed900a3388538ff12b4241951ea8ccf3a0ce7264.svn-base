@@ -1,0 +1,30 @@
+<ion-view title="修改密码">
+    <ion-nav-buttons side="left">
+        <button ng-click="back()" class="button button-clear ion-ios-arrow-back"></button>
+    </ion-nav-buttons>
+
+    <ion-content>
+        <div class="list list-inset">
+            <label class="item item-input iLabel">
+                <i class="icon ion-locked dark placeholder-icon" ng-style="oldPassStyle" style="font-size: 25px;padding-top:5px;"></i>
+                <input type="password" placeholder="旧密码" style="font-size: 16px;" ng-model="updatePass.oldPass" ng-focus="oldPassFocus()" ng-blur="oldPassBlur()"/>
+            </label>
+        </div>
+        <div class="list list-inset">
+            <label class="item item-input iLabel">
+                <i class="icon ion-ios-locked dark placeholder-icon" ng-style="newPassStyle" style="font-size: 30px;"></i>
+                <input type="password" placeholder="新密码" style="font-size: 16px;" ng-model="updatePass.newPass" ng-focus="newPassFocus()" ng-blur="newPassBlur()"/>
+            </label>
+        </div>
+        <div class="list list-inset">
+            <label class="item item-input iLabel">
+                <i class="icon ion-ios-locked dark placeholder-icon" ng-style="newPassCStyle" style="font-size: 30px;"></i>
+                <input type="password" placeholder="新密码确认" style="font-size: 16px;" ng-model="updatePass.newPassC" ng-focus="newPassCFocus()" ng-blur="newPassCBlur()"/>
+            </label>
+        </div>
+        <div class="row padding">
+            <button class="button button-block button-positive" id="sendMessage" ng-click="sendNewPass()">确认修改</button>
+        </div>
+    </ion-content>
+</ion-view>
+

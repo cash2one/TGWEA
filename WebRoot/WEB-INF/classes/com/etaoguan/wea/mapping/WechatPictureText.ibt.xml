@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+
+<sqlMap>
+
+	<typeAlias alias="WechatMassMpnews"
+		type="com.etaoguan.wea.wechat.vo.WechatMassMpnews" />
+
+	<resultMap id="wpicText" class="WechatMassMpnews">
+		<result property="mpnewsId" column="mpnews_id" />
+		<result property="massMessageId" column="mass_message_id" />
+		<result property="thumbMediaId" column="thumb_media_id" />
+		<result property="author" column="author" />
+		<result property="title" column="title" />
+		<result property="contentSourceUrl" column="content_source_url" />
+		<result property="content" column="content" />
+		<result property="digest" column="digest" />
+		<result property="showCoverPic" column="show_cover_pic" />
+	</resultMap>
+
+
+	<update id="updateWechatPictureText" parameterClass="WechatMassMpnews">
+		UPDATE wechat_mass_mpnews SET
+		thumb_media_id=#thumbMediaId#,author=#author#,title=#title#,content_source_url=#contentSourceUrl#,content=#content#,digest=#digest#
+		WHERE wechat_mass_mpnews.mpnews_id = #mpnewsId#
+
+	</update>
+
+	<delete id="deleteWechatMassMpnews" parameterClass="java.util.HashMap">
+		DELETE FROM
+		wechat_mass_mpnews where wechat_mass_mpnews.mass_message_id =
+		#massMessageId#
+	</delete>
+
+	<select id="getDetailsById" parameterClass="java.util.HashMap"
+		resultMap="wpicText">
+		SELECT
+		wechat_mass_mpnews.mpnews_id,
+		wechat_mass_mpnews.mass_message_id,
+		wechat_mass_mpnews.thumb_media_id,
+		wechat_mass_mpnews.author,
+		wechat_mass_mpnews.title,
+		wechat_mass_mpnews.content_source_url,
+		wechat_mass_mpnews.content,
+		wechat_mass_mpnews.digest,
+		wechat_mass_mpnews.show_cover_pic
+		FROM
+		wechat_mass_mpnews
+		WHERE
+		wechat_mass_mpnews.mass_message_id =
+		#massMessageId#
+
+	</select>
+
+	<insert id="createWechatPictureText" parameterClass="WechatMassMpnews">
+		INSERT INTO
+		wechat_mass_mpnews (
+		wechat_mass_mpnews.mass_message_id,
+		wechat_mass_mpnews.thumb_media_id,
+		wechat_mass_mpnews.author,
+		wechat_mass_mpnews.title,
+		wechat_mass_mpnews.content_source_url,
+		wechat_mass_mpnews.content,
+		wechat_mass_mpnews.digest,
+		wechat_mass_mpnews.show_cover_pic
+		)
+		VALUES
+		(
+		#massMessageId#,
+		#thumbMediaId#,
+		#author#,
+		#title#,
+		#contentSourceUrl#,
+		#content#,
+		#digest#,
+		#showCoverPic#
+		)
+	</insert>
+
+
+
+
+</sqlMap>

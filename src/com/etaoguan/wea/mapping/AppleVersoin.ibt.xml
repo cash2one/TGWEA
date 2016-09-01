@@ -1,0 +1,207 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+
+<sqlMap>
+
+	<typeAlias alias="AppleVersion" type="com.etaoguan.wea.vo.AppleVersion" />
+
+	<resultMap id="apple" class="AppleVersion">
+		<result property="versionId" column="version_id" />
+		<result property="bundleId" column="bundle_id" />
+		<result property="ownerNum" column="owner_num" />
+		<result property="versionCode" column="version_code" />
+		<result property="forceUpdate" column="force_update" />
+		<result property="activeFlag" column="active_flag" />
+		<result property="remark" column="remark" />
+		<result property="createDate" column="create_date" />
+		<result property="createBy" column="create_by" />
+		<result property="updateDate" column="update_date" />
+		<result property="updateBy" column="update_by" />
+		<result property="appName" column="app_name" />
+		<result property="packageName" column="package_name" />
+	</resultMap>
+
+	<resultMap id="ownerMap" class="AppleVersion">
+		<result property="versionId" column="version_id" />
+		<result property="bundleId" column="bundle_id" />
+		<result property="ownerNum" column="owner_num" />
+		<result property="versionCode" column="version_code" />
+		<result property="forceUpdate" column="force_update" />
+		<result property="activeFlag" column="active_flag" />
+		<result property="remark" column="remark" />
+		<result property="createDate" column="create_date" />
+		<result property="createBy" column="create_by" />
+		<result property="updateDate" column="update_date" />
+		<result property="updateBy" column="update_by" />
+		<result property="companyName" column="company_name" />
+		<result property="appName" column="app_name" />
+		<result property="fileName" column="file_name" />
+		<result property="packageName" column="package_name" />
+	</resultMap>
+
+	<resultMap id="appMap" class="AppleVersion">
+		<result property="versionId" column="version_id" />
+		<result property="companyName" column="company_name" />
+		<result property="versionCode" column="version_code" />
+		<result property="updateDate" column="update_date" />
+		<result property="versionNum" column="version_num" />
+		<result property="aupdateDate" column="aupdatedate" />
+		<result property="ownerNum" column="owner_num" />
+		<result property="appName" column="app_name" />
+		<result property="bundleId" column="bundle_id" />
+		<result property="iosId" column="iosid" />
+		<result property="fileName" column="file_name" />
+		<result property="packageName" column="package_name" />
+	</resultMap>
+
+	<!-- android 统计页数 -->
+	<select id="getApplePageCount" parameterClass="java.util.HashMap"
+		resultClass="java.lang.Integer">
+		SELECT COUNT(version_id)
+		FROM
+		wea.app_ios_version ios,
+		OWNER
+		WHERE
+		ios.owner_num = OWNER .owner_num
+		<isNotEmpty property="companyName" prepend="and">
+			owner.company_name like CONCAT('%',#companyName#, '%')
+		</isNotEmpty>
+	</select>
+
+	<!-- APP发布管理 列表 -->
+	<select id="appversions" parameterClass="java.util.HashMap"
+		resultMap="appMap">
+		SELECT
+	`owner`.owner_num,
+	`owner`.company_name,
+	ios.version_code,
+	ios.update_date,
+	andriod.version_id,
+	andriod.version_num,
+	andriod.package_name,
+	andriod.update_date AS aupdatedate,
+	ios.app_name,
+	ios.bundle_id,
+	ios.version_id AS iosid,
+	ios.file_name,
+	ios.package_name
+FROM
+	wea.app_andriod_version andriod,
+	wea.app_ios_version ios,
+	wea. OWNER
+WHERE
+	andriod.owner_num = OWNER .owner_num
+OR ios.owner_num = OWNER .owner_num
+GROUP BY
+	OWNER .company_name
+
+	</select>
+
+	<!-- 查看某个用户的最大版本号，决定是否更新 -->
+	<select id="getAppleMaxVersion" parameterClass="java.util.HashMap"
+		resultClass="java.lang.String">
+		SELECT
+		app_ios_version.version_code
+		FROM
+		app_ios_version
+		WHERE
+		app_ios_version.create_date = (select max(create_date) from
+		app_ios_version) AND
+		app_ios_version.owner_num = #ownerNum#
+
+	</select>
+
+	<!-- 更新版本信息之前的初始化信息 -->
+	<select id="getApplevsbyid" parameterClass="java.util.HashMap"
+		resultMap="ownerMap">
+				SELECT
+		`owner`.company_name,
+		app_ios_version.version_id,
+		app_ios_version.bundle_id,
+		app_ios_version.version_code,
+		app_ios_version.force_update,
+		app_ios_version.active_flag,
+		app_ios_version.remark,
+		app_ios_version.create_date,
+		app_ios_version.create_by,
+		app_ios_version.update_date,
+		app_ios_version.update_by,
+		app_ios_version.owner_num,
+		app_ios_version.app_name,
+		app_ios_version.file_name,
+		app_ios_version.package_name
+		FROM
+		app_ios_version,`owner` WHERE
+			app_ios_version.owner_num = `owner`.owner_num
+		<dynamic>
+
+			<isNotEqual property="versionId" compareValue="-1"
+				prepend="and">
+				version_id = #versionId#
+			</isNotEqual>
+			<isEqual property="versionId" compareValue="-1" prepend="and">
+				app_ios_version.create_date =
+				(SELECT max(create_date) FROM wea.app_ios_version where
+				owner_num = #ownerNum#)
+			</isEqual>
+
+		</dynamic>
+	</select>
+
+	<!-- 查看所有版本 -->
+	<select id="getApplevs" parameterClass="java.util.HashMap"
+		resultMap="ownerMap">
+		SELECT owner.company_name,version_id, ios.bundle_id,
+		ios.version_code,ios.file_name,
+		ios.force_update, ios.active_flag, ios.remark,
+		ios.create_date,
+		ios.package_name,
+		ios.create_by, ios.update_date, ios.update_by,
+		ios.owner_num,ios.app_name,ios.file_name
+		FROM
+		wea.app_ios_version ios , owner
+		where ios.owner_num = owner.owner_num
+		<isNotEmpty property="companyName" prepend="and">
+			owner.company_name like CONCAT('%',#companyName#, '%')
+		</isNotEmpty>
+		order by ios.create_date desc
+		limit #limit# offset #offset#
+	</select>
+
+	<!-- 添加版本信息 -->
+	<insert id="createAppleVs" parameterClass="AppleVersion">
+		update app_ios_version set active_flag = 0 where owner_num = #ownerNum# ;
+
+		INSERT INTO
+		wea.app_ios_version
+		(bundle_id, version_code, active_flag,
+		remark,
+		create_date, create_by,owner_num,update_date,update_by,app_name,file_name,package_name)
+		VALUES
+		(#bundleId#,
+		#versionCode#,
+		#activeFlag#, #remark#, now(),
+		#createBy#,#ownerNum#, now(),#createBy#,#appName#,#fileName#,#packageName#)
+
+	</insert>
+
+	<!-- 删除版本信息 -->
+	<delete id="delAppleVs" parameterClass="java.util.HashMap">
+		DELETE FROM
+		wea.app_ios_version
+		WHERE version_id = #versionId#
+	</delete>
+
+	<!-- 修改版本信息 -->
+	<update id="changeAppleVs" parameterClass="AppleVersion">
+		UPDATE
+		wea.app_ios_version
+		SET bundle_id = #bundleId# , version_code =
+		#versionCode#, force_update =
+		#forceUpdate#, remark = #remark#,app_name = #appName#,
+		update_date = now(), update_by = #updateBy# ,owner_num = #ownerNum#,file_name = #fileName#,package_name=#packageName#
+		WHERE version_id = #versionId#
+
+	</update>
+
+</sqlMap>

@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+
+<sqlMap>
+
+	<typeAlias alias="WechatNotifyEvent" type="com.etaoguan.wea.vo.WechatNotifyEvent"/>
+
+
+	<resultMap id="wechatNotifyEventMap" class="NotifyUrl">
+		<result property="id" column="id"/>
+		<result property="totalFee" column="total_fee"/>
+		<result property="cashFee" column="cash_fee"/>
+		<result property="couponFee" column="coupon_fee"/>
+		<result property="couponCount" column="coupon_count"/>
+		<result property="couponFeeN" column="coupon_fee_n"/>
+		<result property="returnCode" column="return_code"/>
+		<result property="returnMsg" column="return_msg"/>
+		<result property="appid" column="appid"/>
+		<result property="mchId" column="mch_id"/>
+		<result property="deviceInfo" column="device_info"/>
+		<result property="nonceStr" column="nonce_str"/>
+		<result property="sign" column="sign"/>
+		<result property="resultCode" column="result_code"/>
+		<result property="errCode" column="err_code"/>
+		<result property="errCodeDes" column="err_code_des"/>
+		<result property="openid" column="openid"/>
+		<result property="isSubscribe" column="is_subscribe"/>
+		<result property="tradeType" column="trade_type"/>
+		<result property="bankType" column="bank_type"/>
+		<result property="feeType" column="fee_type"/>
+		<result property="cashFeeType" column="cash_fee_type"/>
+		<result property="couponBatchIdN" column="coupon_batch_id_n"/>
+		<result property="couponIdN" column="coupon_id_n"/>
+		<result property="transactionId" column="transaction_id"/>
+		<result property="outTradeNo" column="out_trade_no"/>
+		<result property="attach" column="attach"/>
+		<result property="timeEnd" column="time_end"/>
+		<result property="createDate" column="create_date"/>
+	
+	</resultMap>
+	
+	
+	
+	<select id="getAd2mins" parameterClass="java.util.HashMap"  resultMap="wechatNotifyEventMap">
+
+	</select>
+	
+	
+	
+</sqlMap>

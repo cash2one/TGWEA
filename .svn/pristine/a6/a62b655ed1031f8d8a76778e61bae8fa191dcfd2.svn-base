@@ -1,0 +1,51 @@
+<ion-view title="客户待审核订单">
+    <ion-nav-buttons side="left">
+        <button ng-click="back()" class="button button-clear button-light ion-ios7-arrow-back barIcon"></button>
+    </ion-nav-buttons>
+
+
+    <ion-content>
+        <ion-refresher on-refresh="waitingRefresh()" pulling-text="下拉刷新..." refreshing-text="正在加载..." pulling-icon="ion-ios-arrow-thin-down" refreshing-icon="icon-spinner icon-spin"></ion-refresher>
+
+        <div class="list waitingList" ng-repeat="waoList in waoLists">
+            <div class="item waitingHead" >
+                <span ng-bind="waoList.waorderId"></span>
+                <button class="button button-block button-light orderState" id="generateOrder" ng-click="ashowConfirm($index)" >生成订单</button>
+            </div>
+
+            <div id="mainContent">
+                <div class="padding-left-right-25 floorMain">
+                    <div class="item item-thumbnail-left" ng-repeat="waoPro in waoList.waoPros" ng-click="toDetailed(waoPro.proId)">
+                        <img  id="prListImg" _lazysrc="{{waoPro.proImg}}" onerror=this.src=errImg>
+                        <p class="proName" ng-bind="waoPro.proName"></p>
+                        <p class="margin-bottom-none"><b class="proModel itemProNum" ng-bind="waoPro.proNum"></b></p>
+                        <p><span class="proPrice" ng-bind="waoPro.proPrice"></span></p>
+                    </div>
+                </div>
+                <div class="padding-left-right-25 floorMain" ng-hide="waoList.isProHide">
+                    <div class="item item-thumbnail-left" ng-repeat="waHidePro in waoList.waoHidePro" ng-click="toDetailed(waHidePro.proId)">
+                        <img id="prListImg" _lazysrc="{{waHidePro.proImg}}" onerror=this.src=errImg>
+                        <p class="proName" ng-bind="waHidePro.proName"></p>
+                        <p class="margin-bottom-none"><b class="proModel itemProNum" ng-bind="waHidePro.proNum"></b></p>
+                        <p><span class="proPrice" ng-bind="waHidePro.proPrice"></span></p>
+                    </div>
+                </div>
+                <div class="padding-left-right-25 floorMain">
+                    <div class="item text-center btnItem">
+                        <button class="button waitingBtn" ng-hide="waoList.isHide" ng-bind="waoList.btnText" ng-click="hideShowPro($index)"></button>
+                    </div>
+                </div>
+                <div class="item row itemFooter">
+                    <span class="col col-33" ng-bind="waoList.date"></span>
+                    <span class="col col-45 text-right">
+                        共<span ng-bind="waoList.waiCountNum"></span>件
+                        总价 : <span ng-bind="waoList.waiCountPrice" class="icountPrice"></span>
+                    </span>
+                </div>
+            </div>
+        </div>
+        <ion-infinite-scroll  distance="0px" on-infinite="waitingAuditLoadMore()" ng-hide="loadingHide" ng-bind-html="text"></ion-infinite-scroll>
+        <h2 class="noMore margin-top-none" ng-hide="noMoreHide">已经到底啦</h2>
+        <div style="height: 30px;"></div>
+    </ion-content>
+</ion-view>

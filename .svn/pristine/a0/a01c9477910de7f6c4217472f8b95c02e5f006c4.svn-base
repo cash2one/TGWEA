@@ -1,0 +1,290 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+
+<!-- author 刘卿 -->
+<!-- 感谢ibatis的持久层框架 -->
+
+<sqlMap>
+
+	<typeAlias alias="DELIVERINV" type="com.etaoguan.wea.vo.DeliverInvoice"/>
+	<typeAlias alias="DELIVERINVITEM" type="com.etaoguan.wea.vo.DeliverInvoiceItem"/>
+
+	<!-- 送货单信息之SQL映射 -->
+	<resultMap id="deliverInv" class="DELIVERINV">
+		<result property="deliverNum" column="deliver_num"/>
+		<result property="whNum" column="wh_num"/>
+		<result property="whName" column="wh_name"/>
+		<result property="custNum" column="cust_num"/>
+		<result property="ownerNum" column="owner_num"/>
+		<result property="referOrderNum" column="refer_order_num"/>
+		<result property="logisticsNum" column="logistics_num"/>
+		<result property="logisticsCompany" column="logistics_company"/>
+		<result property="deliverAddress" column="deliver_address"/>
+		<result property="deliverWhStatus" column="deliver_wh_status"/>
+		<result property="remark" column="remark"/>
+		<result property="createDate" column="create_date"/>
+		<result property="createBy" column="create_by"/>
+		<result property="updateDate" column="update_date"/>
+		<result property="updateBy" column="update_by"/>
+	</resultMap>
+	
+	<resultMap id="compDeliverInvDataSet" extends="deliverInv" class="DELIVERINV">
+		<result property="order.orderNum" column="order_num"/>
+		<result property="order.realPriceTotal" column="real_price_total"/>
+		<result property="order.deliverStatus" column="deliver_status"/>
+		<result property="order.cashStatus" column="cash_status"/>
+		<result property="order.settleStatus" column="settle_status"/>
+		<result property="customer.custNum" column="cust_num"/>
+		<result property="customer.companyName" column="company_name"/>
+	</resultMap>
+
+	<!-- 送货单明细信息之SQL映射 -->
+	<resultMap id="deliverInvItem" class="DELIVERINVITEM">
+		<result property="deliverNum" column="deliver_num"/>
+		<result property="prodNum" column="prod_num"/>
+		<result property="prodName" column="prod_name"/>
+		<result property="unit" column="unit"/>
+		<result property="cases" column="cases"/>
+		<result property="pieces" column="pieces"/>
+	</resultMap>	
+
+	<select id="getDeliverInvCount" parameterClass="java.util.HashMap" resultClass="java.lang.Integer">
+		SELECT
+		count(1) 
+		FROM
+		deliver_invoice where owner_num = #ownerNum#
+		<dynamic>
+			<isNotEmpty property="referOrderNum" prepend="and">
+		 		refer_order_num = #referOrderNum#
+		 	</isNotEmpty>
+			<isNotEmpty property="custNum" prepend="and">
+			    cust_num = #custNum#
+			</isNotEmpty>
+			<isNotEmpty property="deliverWhStatus" prepend="and">
+			    deliver_wh_status = #deliverWhStatus#
+			</isNotEmpty>
+		</dynamic>
+	</select>
+	
+	<select id="getDeliverInvDatSet" parameterClass="java.util.HashMap"  resultMap="compDeliverInvDataSet">
+		SELECT t3.*,t4.company_name FROM 
+		(SELECT t1.*,
+		t2.order_num,
+		t2.real_price_total,
+		t2.deliver_status,
+		t2.cash_status,
+		t2.settle_status FROM 
+		(SELECT
+		deliver_num,
+		owner_num,
+		cust_num,
+		wh_num,
+		wh_name,
+		refer_order_num,
+		remark,
+		create_date,
+		create_by,
+		update_date,
+		update_by,
+		logistics_num,
+		logistics_company,
+		deliver_wh_status,
+		deliver_address  
+		FROM 
+		deliver_invoice where owner_num = #ownerNum#
+		<dynamic>
+			<isNotEmpty property="referOrderNum" prepend="and">
+		 		refer_order_num = #referOrderNum#
+		 	</isNotEmpty>
+			<isNotEmpty property="custNum" prepend="and">
+			    cust_num = #custNum#
+			</isNotEmpty>
+			<isNotEmpty property="deliverWhStatus" prepend="and">
+			    deliver_wh_status = #deliverWhStatus#
+			</isNotEmpty>
+		</dynamic>
+		<isNull property="asc">
+			<isNull property="desc">order by create_date desc
+			</isNull>
+		</isNull>
+
+		limit #limit# offset #offset#
+		) t1, `order` t2 where t1.refer_order_num = t2.order_num
+		) t3 left outer join customer t4 on t3.cust_num = t4.cust_num
+	</select>
+	
+	<insert id="createDeliverInv" parameterClass="DELIVERINV">
+		insert into deliver_invoice 
+		(
+		deliver_num,
+		owner_num,
+		cust_num,
+		wh_num,
+		wh_name,
+		refer_order_num,
+		remark,
+		create_date,
+		create_by,
+		update_date,
+		update_by,
+		logistics_num,
+		logistics_company,
+		deliver_wh_status,
+		deliver_address
+		)
+		values(
+			#deliverNum#,
+			#ownerNum#,		
+			#custNum#,
+			#whNum#,
+			#whName#,
+			#referOrderNum#
+			<isNotEmpty property="remark" prepend=",">
+				#remark#
+			</isNotEmpty>
+			<isEmpty property="remark" prepend=",">
+				''
+			</isEmpty>		
+			<isNotEmpty property="createDate" prepend=",">
+				#createDate#
+			</isNotEmpty>
+			<isEmpty property="createDate" prepend=",">
+				now()
+			</isEmpty>			
+			<isNotEmpty property="createBy" prepend=",">
+				#createBy#
+			</isNotEmpty>
+			<isEmpty property="createBy" prepend=",">
+				''
+			</isEmpty>			
+			<isNotEmpty property="updateDate" prepend=",">
+				#updateDate#
+			</isNotEmpty>
+			<isEmpty property="updateDate" prepend=",">
+				now()
+			</isEmpty>			
+			<isNotEmpty property="updateBy" prepend=",">
+				#updateBy#
+			</isNotEmpty>
+			<isEmpty property="updateBy" prepend=",">
+				''
+			</isEmpty>
+			,'','',0,''		
+		)
+
+	</insert>
+	
+	<insert id="createDeliverInvItem" parameterClass="DELIVERINVITEM">
+		insert into deliver_invoice_item 
+		(
+		deliver_num,
+		prod_num,
+		prod_name,
+		unit,
+		cases,
+		pieces
+		)
+		values(
+		#deliverNum#,
+		#prodNum#,		
+		#prodName#,
+		#unit#,
+		#cases#,
+		#pieces#
+		)
+
+	</insert>
+	
+	
+	<!-- 获取送货单的信息-->
+	<select id="getDeliverInv" parameterClass="java.util.HashMap" resultMap="deliverInv">
+		select    deliver_num,
+		owner_num,
+		cust_num,
+		wh_num,
+		wh_name,
+		refer_order_num,
+		remark,
+		create_date,
+		create_by,
+		update_date,
+		update_by,
+		logistics_num,
+		logistics_company,
+		deliver_wh_status,
+		deliver_address from deliver_invoice where 1=1 
+		<dynamic>
+			<isNotEmpty property="referOrderNum" prepend="and">
+		 		refer_order_num = #referOrderNum#
+		 	</isNotEmpty>
+		 	<isNotEmpty property="deliverNum" prepend="and">
+		 		deliver_num = #deliverNum#
+		 	</isNotEmpty>
+		 </dynamic>
+		 
+		 limit 1
+	</select>
+	
+	
+	<select id="getDeliverInvItems" parameterClass="java.util.HashMap"  resultMap="deliverInvItem">
+		SELECT
+		deliver_num,
+		prod_num,
+		prod_name,
+		unit,
+		cases,
+		pieces 
+		FROM 
+		deliver_invoice_item where deliver_num = #deliverNum#
+
+	</select>
+	
+	<statement id="deleteDeliverInv" parameterClass="java.util.HashMap">
+		DELETE 
+		FROM
+		deliver_invoice where deliver_num = #deliverNum#;
+		DELETE 
+		FROM
+		deliver_invoice_item where deliver_num = #deliverNum#;
+
+	</statement>
+	
+	<update id="updateDeliverInvByMap"  parameterClass="java.util.HashMap">
+			update deliver_invoice set 
+			<isNotEmpty property="whNum">
+				wh_num = #whNum#
+			</isNotEmpty>
+			<isEmpty property="whNum">
+				wh_num = wh_num
+			</isEmpty>
+			<isNotEmpty property="whName" prepend=",">
+				wh_name = #whName#
+			</isNotEmpty>
+			<isNotEmpty property="deliverWhStatus" prepend=",">
+				deliver_wh_status = #deliverWhStatus#
+			</isNotEmpty>
+			<isNotEmpty property="logisticsNum" prepend=",">
+				logistics_num = #logisticsNum#
+			</isNotEmpty>
+			<isNotEmpty property="logisticsCompany" prepend=",">
+				logistics_company = #logisticsCompany#
+			</isNotEmpty>
+			<isNotEmpty property="deliverAddress" prepend=",">
+				deliver_address = #deliverAddress#
+			</isNotEmpty>
+			<isNotEmpty property="remark" prepend=",">
+				remark = #remark#
+			</isNotEmpty>
+			<isEmpty property="updateDate" prepend=",">
+				update_date = now()
+			</isEmpty>			
+			<isNotEmpty property="updateBy" prepend=",">
+				update_by = #updateBy#
+			</isNotEmpty>
+			<isEmpty property="updateBy" prepend=",">
+				update_by = ''
+			</isEmpty>		
+			where deliver_num = #deliverNum#
+	</update>
+	
+</sqlMap>

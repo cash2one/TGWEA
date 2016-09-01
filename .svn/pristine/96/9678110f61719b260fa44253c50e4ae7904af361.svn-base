@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+
+<sqlMap>
+
+	<typeAlias alias="AlipayKeys" type="com.etaoguan.wea.vo.AlipayKeys" />
+
+	<resultMap id="alipayKeysMap" class="AlipayKeys">
+
+		<result property="userId" column="owner_num" />
+		<result property="userPartner" column="owner_partner" />
+		<result property="userKey" column="owner_key" />
+		<result property="ownerAccountName" column="owner_account_name" />
+		<result property="createDate" column="create_date" />
+		
+		<result property="adminName" column="admin_name" />
+
+	</resultMap>
+
+
+	<select id="alipayKeysInformation" parameterClass="java.util.HashMap"
+		resultMap="alipayKeysMap">
+		SELECT
+		alipay_keys.owner_num,
+		alipay_keys.owner_partner,
+		alipay_keys.owner_key,
+		alipay_keys.owner_account_name,
+		alipay_keys.create_date
+		FROM
+		alipay_keys
+		where owner_num = #userId#
+	</select>
+
+	<insert id="addAlipayKeys" parameterClass="AlipayKeys">
+		insert into
+		alipay_keys
+		(owner_num,owner_partner,owner_key,create_date,owner_account_name)
+		values (#userId#,#userPartner#,#userKey#,now(),#ownerAccountName#)
+	</insert>
+
+	<delete id="deleteAlipayKeys" parameterClass="java.util.HashMap">
+		delete from
+		alipay_keys where owner_num = #userId#
+	</delete>
+
+	<update id="updateAlipaykeys" parameterClass="java.util.HashMap">
+		update alipay_keys
+		set owner_partner = #userPartner#,owner_key=#userKey# where owner_num
+		= #userId#
+	</update>
+
+	<select id="alipayKeysDatSet" parameterClass="java.util.HashMap"
+		resultMap="alipayKeysMap">
+		SELECT
+		owner_admin.admin_name,
+		alipay_keys.owner_num,
+		alipay_keys.owner_partner,
+		alipay_keys.owner_key,
+		alipay_keys.owner_account_name,
+		alipay_keys.create_date
+		FROM
+		alipay_keys
+		LEFT JOIN owner_admin ON alipay_keys.owner_num = owner_admin.owner_num
+		where 1 = 1
+		<isNotEmpty property="adminName" prepend="and">
+			owner_admin.admin_name like
+			CONCAT('%',#adminName#, '%')
+		</isNotEmpty>
+		order by create_date desc limit #limit# offset #offset#
+	</select>
+
+	<select id="alipayKeysCount" parameterClass="java.util.HashMap"
+		resultClass="java.lang.Integer">
+		SELECT count(1) FROM alipay_keys LEFT JOIN owner_admin ON alipay_keys.owner_num = owner_admin.owner_num
+	</select>
+
+
+</sqlMap>

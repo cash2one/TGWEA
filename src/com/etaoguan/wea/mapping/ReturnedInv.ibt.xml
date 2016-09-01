@@ -1,0 +1,358 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+
+<!-- author 刘卿 -->
+<!-- 感谢ibatis的持久层框架 -->
+
+<sqlMap>
+
+	<typeAlias alias="RETURNEDINV" type="com.etaoguan.wea.vo.ReturnedInvoice"/>
+	<typeAlias alias="RETURNEDINVITEM" type="com.etaoguan.wea.vo.ReturnedInvoiceItem"/>
+
+
+	<resultMap id="returnedInv" class="RETURNEDINV">
+		<result property="retNum" column="ret_num"/>
+		<result property="custNum" column="cust_num"/>
+		<result property="ownerNum" column="owner_num"/>
+		<result property="whNum" column="wh_num"/>
+		<result property="whName" column="wh_name"/>
+		<result property="referOrderNum" column="refer_order_num"/>
+		<result property="referDeliverNum" column="refer_deliver_num"/>
+		<result property="retReason" column="ret_reason"/>
+		<result property="retWhStatus" column="ret_wh_status"/>
+		<result property="remark" column="remark"/>
+		<result property="createDate" column="create_date"/>
+		<result property="createBy" column="create_by"/>
+		<result property="updateDate" column="update_date"/>
+		<result property="updateBy" column="update_by"/>
+	</resultMap>
+	
+	<resultMap id="compReturnedInvDataSet" extends="returnedInv" class="RETURNEDINV">
+		<result property="deliverInv.deliverNum" column="deliver_num"/>
+		<result property="deliverInv.whNum" column="deliver_wh_num"/>
+		<result property="deliverInv.whName" column="deliver_wh_name"/>
+		<result property="deliverInv.updateDate" column="deliver_date"/>
+		<result property="customer.custNum" column="cust_num"/>
+		<result property="customer.companyName" column="company_name"/>
+	</resultMap>	
+
+	<resultMap id="returnedInvItem" class="RETURNEDINVITEM">
+		<result property="retNum" column="ret_num"/>
+		<result property="prodNum" column="prod_num"/>
+		<result property="prodName" column="prod_name"/>
+		<result property="differName" column="differ_name"/>
+		<result property="unit" column="unit"/>
+		<result property="cases" column="cases"/>
+		<result property="pieces" column="pieces"/>
+	</resultMap>	
+
+	<select id="getReturnedInvCount" parameterClass="java.util.HashMap" resultClass="java.lang.Integer">
+		SELECT
+		count(1) 
+		FROM
+		returned_invoice where owner_num = #ownerNum#
+		<dynamic>
+			<isNotEmpty property="referOrderNum" prepend="and">
+		 		refer_order_num = #referOrderNum#
+		 	</isNotEmpty>
+			<isNotEmpty property="custNum" prepend="and">
+			    cust_num = #custNum#
+			</isNotEmpty>
+			<isNotEmpty property="retWhStatus" prepend="and">
+			    ret_wh_status = #retWhStatus#
+			</isNotEmpty>
+		</dynamic>
+	</select>
+	
+	<select id="getReturnedInvDataSet" parameterClass="java.util.HashMap"  resultMap="compReturnedInvDataSet">
+		SELECT t3.*,
+		t4.company_name FROM 
+		(SELECT t1.*,
+		t2.deliver_num,
+		t2.wh_num deliver_wh_num,
+		t2.wh_name deliver_wh_name,
+		t2.update_date deliver_date FROM 
+		(SELECT
+		ret_num,
+		owner_num,
+		cust_num,
+		wh_num,
+		wh_name,
+		refer_order_num,
+		refer_deliver_num,
+		ret_reason,
+		remark,
+		ret_wh_status,
+		create_date,
+		create_by,
+		update_date,
+		update_by 
+		FROM 
+		returned_invoice where owner_num = #ownerNum#
+		<dynamic>
+			<isNotEmpty property="referOrderNum" prepend="and">
+		 		refer_order_num = #referOrderNum#
+		 	</isNotEmpty>
+		 	<isNotEmpty property="referDeliverNum" prepend="and">
+		 		refer_deliver_num = #referDeliverNum#
+		 	</isNotEmpty>
+			<isNotEmpty property="custNum" prepend="and">
+			    cust_num = #custNum#
+			</isNotEmpty>
+			<isNotEmpty property="retWhStatus" prepend="and">
+			    ret_wh_status = #retWhStatus#
+			</isNotEmpty>
+		</dynamic>
+		<isNull property="asc">
+			<isNull property="desc">order by create_date desc
+			</isNull>
+		</isNull>
+
+		limit #limit# offset #offset#
+		) t1 left outer join  deliver_invoice t2 
+		on t1.refer_order_num =  t2.refer_order_num ) t3 
+		left outer join 
+		customer t4 
+		on t3.cust_num = t4.cust_num
+		
+	</select>
+	
+	<insert id="createReturnedInv" parameterClass="RETURNEDINV">
+		insert into returned_invoice 
+		(
+		ret_num,
+		owner_num,
+		cust_num,
+		wh_num,
+		wh_name,
+		refer_order_num,
+		refer_deliver_num,
+		ret_reason,
+		ret_wh_status,
+		remark,
+		create_date,
+		create_by,
+		update_date,
+		update_by 
+		)
+		values(
+			#retNum#,
+			#ownerNum#,		
+			#custNum#,
+			#whNum#,
+			#whName#,
+			#referOrderNum#,
+			#referDeliverNum#,
+			#retReason#,
+			0
+			<isNotEmpty property="remark" prepend=",">
+				#remark#
+			</isNotEmpty>
+			<isEmpty property="remark" prepend=",">
+				''
+			</isEmpty>		
+			<isNotEmpty property="createDate" prepend=",">
+				#createDate#
+			</isNotEmpty>
+			<isEmpty property="createDate" prepend=",">
+				now()
+			</isEmpty>			
+			<isNotEmpty property="createBy" prepend=",">
+				#createBy#
+			</isNotEmpty>
+			<isEmpty property="createBy" prepend=",">
+				''
+			</isEmpty>			
+			<isNotEmpty property="updateDate" prepend=",">
+				#updateDate#
+			</isNotEmpty>
+			<isEmpty property="updateDate" prepend=",">
+				now()
+			</isEmpty>			
+			<isNotEmpty property="updateBy" prepend=",">
+				#updateBy#
+			</isNotEmpty>
+			<isEmpty property="updateBy" prepend=",">
+				''
+			</isEmpty>	
+		)
+
+	</insert>
+	
+	<insert id="createReturnedInvItem" parameterClass="RETURNEDINVITEM">
+		insert into returned_invoice_item 
+		(
+		ret_num,
+		prod_num,
+		prod_name,
+		differ_name,
+		unit,
+		cases,
+		pieces
+		)
+		values(
+		#retNum#,
+		#prodNum#,		
+		#prodName#,
+		#differName#,
+		#unit#,
+		#cases#,
+		#pieces#
+		)
+
+	</insert>
+	
+	
+
+	<select id="getReturnedInv" parameterClass="java.util.HashMap" resultMap="returnedInv">
+		select    ret_num,
+		owner_num,
+		cust_num,
+		wh_num,
+		wh_name,
+		refer_order_num,
+		refer_deliver_num,
+		ret_reason,
+		ret_wh_status,
+		remark,
+		create_date,
+		create_by,
+		update_date,
+		update_by  from returned_invoice where 1=1 
+		<dynamic>
+			<isNotEmpty property="referOrderNum" prepend="and">
+		 		refer_order_num = #referOrderNum#
+		 	</isNotEmpty>
+		 	<isNotEmpty property="referDeliverNum" prepend="and">
+		 		refer_deliver_num = #referDeliverNum#
+		 	</isNotEmpty>
+		 	<isNotEmpty property="retNum" prepend="and">
+		 		ret_num = #retNum#
+		 	</isNotEmpty>
+		 </dynamic>
+		 
+		 limit 1
+	</select>
+	
+	
+	<select id="getRetItems" parameterClass="java.util.HashMap"  resultMap="returnedInvItem">
+		SELECT
+		ret_num,
+		prod_num,
+		prod_name,
+		differ_name,
+		unit,
+		cases,
+		pieces 
+		FROM 
+		returned_invoice_item where ret_num = #retNum#
+
+	</select>
+	
+	<statement id="deleteReturnedInv" parameterClass="java.util.HashMap">
+		DELETE 
+		FROM
+		returned_invoice where ret_num = #retNum#;
+		DELETE 
+		FROM
+		returned_invoice_item where ret_num = #retNum#;
+
+	</statement>
+	
+	<delete id="deleteReturnedInvItem" parameterClass="java.util.HashMap">
+		DELETE 
+		FROM
+		returned_invoice_item where ret_num = #retNum# 
+		<isNotEmpty property="prodNum" prepend="and">
+			prod_num = #prodNum#
+		</isNotEmpty>
+
+	</delete>
+
+	
+	<update id="updateReturnedInvByMap"  parameterClass="java.util.HashMap">
+			update returned_invoice set 
+			<isNotEmpty property="retWhStatus">
+				ret_wh_status = #retWhStatus#
+			</isNotEmpty>
+			<isEmpty property="retWhStatus">
+				ret_wh_status = ret_wh_status
+			</isEmpty>
+			<isNotEmpty property="whNum" prepend=",">
+				wh_num = #whNum#
+			</isNotEmpty>
+			<isNotEmpty property="whName" prepend=",">
+				wh_name = #whName#
+			</isNotEmpty>
+			<isNotEmpty property="retReason" prepend=",">
+				ret_reason = #retReason#
+			</isNotEmpty>
+			<isNotEmpty property="remark" prepend=",">
+				remark = #remark#
+			</isNotEmpty>
+			<isEmpty property="updateDate" prepend=",">
+				update_date = now()
+			</isEmpty>			
+			<isNotEmpty property="updateBy" prepend=",">
+				update_by = #updateBy#
+			</isNotEmpty>
+			<isEmpty property="updateBy" prepend=",">
+				update_by = ''
+			</isEmpty>		
+			where ret_num = #retNum#
+	</update>
+	
+	<update id="updateReturnedInv"  parameterClass="RETURNEDINV">
+			update returned_invoice set 
+			<isNotEmpty property="retWhStatus">
+				ret_wh_status = #retWhStatus#
+			</isNotEmpty>
+			<isEmpty property="retWhStatus">
+				ret_wh_status = ret_wh_status
+			</isEmpty>
+			<isNotEmpty property="whNum" prepend=",">
+				wh_num = #whNum#
+			</isNotEmpty>
+			<isNotEmpty property="whName" prepend=",">
+				wh_name = #whName#
+			</isNotEmpty>
+			<isNotEmpty property="retReason" prepend=",">
+				ret_reason = #retReason#
+			</isNotEmpty>
+			<isNotEmpty property="remark" prepend=",">
+				remark = #remark#
+			</isNotEmpty>
+			<isEmpty property="updateDate" prepend=",">
+				update_date = now()
+			</isEmpty>			
+			<isNotEmpty property="updateBy" prepend=",">
+				update_by = #updateBy#
+			</isNotEmpty>
+			<isEmpty property="updateBy" prepend=",">
+				update_by = ''
+			</isEmpty>		
+			where ret_num = #retNum#
+	</update>
+	
+	<update id="updateReturnedInvItemByMap"  parameterClass="java.util.HashMap">
+			update returned_invoice_item set 
+			<isNotEmpty property="cases">
+				cases = #cases#
+			</isNotEmpty>
+			<isEmpty property="cases">
+				cases = cases
+			</isEmpty>
+			<isNotEmpty property="pieces" prepend=",">
+				pieces = #pieces#
+			</isNotEmpty>
+			where ret_num = #retNum# and prod_num = #prodNum#
+	</update>
+	
+	<update id="updateReturnedInvItem"  parameterClass="RETURNEDINVITEM">
+			update returned_invoice_item set 
+			cases = #cases#,
+			pieces = #pieces# 
+			where ret_num = #retNum# and prod_num = #prodNum# and differ_name = #differName#
+	</update>
+	
+</sqlMap>

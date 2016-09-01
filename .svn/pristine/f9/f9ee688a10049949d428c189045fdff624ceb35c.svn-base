@@ -1,0 +1,209 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+
+<!-- author 刘卿 -->
+<!-- 感谢ibatis的持久层框架 -->
+
+<sqlMap>
+
+	<typeAlias alias="ACCESSOPERATION" type="com.etaoguan.wea.vo.AccessOperation"/>
+	<typeAlias alias="ACCESSFUNCMETHOD" type="com.etaoguan.wea.vo.AccessFuncMethod"/>
+
+
+	<resultMap id="accessOperation" class="ACCESSOPERATION">
+		<result property="moduleName" column="module_name"/>
+		<result property="operationName" column="operation_name"/>
+		<result property="affectRole" column="affect_role"/>
+	</resultMap>
+	
+	<resultMap id="accessFuncMethod" class="ACCESSFUNCMETHOD">
+		<result property="moduleName" column="module_name"/>
+		<result property="functionName" column="function_name"/>
+		<result property="operationName" column="operation_name"/>
+		<result property="affectRole" column="affect_role"/>
+		<result property="classMethod" column="class_method"/>
+	</resultMap>
+
+	
+	<select id="getAccessOperations" parameterClass="java.util.HashMap"  resultMap="accessOperation">
+	
+		<isEqual property="affectRole" compareValue="1">
+	
+			SELECT
+			t1.module_name,
+			t1.operation_name,
+			t1.affect_role 
+			FROM 
+			(select module_name,
+			operation_name,
+			affect_role from access_operation 
+			where affect_role=1)t1
+			<isEmpty property="roleId">
+				<isEmpty property="roleIds">
+					,(select  module_name,
+					operation_name 
+					from admin_role_operation_ref 
+					where role_id = 0) t2 
+					where t1.module_name=t2.module_name 
+					and t1.operation_name = t2.operation_name 
+				</isEmpty>
+			</isEmpty>
+			<isNotEmpty property="roleId">
+				,(select  module_name,
+				operation_name 
+				from admin_role_operation_ref 
+				where role_id = #roleId#) t2 
+				where t1.module_name=t2.module_name 
+				and t1.operation_name = t2.operation_name 
+			</isNotEmpty>
+			<isNotEmpty property="roleIds">
+				,(select  distinct module_name,
+				operation_name 
+				from admin_role_operation_ref 
+				where role_id IN 
+				    <iterate property="roleIds" open="(" close=")" conjunction=","> 
+				    #roleIds[]#
+				    </iterate>
+				    ) t2 
+				where t1.module_name=t2.module_name 
+				and t1.operation_name = t2.operation_name
+			</isNotEmpty>
+			
+		</isEqual>
+		<isEqual property="affectRole" compareValue="2">
+			SELECT
+			module_name,
+			operation_name,
+			affect_role 
+			FROM 
+			access_operation where 
+			affect_role=2
+		</isEqual>
+
+		<isEqual property="affectRole" compareValue="3">
+			SELECT
+			module_name,
+			operation_name,
+			affect_role 
+			FROM 
+			access_operation where 
+			affect_role=3
+		</isEqual>
+	</select>
+	
+	<statement id="syncAccessOperations">
+		delete from access_operation;
+		insert into access_operation 
+		(
+		module_name,
+		operation_name,
+		affect_role 
+		)
+		select 
+		distinct 
+		module_name,
+		operation_name,
+		affect_role 
+		from access_function_method ;
+
+	</statement>
+
+	<delete id="deleteAccessOperation" parameterClass="java.util.HashMap">
+		DELETE 
+		FROM
+		access_operation where 1=1 
+		
+		<dynamic>
+			<isNotEmpty property="moduleName" prepend="and">
+			    module_name = #moduleName#
+			</isNotEmpty>
+			<isNotEmpty property="operationName" prepend="and">
+			    operation_name = #operationName#
+			</isNotEmpty>
+			<isNotEmpty property="affectRole" prepend="and">
+			    affect_role = #affectRole#
+			</isNotEmpty>
+		</dynamic>
+
+	</delete>
+	
+	<delete id="deleteAccessFuncMethod" parameterClass="java.util.HashMap">
+		DELETE 
+		FROM
+		access_function_method where 1=1 
+		
+		<dynamic>
+			<isNotEmpty property="moduleName" prepend="and">
+			    module_name = #moduleName#
+			</isNotEmpty>
+			<isNotEmpty property="functionName" prepend="and">
+			    function_name = #functionName#
+			</isNotEmpty>
+			<isNotEmpty property="operationName" prepend="and">
+			    operation_name = #operationName#
+			</isNotEmpty>
+			<isNotEmpty property="affectRole" prepend="and">
+			    affect_role = #affectRole#
+			</isNotEmpty>
+		</dynamic>
+
+	</delete>
+	
+	
+	<insert id="createAccessFuncMethod" parameterClass="ACCESSFUNCMETHOD">
+		insert into access_function_method 
+		(
+		module_name,
+		function_name,
+		operation_name,
+		affect_role,
+		class_method
+		)
+		values(
+		#moduleName#,
+		#functionName#,
+		#operationName#,
+		#affectRole#,
+		#classMethod#
+		)
+
+	</insert>
+
+	<select id="getAccessFuncMethod" parameterClass="java.util.HashMap"  resultMap="accessFuncMethod">
+		SELECT
+		module_name,
+		function_name,
+		operation_name,
+		affect_role,
+		class_method 
+		FROM 
+		access_function_method where class_method = #classMethod#
+	</select>
+	
+	<select id="getAccessFuncMethods" parameterClass="java.util.HashMap"  resultMap="accessFuncMethod">
+		SELECT
+		module_name,
+		function_name,
+		operation_name,
+		affect_role,
+		class_method 
+		FROM 
+		access_function_method where 1=1 
+		
+		<dynamic>
+			<isNotEmpty property="moduleName" prepend="and">
+			    module_name = #moduleName#
+			</isNotEmpty>
+			<isNotEmpty property="functionName" prepend="and">
+			    function_name = #functionName#
+			</isNotEmpty>
+			<isNotEmpty property="operationName" prepend="and">
+			    operation_name = #operationName#
+			</isNotEmpty>
+			<isNotEmpty property="affectRole" prepend="and">
+			    affect_role = #affectRole#
+			</isNotEmpty>
+		</dynamic>
+	</select>
+	
+</sqlMap>

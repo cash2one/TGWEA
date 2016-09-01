@@ -1,0 +1,78 @@
+package com.etaoguan.wea.client.web.service.impl;
+
+import java.util.HashMap;
+import java.util.Map;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.etaoguan.wea.client.vo.SortParam;
+import com.etaoguan.wea.client.web.service.IWProdStockService;
+import com.etaoguan.wea.client.web.service.IWWareHouseService;
+import com.etaoguan.wea.client.web.vo.ProdStockSearch;
+import com.etaoguan.wea.client.web.vo.StockTraceSearch;
+import com.etaoguan.wea.client.web.vo.WPage;
+import com.etaoguan.wea.client.web.vo.WPagingRequest;
+import com.etaoguan.wea.common.DataCriteria;
+import com.etaoguan.wea.common.DataSet;
+import com.etaoguan.wea.common.OffsetRequest;
+import com.etaoguan.wea.service.impl.ProdStockService;
+@Service("wprodStockService")
+public class WProdStockService extends ProdStockService implements IWProdStockService{
+	
+	@Autowired
+	IWWareHouseService iWWareHouseService;
+
+	@Override
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	public Map getListProdStocksSearchInitData(String ownerNum) {
+		Map dataMap = new HashMap();
+		dataMap.put("warehouses",iWWareHouseService.getAllWarehouses(ownerNum));
+		return dataMap;
+	}
+
+	@Override
+	@SuppressWarnings("rawtypes")
+	public WPage listProdStocks(ProdStockSearch prodStockSearch,
+			SortParam sortParam, WPagingRequest wpagingRequest) {
+		OffsetRequest offsetRequest = wpagingRequest.format2OffsetRequest();
+		DataCriteria dataCriteria = new DataCriteria();
+		dataCriteria.setParam("ownerNum", prodStockSearch.getOwnerNum());
+		dataCriteria.setParam("prodName", prodStockSearch.getProdName());
+		dataCriteria.setParam("whNum", prodStockSearch.getWhNum());
+		if("cases".equalsIgnoreCase(sortParam.getSortBy())){
+			sortParam.setSortBy("cases");
+		}else{
+			
+			sortParam.setSortBy("");
+		}
+		dataCriteria.extractSortParam(sortParam);
+		
+		DataSet dataSet = listProdStock(dataCriteria, offsetRequest);
+		
+		return new WPage(wpagingRequest,dataSet);
+	}
+
+	@Override
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	public Map getListStockTracesSearchInitData(String ownerNum) {
+		Map dataMap = new HashMap();
+		dataMap.put("warehouses",iWWareHouseService.getAllWarehouses(ownerNum));
+		return dataMap;
+	}
+
+	@Override
+	@SuppressWarnings("rawtypes")
+	public WPage listStockTraces(StockTraceSearch stockTraceSearch,
+			SortParam sortParam, WPagingRequest wpagingRequest) {
+		OffsetRequest offsetRequest = wpagingRequest.format2OffsetRequest();
+		DataCriteria dataCriteria = new DataCriteria();
+		dataCriteria.setParam("ownerNum", stockTraceSearch.getOwnerNum());
+		dataCriteria.setParam("prodName", stockTraceSearch.getProdName());
+		dataCriteria.setParam("whNum", stockTraceSearch.getWhNum());
+		DataSet dataSet = listStockTrace(dataCriteria, offsetRequest);
+		
+		return new WPage(wpagingRequest,dataSet);
+	}
+
+}

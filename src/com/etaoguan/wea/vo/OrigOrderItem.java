@@ -1,0 +1,77 @@
+package com.etaoguan.wea.vo;
+
+public class OrigOrderItem {
+	
+	private String origOrderNum;
+	private String prodNum;
+	private String prodName;
+	private String differName;
+	private String unit;
+	private double prodPrice;
+	private double prodPriceTotal;
+	private int cases;
+	private int pieces;
+	private String whereimg;
+	
+	public String getWhereimg() {
+		return whereimg;
+	}
+	public void setWhereimg(String whereimg) {
+		this.whereimg = whereimg;
+	}
+	public String getOrigOrderNum() {
+		return origOrderNum;
+	}
+	public void setOrigOrderNum(String origOrderNum) {
+		this.origOrderNum = origOrderNum;
+	}
+	public String getProdNum() {
+		return prodNum;
+	}
+	public void setProdNum(String prodNum) {
+		this.prodNum = prodNum;
+	}
+	public String getProdName() {
+		return prodName;
+	}
+	public void setProdName(String prodName) {
+		this.prodName = prodName;
+	}
+	public double getProdPrice() {
+		return prodPrice;
+	}
+	public void setProdPrice(double prodPrice) {
+		this.prodPrice = prodPrice;
+	}
+	public double getProdPriceTotal() {
+		return prodPriceTotal;
+	}
+	public void setProdPriceTotal(double prodPriceTotal) {
+		this.prodPriceTotal = prodPriceTotal;
+	}
+	public int getCases() {
+		return cases;
+	}
+	public void setCases(int cases) {
+		this.cases = cases;
+	}
+	public int getPieces() {
+		return pieces;
+	}
+	public void setPieces(int pieces) {
+		this.pieces = pieces;
+	}
+	public String getUnit() {
+		return unit;
+	}
+	public void setUnit(String unit) {
+		this.unit = unit;
+	}
+	public String getDifferName() {
+		return differName;
+	}
+	public void setDifferName(String differName) {
+		this.differName = differName;
+	}
+
+}

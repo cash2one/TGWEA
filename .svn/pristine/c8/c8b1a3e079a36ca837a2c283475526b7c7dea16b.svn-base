@@ -1,0 +1,10 @@
+package com.etaoguan.wea.client.mobile.service;
+
+import com.etaoguan.wea.client.mobile.vo.OrderPay;
+
+public interface IMPaymentService{
+
+	public void processPayOrder(OrderPay orderPay);
+	
+	public void processAlipayWapResp(String notifyData);
+}

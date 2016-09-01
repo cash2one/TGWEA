@@ -1,0 +1,149 @@
+package com.etaoguan.wea.service.impl;
+
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.etaoguan.wea.client.vo.SortParam;
+import com.etaoguan.wea.client.web.vo.AppleSearch;
+import com.etaoguan.wea.client.web.vo.WPage;
+import com.etaoguan.wea.client.web.vo.WPagingRequest;
+import com.etaoguan.wea.common.DataCriteria;
+import com.etaoguan.wea.common.DataSet;
+import com.etaoguan.wea.common.OffsetRequest;
+import com.etaoguan.wea.dao.IAppleVersionDao;
+import com.etaoguan.wea.service.IAppleVersionService;
+import com.etaoguan.wea.vo.AppleVersion;
+
+/**
+ * @author cunli 苹果版本 业务接口实现类
+ */
+@Service("appleVersionService")
+public class AppleVersionService extends BaseService implements
+		IAppleVersionService {
+
+	@Autowired
+	private IAppleVersionDao iAppleVersionDao;
+
+	/*
+	 * (non-Javadoc)添加苹果版本信息
+	 * 
+	 * @see
+	 * com.etaoguan.wea.service.IAppleVersionService#addAppleVs(com.etaoguan
+	 * .wea.vo.AppleVersion)
+	 */
+	@Override
+	public void addAppleVs(AppleVersion appleVersion) {
+		appleVersion.setCreateBy(getCurrentOperator());// 创建人
+		iAppleVersionDao.addappleversion(appleVersion);
+	}
+
+	/*
+	 * (non-Javadoc)删除苹果版本信息
+	 * 
+	 * @see com.etaoguan.wea.service.IAppleVersionService#delAppleVs(int)
+	 */
+	@Override
+	public void delAppleVs(int versionId) {
+		DataCriteria dataCriteria = new DataCriteria();
+		dataCriteria.setParam("versionId", versionId);
+		iAppleVersionDao.delappleversoin(dataCriteria);
+
+	}
+
+	/*
+	 * (non-Javadoc)修改苹果版本信息
+	 * 
+	 * @see
+	 * com.etaoguan.wea.service.IAppleVersionService#updateAppleVs(com.etaoguan
+	 * .wea.vo.AppleVersion)
+	 */
+	@Override
+	public void updateAppleVs(AppleVersion appleVersion) {
+		appleVersion.setUpdateBy(getCurrentOperator());
+		iAppleVersionDao.updateappleversoin(appleVersion);
+
+	}
+
+	/*
+	 * (non-Javadoc)查看所有苹果版本信息
+	 * 
+	 * @see com.etaoguan.wea.service.IAppleVersionService#getAppleVersions()
+	 */
+	@Override
+	@SuppressWarnings("rawtypes")
+	public WPage getAppleVersions(AppleSearch appleSearch, SortParam sortParam,
+			WPagingRequest wpagingRequest) {
+
+		OffsetRequest offsetRequest = wpagingRequest.format2OffsetRequest();
+		DataCriteria dataCriteria = new DataCriteria();
+		dataCriteria.setParam("companyName", appleSearch.getCompanyName());
+
+		DataSet dataSet = iAppleVersionDao.getAppleVersions(dataCriteria,
+				offsetRequest);
+
+		return new WPage(wpagingRequest, dataSet);
+
+	}
+
+	/*
+	 * (non-Javadoc)更新版本信息之前的初始化信息
+	 * 
+	 * @see
+	 * com.etaoguan.wea.service.IAppleVersionService#getAppleVersionById(int)
+	 */
+	@Override
+	public AppleVersion getAppleVersionById(AppleVersion appleVersion) {
+		DataCriteria dataCriteria = new DataCriteria();
+		dataCriteria.setParam("versionId", appleVersion.getVersionId());
+		dataCriteria.setParam("ownerNum", appleVersion.getOwnerNum());
+		return iAppleVersionDao.getAppleVersionById(dataCriteria);
+	}
+
+	/*
+	 * (non-Javadoc)APP发布管理 列表
+	 * 
+	 * @see com.etaoguan.wea.service.IAppleVersionService#getVersionsService()
+	 */
+	@Override
+	public List<AppleVersion> getVersionsService() {
+		return iAppleVersionDao.getVersions();
+	}
+
+	/*
+	 * (non-Javadoc)确定是否更新
+	 * 
+	 * @see
+	 * com.etaoguan.wea.service.IAppleVersionService#getAppleMaxVersionService
+	 * (int, int)
+	 */
+	@Override
+	public boolean getAppleMaxVersionService(String ownerNum, String versionNum) {
+		boolean result = false;
+
+		DataCriteria dataCriteria = new DataCriteria();
+		dataCriteria.setParam("ownerNum", ownerNum);
+		String newVersion = iAppleVersionDao
+				.getAppleMaxVersionDao(dataCriteria);
+		String[] nvs = newVersion.split("\\.");// 数据库版本
+		String[] vn = versionNum.split("\\.");// 客户端版本
+		
+		/*版本号 第一位*/
+		if (Integer.parseInt(nvs[0]) > Integer.parseInt(vn[0])) {
+			return true;
+		} 
+		
+		/*版本号 第二位*/
+		if (Integer.parseInt(nvs[0]) == Integer.parseInt(vn[0]) && Integer.parseInt(nvs[1]) > Integer.parseInt(vn[1])) {
+			return true;
+		} 
+		
+		/*版本号 第三位*/
+		if (Integer.parseInt(nvs[0]) == Integer.parseInt(vn[0]) && Integer.parseInt(nvs[1]) == Integer.parseInt(vn[1]) && Integer.parseInt(nvs[2]) > Integer.parseInt(vn[2])) {
+			return true;
+		}
+		return result;
+	}
+
+}

@@ -1,0 +1,8 @@
+package com.etaoguan.wea.service;
+
+
+public interface IPaymentService {
+
+	public String pay(String orderNum,String domainBaseUrl);
+
+}

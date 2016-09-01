@@ -1,0 +1,61 @@
+
+<ion-view title="产品列表">
+    <ion-nav-buttons side="right">
+        <button ng-click="toProduct()" class="button button-clear button-light ion-images icon-large"></button>
+    </ion-nav-buttons>
+    <ion-content>
+        <div  ng-hide="bodyHide" style="height: 100%;width:100%;background-color: #f9f9f9;position: fixed;top: 0; z-index: 9999999;"></div>
+
+        <ion-refresher on-refresh="proListRefresh()" pulling-text="下拉刷新..." refreshing-text="正在加载..." pulling-icon="ion-ios-arrow-thin-down" refreshing-icon="icon-spinner icon-spin"></ion-refresher>
+
+        <div class="bar item-input-inset searchBar">
+            <label class="item-input-wrapper searchBarInput">
+                <i class="ion-ios7-search searchBarIcon"></i>
+                <input type="text" placeholder="搜索产品" ng-model="iPro.searchText" ng-change="proSearchTextChange()"/>
+            </label>
+            <button class="button button-clear button-light" id="searchBtn" ng-click="iProSearch()">搜 索</button>
+        </div>
+
+        <div id="mainContent">
+        <div class="list margin-bottom-none">
+            <div class="item item-thumbnail-left floorMain" ng-click="proItemClick($index)" ng-repeat="listDatas in proListDatas">
+                <img id="prListImg" _lazysrc="{{listDatas.proListImg}}" onerror=this.src=errImg>
+                <p class="proName" ng-bind="listDatas.proName"></p>
+                <p class="margin-bottom-none"><span class="proModel" ng-bind="listDatas.proModel"></span></p>
+                <p><span class="proPrice" ng-bind="listDatas.proPrice"></span></p>
+            </div>
+        </div>
+        </div>
+
+        <h2 class="noMore margin-top-none" ng-hide="noMoreHide">已经到底啦</h2>
+        <ion-infinite-scroll icon="icon-spinner icon-spin" distance="0px" on-infinite="proListLoadMore()" ng-hide="loadingHide"></ion-infinite-scroll>
+        <div style="height: 50px;"></div>
+    </ion-content>
+
+    <div class="tabs tabs-icon-top tabs-light">
+        <div class="tab-item">
+            <i class="icon ion-ios7-home-outline"></i>
+            首 页
+        </div>
+
+        <div class="tab-item">
+            <i class="icon ion-ios-list"></i>
+            产 品
+        </div>
+
+        <div class="tab-item">
+            <i class="icon ion-ios7-keypad-outline"></i>
+            分 类
+        </div>
+
+        <div class="tab-item">
+            <i class="icon ion-ios7-cart-outline"></i>
+            购物车
+        </div>
+        <div class="tab-item">
+            <i class="icon ion-ios7-person-outline"></i>
+            批发商
+        </div>
+
+    </div>
+</ion-view>

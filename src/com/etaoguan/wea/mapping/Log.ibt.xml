@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+
+<!-- author 刘卿 -->
+<!-- 感谢ibatis的持久层框架 -->
+
+<sqlMap>
+
+	<typeAlias alias="OPERATIONLOGINFO" type="com.etaoguan.wea.vo.OperationLogInfo"/>
+
+	<resultMap id="operationLogInfo" class="OPERATIONLOGINFO">
+		<result property="operatorId" column="operator_id"/>
+		<result property="operatorName" column="operator_name"/>
+		<result property="sysRole" column="sys_role"/>
+		<result property="logInfo" column="log_info"/>
+		<result property="startDate" column="start_date"/>
+		<result property="endDate" column="end_date"/>
+		<result property="actionName" column="action_name"/>
+		<result property="method" column="method"/>
+		<result property="params" column="params"/>
+		<result property="costTime" column="cost_time"/>
+		<result property="result" column="result"/>
+		<result property="remark" column="remark"/>
+	</resultMap>
+
+	<insert id="createOperationLogInfo"  parameterClass="OPERATIONLOGINFO">
+		insert into operation_log 
+		(
+			action_name,
+			start_date,
+			end_date,
+			cost_time,
+			log_info,
+			method,
+			operator_id,
+			operator_name,
+			sys_role,
+			params,
+			result,
+			remark
+		)
+		values(
+			#actionName#,
+			#startDate#,	
+			#endDate#,
+			#costTime#,
+			#logInfo#,
+			#method#,
+			#operatorId#,
+			#operatorName#,	
+			#sysRole#,
+			#params#,
+			#result#
+			<isNotEmpty property="remark" prepend=",">
+			#remark#
+			</isNotEmpty>
+			<isEmpty property="remark" prepend=",">
+			''
+			</isEmpty>		
+		
+		)
+
+	</insert>
+
+
+</sqlMap>

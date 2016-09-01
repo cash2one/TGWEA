@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+
+<sqlMap>
+
+	<typeAlias alias="AppAndroidVersion" type="com.etaoguan.wea.vo.AppAndroidVersion" />
+	<typeAlias alias="OWNER" type="com.etaoguan.wea.vo.Owner" />
+
+	<resultMap id="androidversion" class="AppAndroidVersion">
+		<result property="versionId" column="version_id" />
+		<result property="versionNum" column="version_num" />
+		<result property="versionCode" column="version_code" />
+		<result property="appName" column="app_name" />
+		<result property="forceUpdate" column="force_update" />
+		<result property="activeFlag" column="active_flag" />
+		<result property="remark" column="remark" />
+		<result property="createDate" column="create_date" />
+		<result property="createBy" column="create_by" />
+		<result property="updateDate" column="update_date" />
+		<result property="updateBy" column="update_by" />
+		<result property="ownerNum" column="owner_num" />
+		<result property="packageName" column="package_name" />
+	</resultMap>
+
+	<resultMap id="ownerMap" class="AppAndroidVersion">
+		<result property="versionId" column="version_id" />
+		<result property="ownerNum" column="owner_num" />
+		<result property="versionNum" column="version_num" />
+		<result property="versionCode" column="version_code" />
+		<result property="appName" column="app_name" />
+		<result property="forceUpdate" column="force_update" />
+		<result property="activeFlag" column="active_flag" />
+		<result property="remark" column="remark" />
+		<result property="createDate" column="create_date" />
+		<result property="createBy" column="create_by" />
+		<result property="updateDate" column="update_date" />
+		<result property="updateBy" column="update_by" />
+		<result property="companyName" column="company_name" />
+		<result property="fileName" column="file_name" />
+		<result property="packageName" column="package_name" />
+	</resultMap>
+
+	<!-- android 统计页数 -->
+	<select id="getAndroidPageCount" parameterClass="java.util.HashMap"
+		resultClass="java.lang.Integer">
+		SELECT
+		COUNT(andriod.version_id)
+		FROM
+		wea.app_andriod_version andriod,
+		OWNER
+		WHERE
+		andriod.owner_num = OWNER .owner_num
+		<isNotEmpty property="companyName" prepend="and">
+			owner.company_name like CONCAT('%',#companyName#, '%')
+		</isNotEmpty>
+	</select>
+
+	<!-- 更新版本信息之前的初始化信息 -->
+	<select id="getAndroidvsbyid" parameterClass="java.util.HashMap"
+		resultMap="ownerMap">
+		
+		SELECT
+	`owner`.company_name,
+	app_andriod_version.version_id,
+	app_andriod_version.version_num,
+	app_andriod_version.version_code,
+	app_andriod_version.app_name,
+	app_andriod_version.force_update,
+	app_andriod_version.active_flag,
+	app_andriod_version.remark,
+	app_andriod_version.create_date,
+	app_andriod_version.create_by,
+	app_andriod_version.update_date,
+	app_andriod_version.update_by,
+	app_andriod_version.owner_num,
+	app_andriod_version.file_name,
+	app_andriod_version.package_name
+FROM
+	app_andriod_version,
+	`owner`
+WHERE
+	app_andriod_version.owner_num = `owner`.owner_num 
+		<dynamic>
+
+			<isNotEqual property="versionId" compareValue="-1"
+				prepend="and">
+				version_id = #versionId#
+			</isNotEqual>
+			<isEqual property="versionId" compareValue="-1" prepend="and">
+				version_num = (SELECT max(version_num) FROM wea.app_andriod_version)
+			</isEqual>
+
+		</dynamic>
+
+	</select>
+
+	<!-- 获取安卓版本信息 -->
+	<select id="getAndroidvs" parameterClass="java.util.HashMap"
+		resultMap="ownerMap">
+		SELECT
+		owner.company_name,andriod.version_id,andriod.version_num,
+		andriod.version_code,
+		andriod.package_name,
+		andriod.app_name,andriod.force_update,andriod.active_flag,
+		andriod.remark, andriod.create_date, andriod.create_by,
+		andriod.update_date,
+		andriod.update_by, andriod.owner_num, andriod.file_name
+		FROM
+		wea.app_andriod_version andriod , owner
+		where andriod.owner_num =
+		owner.owner_num
+		<isNotEmpty property="companyName" prepend="and">
+			owner.company_name like CONCAT('%',#companyName#, '%')
+		</isNotEmpty>
+		order by andriod.create_date desc
+		limit #limit# offset #offset#
+	</select>
+
+	<!-- 查询最大的版本号 -->
+	<select id="maxVersionNum" parameterClass="java.util.HashMap"
+		resultClass="java.lang.Integer">
+		SELECT IFNULL(max(version_num),0) FROM wea.app_andriod_version
+		where 1=1
+		<isNotEmpty property="ownerNum" prepend="and">
+			owner_num = #ownerNum#
+		</isNotEmpty>
+	</select>
+
+	<!-- 添加安卓版本信息 -->
+	<statement id="createAndroidversionmethod" parameterClass="AppAndroidVersion">
+		update app_andriod_version set active_flag = 0 where owner_num =
+		#ownerNum# ;
+		
+		insert into app_andriod_version
+		(version_num,version_code,app_name,remark,create_date,create_by,update_date,update_by,active_flag,owner_num,file_name,package_name)
+		values
+	(#versionNum#,#versionCode#,#appName#,#remark#,now(),#createBy#,now(),#createBy#,#activeFlag#,#ownerNum#,#fileName#,#packageName#) 
+	
+	
+	</statement>
+
+	<!-- 删除安卓版本信息 -->
+	<delete id="delAndroidvs" parameterClass="java.util.HashMap">
+		delete from
+		app_andriod_version where version_id = #versionId#
+	</delete>
+
+	<!-- 修改安卓版本信息 -->
+	<update id="syncAndroidversoin" parameterClass="AppAndroidVersion">
+		update
+		app_andriod_version set
+		version_code = #versionCode#,
+		app_name = #appName#,
+		update_date = now(),update_by =
+		#updateBy#,remark
+		=#remark#,owner_num = #ownerNum#,file_name = #fileName#,package_name=#packageName#
+		where
+		version_id =
+		#versionId#
+
+	</update>
+
+</sqlMap>

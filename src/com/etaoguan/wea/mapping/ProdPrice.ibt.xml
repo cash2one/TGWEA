@@ -1,0 +1,617 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+
+<!-- author 刘卿 -->
+<!-- 感谢ibatis的持久层框架 -->
+
+<sqlMap>
+
+	<typeAlias alias="PRODPRICE" type="com.etaoguan.wea.vo.ProdPrice"/>
+	<typeAlias alias="CUSTPRODPRICE" type="com.etaoguan.wea.vo.CustProdPrice"/>
+	<typeAlias alias="CUSTFINALPRODPRICE" type="com.etaoguan.wea.vo.CustFinalProdPrice"/>
+
+	<resultMap id="prodPrice" class="PRODPRICE">
+		<result property="prodNum" column="prod_num"/>
+		<result property="prodName" column="prod_name"/>
+		<result property="prodPrice" column="prod_price" nullValue="0"/>
+		<result property="effectiveFrom" column="effective_from"/>
+		<result property="effectiveTo" column="effective_to"/>
+		<result property="ownerNum" column="owner_num"/>
+		<result property="remark" column="remark"/>
+		<result property="createDate" column="create_date"/>
+		<result property="createBy" column="create_by"/>
+		<result property="updateDate" column="update_date"/>
+		<result property="updateBy" column="update_by"/>
+	</resultMap>
+	
+	<resultMap id="custProdPrice" extends="prodPrice" class="CUSTPRODPRICE">
+		<result property="custNum" column="cust_num"/>
+	</resultMap>
+	
+	<resultMap id="custProdPriceDataSet" extends="custProdPrice" class="CUSTPRODPRICE">
+		<result property="stdProdPrice" column="std_prod_price" nullValue="0"/>
+		<result property="cust.custNum" column="cust_num"/>
+		<result property="cust.companyName" column="company_name"/>
+	</resultMap>
+	
+	<resultMap id="custFinalProdPrice" class="CUSTFINALPRODPRICE">
+		<result property="prodNum" column="prod_num"/>
+		<result property="prodName" column="prod_name"/>
+		<result property="finalPrice" column="final_price"/>
+		<result property="isStdPrice" column="is_std_price"/>
+	</resultMap>
+	
+
+	<select id="getCustProdPriceCount" parameterClass="java.util.HashMap" resultClass="java.lang.Integer">
+		<isNotEmpty property="custNum">
+			SELECT count(1)   
+			FROM 
+			product where 1=1 
+	
+			<isNotEmpty property="prodNum" prepend="and">
+			    prod_num = #prodNum# 
+			</isNotEmpty>
+
+			and owner_num = #ownerNum# 
+	
+		</isNotEmpty>
+		<isEmpty property="custNum">
+			<isNotEmpty property="prodNum">
+				select count(1) from customer
+					where owner_num = #ownerNum#
+			</isNotEmpty> 
+			<isEmpty property="prodNum">
+				select 0 count
+			</isEmpty>
+
+		</isEmpty> 
+	</select>
+
+	<select id="getCustProdPriceDatSet" parameterClass="java.util.HashMap"  resultMap="custProdPriceDataSet">
+		<isNotEmpty property="custNum">
+			SELECT t5.*,t6.company_name from 
+			(SELECT t3.std_prod_price,   
+			t3.prod_num,   
+			t3.prod_name,   
+			t4.prod_price,   
+			t4.effective_from,   
+			t4.effective_to,   
+			#custNum# cust_num,   
+			t4.remark,   
+			t4.owner_num,   
+			t4.create_date,   
+			t4.create_by,   
+			t4.update_date,   
+			t4.update_by FROM  
+			(SELECT t1.std_prod_price,
+			t2.prod_num,
+			t2.prod_name  FROM 
+			(SELECT prod_num,
+			prod_price std_prod_price 
+			FROM product_price 
+			where owner_num = #ownerNum#
+			)
+			t1 right outer join (
+			SELECT
+			prod_num,
+			prod_name  
+			FROM 
+			product where 1=1 
+				<isNotEmpty property="prodNum" prepend="and">
+				    prod_num = #prodNum# 
+				</isNotEmpty>
+			and owner_num = #ownerNum# 
+			) t2 
+			on t1.prod_num = t2.prod_num ) t3 
+				left outer join 
+				(SELECT prod_num,
+				prod_price,
+				effective_from,
+				effective_to,
+				remark,
+				owner_num,
+				create_date,
+				create_by,
+				update_date,
+				update_by  
+				FROM cust_product_price 
+				where owner_num = #ownerNum# and cust_num = #custNum#) t4
+			on t3.prod_num = t4.prod_num 	
+			) t5,
+			(select cust_num,company_name from customer where cust_num = #custNum#) t6 
+			where t5.cust_num = t6.cust_num 
+			
+		</isNotEmpty>
+		<isEmpty property="custNum">
+			<isNotEmpty property="prodNum">
+				SELECT t3.std_prod_price,   
+				t3.prod_num,   
+				t3.prod_name,   
+				t6.prod_price,   
+				t6.effective_from,   
+				t6.effective_to,   
+				t6.cust_num,   
+				t6.company_name, 
+				t6.remark,   
+				t6.owner_num,   
+				t6.create_date,   
+				t6.create_by,   
+				t6.update_date,   
+				t6.update_by FROM  
+				(SELECT t1.std_prod_price,
+				t2.prod_num,
+				t2.prod_name  FROM 
+				(SELECT prod_num,
+				prod_price std_prod_price 
+				FROM product_price 
+				where owner_num = #ownerNum#
+		
+				)
+				t1 right outer join (
+				SELECT
+				prod_num,
+				prod_name  
+				FROM 
+				product where 
+				prod_num = #prodNum# 
+				and owner_num = #ownerNum# 
+				) t2 
+				on t1.prod_num = t2.prod_num ) t3 
+					right outer join 
+					( select t4.cust_num,t4.company_name,
+					#prodNum# prod_num,
+					t5.prod_price,
+					t5.effective_from,
+					t5.effective_to,
+					t5.remark,
+					t5.owner_num,
+					t5.create_date,
+					t5.create_by,
+					t5.update_date,
+					t5.update_by  from 
+					(select cust_num,company_name from customer
+					where owner_num = #ownerNum#  ) t4 
+					left outer join (SELECT prod_num,
+					cust_num,
+					prod_price,
+					effective_from,
+					effective_to,
+					remark,
+					owner_num,
+					create_date,
+					create_by,
+					update_date,
+					update_by  
+					FROM cust_product_price 
+					where prod_num = #prodNum# 
+					and owner_num = #ownerNum#) t5
+					on t4.cust_num = t5.cust_num) t6
+				on t3.prod_num = t6.prod_num
+			</isNotEmpty> 
+		</isEmpty> 
+		
+
+		limit #limit# offset #offset#
+	</select>
+	
+	<select id="getProdPriceCount" parameterClass="java.util.HashMap" resultClass="java.lang.Integer">
+		SELECT
+		count(1) FROM 
+		(SELECT prod_num 
+		FROM product_price 
+		where owner_num = #ownerNum#
+
+		)
+		t1 right outer join (
+		SELECT
+		prod_num 
+		FROM 
+		product where owner_num = #ownerNum#
+
+		<dynamic>
+			<isNotEmpty property="prodName" prepend="and">
+			    prod_name like CONCAT('%',#prodName#, '%') 
+			</isNotEmpty>
+			<isNotEmpty property="prodCatIds" prepend="and">
+			    prod_cat_id IN 
+			    <iterate property="prodCatIds" open="(" close=")" conjunction=","> 
+			    #prodCatIds[]#
+			    </iterate>
+			</isNotEmpty>
+		</dynamic>
+		) t2 
+		on t1.prod_num = t2.prod_num 
+	</select>
+	
+	<select id="getProdPriceDatSet" parameterClass="java.util.HashMap"  resultMap="prodPrice">
+	
+		SELECT t1.prod_price,
+		t1.effective_from,
+		t1.effective_to,
+		t1.remark,
+		t1.owner_num,
+		t1.create_date,
+		t1.create_by,
+		t1.update_date,
+		t1.update_by,
+		t2.prod_num,
+		t2.prod_name  FROM 
+		(SELECT prod_num,
+		prod_price,
+		effective_from,
+		effective_to,
+		remark,
+		owner_num,
+		create_date,
+		create_by,
+		update_date,
+		update_by  
+		FROM product_price 
+		where owner_num = #ownerNum#
+
+		)
+		t1 right outer join (
+		SELECT
+		prod_num,
+		prod_name  
+		FROM 
+		product where owner_num = #ownerNum#
+
+		<dynamic>
+			<isNotEmpty property="prodName" prepend="and">
+			    prod_name like CONCAT('%',#prodName#, '%') 
+			</isNotEmpty>
+			<isNotEmpty property="prodCatIds" prepend="and">
+			    prod_cat_id IN 
+			    <iterate property="prodCatIds" open="(" close=")" conjunction=","> 
+			    #prodCatIds[]#
+			    </iterate>
+			</isNotEmpty>
+		</dynamic>
+		) t2 
+		on t1.prod_num = t2.prod_num 
+
+		limit #limit# offset #offset#
+	</select>
+	
+
+	<delete id="delCustProdPrice" parameterClass="java.util.HashMap">
+		DELETE 
+		FROM 
+		cust_product_price where prod_num = #prodNum# 
+		
+		<isNotEmpty property="custName" prepend="and">
+			cust_name = #custName#
+		</isNotEmpty>
+			
+		
+
+	</delete>
+	
+	<delete id="delProdPrice" parameterClass="java.util.HashMap">
+		DELETE 
+		FROM 
+		product_price where prod_num = #prodNum# 
+
+	</delete>
+
+	<select id="getCustFinalProdPrice" parameterClass="java.util.HashMap" resultMap="custFinalProdPrice">
+		select t1.*,t2.prod_name 
+		(
+		SELECT t3.prod_num,t4.prod_name,t3.final_price,t3.is_std_price 
+		(SELECT t1.prod_num,
+		IFNULL(t2.prod_price,t1.prod_price) final_price,
+		IF(t2.prod_price IS NULL,0,1) is_std_price 
+		FROM 
+		(SELECT
+		prod_num 
+		prod_price 
+		FROM
+		product_price where prod_num = #prodNum#) t1 LEFT OUTER JOIN 
+		(SELECT
+		prod_num 
+		prod_price 
+		FROM
+		cust_product_price where prod_num = #prodNum# and cust_num = #custNum#) t2 
+		on t1.prod_num = t2.prod_num ) t3, product t4 
+		where t3.prod_num = t4.prod_num 
+
+	</select>
+	
+	<select id="getCustFinalProdPriceList" parameterClass="java.util.HashMap" resultMap="custFinalProdPrice">
+	
+		SELECT t3.prod_num,t4.prod_name,t3.final_price,t3.is_std_price 
+		(SELECT t1.prod_num,
+		IFNULL(t2.prod_price,t1.prod_price) final_price,
+		IF(t2.prod_price IS NULL,0,1) is_std_price 
+		FROM 
+		(SELECT
+		prod_num 
+		prod_price 
+		FROM
+		product_price where owner_num = #ownerNum#) t1 LEFT OUTER JOIN 
+		(SELECT
+		prod_num 
+		prod_price 
+		FROM
+		cust_product_price where owner_num = #ownerNum# and cust_num = #custNum#) t2 
+		on t1.prod_num = t2.prod_num ) t3, product t4 
+		where t3.prod_num = t4.prod_num 
+
+	</select>
+	
+	<select id="getCustProdPrice" parameterClass="java.util.HashMap" resultMap="custProdPrice">
+		select t1.*,t2.prod_name from 
+		(
+		SELECT prod_num,
+		prod_price,
+		effective_from,
+		effective_to,
+		remark,
+		cust_num,
+		owner_num,
+		create_date,
+		create_by,
+		update_date,
+		update_by 
+		FROM cust_product_price 
+		where prod_num = #prodNum# and cust_num = #custNum#)
+		t1, product t2 
+		where t1.prod_num = t2.prod_num 
+
+	</select>
+	
+	<select id="getProdPrice" parameterClass="java.util.HashMap" resultMap="prodPrice">
+		select t1.*,t2.prod_name from 
+		(
+		SELECT prod_num,
+		prod_price,
+		effective_from,
+		effective_to,
+		remark,
+		owner_num,
+		create_date,
+		create_by,
+		update_date,
+		update_by
+		FROM product_price 
+		where prod_num = #prodNum#)
+		t1, product t2 
+		where t1.prod_num = t2.prod_num 
+
+	</select>
+	
+	<insert id="createCustProdPrice"  parameterClass="CUSTPRODPRICE">
+		insert into cust_product_price 
+		(
+			prod_num,
+			prod_price,
+			effective_from,
+			effective_to,
+			remark,
+			cust_num,
+			owner_num,
+			create_date,
+			create_by,
+			update_date,
+			update_by 
+		)
+		values(
+			#prodNum#,
+			#prodPrice#
+			<isNotEmpty property="effectiveFrom" prepend=",">
+				#effectiveFrom#
+			</isNotEmpty>
+			<isEmpty property="effectiveFrom" prepend=",">
+				'1900-01-01'
+			</isEmpty>	
+			<isNotEmpty property="effectiveTo" prepend=",">
+				#effectiveTo#
+			</isNotEmpty>
+			<isEmpty property="effectiveTo" prepend=",">
+				'2099-12-31'
+			</isEmpty>		
+			<isNotEmpty property="remark" prepend=",">
+				#remark#
+			</isNotEmpty>
+			<isEmpty property="remark" prepend=",">
+				''
+			</isEmpty>	
+			,#custNum#,
+			#ownerNum#
+			<isNotEmpty property="createDate" prepend=",">
+				#createDate#
+			</isNotEmpty>
+			<isEmpty property="createDate" prepend=",">
+				now()
+			</isEmpty>			
+			<isNotEmpty property="createBy" prepend=",">
+				#createBy#
+			</isNotEmpty>
+			<isEmpty property="createBy" prepend=",">
+				''
+			</isEmpty>			
+			<isNotEmpty property="updateDate" prepend=",">
+				#updateDate#
+			</isNotEmpty>
+			<isEmpty property="updateDate" prepend=",">
+				now()
+			</isEmpty>			
+			<isNotEmpty property="updateBy" prepend=",">
+				#updateBy#
+			</isNotEmpty>
+			<isEmpty property="updateBy" prepend=",">
+				''
+			</isEmpty>	
+		)
+
+	</insert>
+
+	<insert id="createProdPrice"  parameterClass="PRODPRICE">
+		insert into product_price 
+		(
+			prod_num,
+			prod_price,
+			effective_from,
+			effective_to,
+			remark,
+			owner_num,
+			create_date,
+			create_by,
+			update_date,
+			update_by 
+		)
+		values(
+			#prodNum#,
+			#prodPrice#
+			<isNotEmpty property="effectiveFrom" prepend=",">
+				#effectiveFrom#
+			</isNotEmpty>
+			<isEmpty property="effectiveFrom" prepend=",">
+				'1900-01-01'
+			</isEmpty>	
+			<isNotEmpty property="effectiveTo" prepend=",">
+				#effectiveTo#
+			</isNotEmpty>
+			<isEmpty property="effectiveTo" prepend=",">
+				'2099-12-31'
+			</isEmpty>		
+			<isNotEmpty property="remark" prepend=",">
+				#remark#
+			</isNotEmpty>
+			<isEmpty property="remark" prepend=",">
+				''
+			</isEmpty>	
+			,#ownerNum#
+			<isNotEmpty property="createDate" prepend=",">
+				#createDate#
+			</isNotEmpty>
+			<isEmpty property="createDate" prepend=",">
+				now()
+			</isEmpty>			
+			<isNotEmpty property="createBy" prepend=",">
+				#createBy#
+			</isNotEmpty>
+			<isEmpty property="createBy" prepend=",">
+				''
+			</isEmpty>			
+			<isNotEmpty property="updateDate" prepend=",">
+				#updateDate#
+			</isNotEmpty>
+			<isEmpty property="updateDate" prepend=",">
+				now()
+			</isEmpty>			
+			<isNotEmpty property="updateBy" prepend=",">
+				#updateBy#
+			</isNotEmpty>
+			<isEmpty property="updateBy" prepend=",">
+				''
+			</isEmpty>	
+		)
+
+	</insert>
+		
+	<update id="updateProdPriceByMap"  parameterClass="java.util.HashMap">
+			update product_price set 
+			<isNotEmpty property="prodPrice">
+				prod_price = #prodPrice#
+			</isNotEmpty>
+			<isEmpty property="prodPrice">
+				prod_price = prod_price
+			</isEmpty>
+			<isNotEmpty property="effectiveFrom" prepend=",">
+				effective_from = #effectiveFrom#
+			</isNotEmpty>
+			<isNotEmpty property="effectiveTo" prepend=",">
+				effective_to = #effectiveTo#
+			</isNotEmpty>
+			<isEmpty property="updateDate" prepend=",">
+				update_date = now()
+			</isEmpty>			
+			<isNotEmpty property="updateBy" prepend=",">
+				update_by = #updateBy#
+			</isNotEmpty>
+			<isEmpty property="updateBy" prepend=",">
+				update_by = ''
+			</isEmpty>		
+			where prod_num = #prodNum#
+	</update>
+	
+	<update id="updateProdPrice"  parameterClass="CUSTPRODPRICE">
+			update product_price set 
+			<isNotEmpty property="prodPrice">
+				prod_price = #prodPrice#
+			</isNotEmpty>
+			<isEmpty property="prodPrice">
+				prod_price = prod_price
+			</isEmpty>
+			<isNotEmpty property="effectiveFrom" prepend=",">
+				effective_from = #effectiveFrom#
+			</isNotEmpty>
+			<isNotEmpty property="effectiveTo" prepend=",">
+				effective_to = #effectiveTo#
+			</isNotEmpty>
+			<isEmpty property="updateDate" prepend=",">
+				update_date = now()
+			</isEmpty>			
+			<isNotEmpty property="updateBy" prepend=",">
+				update_by = #updateBy#
+			</isNotEmpty>
+			<isEmpty property="updateBy" prepend=",">
+				update_by = ''
+			</isEmpty>		
+			where prod_num = #prodNum#
+	</update>
+	
+	<update id="updateCustProdPrice"  parameterClass="PRODPRICE">
+			update cust_product_price set 
+			<isNotEmpty property="prodPrice">
+				prod_price = #prodPrice#
+			</isNotEmpty>
+			<isEmpty property="prodPrice">
+				prod_price = prod_price
+			</isEmpty>
+			<isNotEmpty property="effectiveFrom" prepend=",">
+				effective_from = #effectiveFrom#
+			</isNotEmpty>
+			<isNotEmpty property="effectiveTo" prepend=",">
+				effective_to = #effectiveTo#
+			</isNotEmpty>
+			<isEmpty property="updateDate" prepend=",">
+				update_date = now()
+			</isEmpty>			
+			<isNotEmpty property="updateBy" prepend=",">
+				update_by = #updateBy#
+			</isNotEmpty>
+			<isEmpty property="updateBy" prepend=",">
+				update_by = ''
+			</isEmpty>	
+			where prod_num = #prodNum# and cust_num = #custNum#
+	</update>
+
+	<update id="updateCustProdPriceByMap"  parameterClass="java.util.HashMap">
+			update cust_product_price set 
+			<isNotEmpty property="prodPrice">
+				prod_price = #prodPrice#
+			</isNotEmpty>
+			<isEmpty property="prodPrice">
+				prod_price = prod_price
+			</isEmpty>
+			<isNotEmpty property="effectiveFrom" prepend=",">
+				effective_from = #effectiveFrom#
+			</isNotEmpty>
+			<isNotEmpty property="effectiveTo" prepend=",">
+				effective_to = #effectiveTo#
+			</isNotEmpty>
+			<isEmpty property="updateDate" prepend=",">
+				update_date = now()
+			</isEmpty>			
+			<isNotEmpty property="updateBy" prepend=",">
+				update_by = #updateBy#
+			</isNotEmpty>
+			<isEmpty property="updateBy" prepend=",">
+				update_by = ''
+			</isEmpty>	
+			where prod_num = #prodNum# and cust_num = #custNum#
+	</update>
+</sqlMap>

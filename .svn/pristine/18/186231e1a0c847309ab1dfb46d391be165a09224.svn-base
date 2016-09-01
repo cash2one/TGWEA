@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html ng-app="ionicApp">
+<head lang="en">
+    <meta charset="UTF-8">
+    <meta content="telephone=no,email=no" name="format-detection">
+    <meta content="yes" name="apple-mobile-web-app-capable">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no" />
+    <title>杭州淘冠科技</title>
+
+    <link rel="stylesheet" href="mobileCss/ionic.min.css">
+    <link rel="stylesheet" href="css/paegAll.css" />
+    <!-- <link rel="stylesheet" href="mobileCss/ionicons.min.css"> -->
+    <!-- <link rel="stylesheet" href="mobileCss/font-awesome.min.css" > -->
+
+    <script type="text/javascript" src="http://api.map.baidu.com/api?type=quick&ak=0pNtN4cUMQFSGKzgHUDV07LZ&v=1.0"></script>
+
+    <script language="javascript">
+        try{
+            if(privateVerifiction.verifiction.getUrlParm("cordovaFlag") === "1"){
+                document.write("<script type='text/javascript' charset='utf-8' src='cordova.js'><\/script>");
+                document.close();
+            }else{}
+        }catch (error) {}
+    </script>
+</head>
+<body ng-controller="mainCtrl">
+    <ion-nav-bar class="ibarColor" animation="nav-title-slide-ios7" align-title="center" ng-hide="navBarIsHide"></ion-nav-bar>
+    <ion-nav-view animation="slide-left-right"></ion-nav-view>
+
+
+    <div class="tabs tabs-icon-top tabs-light" ng-hide="tabBarHide">
+        <div class="tab-item" ng-click="tabBarToPage(0)">
+            <i class="icon" ng-class="{'ion-ios-home':indexIsShow,'ion-ios-home-outline':categoryIsShow || shoppingCarIsShow || proIsShow}"></i>
+            首 页
+        </div>
+
+        <div class="tab-item" ng-click="tabBarToPage(1)">
+            <i class="icon" ng-class="{'ion-ios-list':proIsShow,'ion-ios-list-outline':indexIsShow || shoppingCarIsShow || categoryIsShow}"></i>
+            产 品
+        </div>
+
+        <div class="tab-item" ng-click="tabBarToPage(2)">
+            <i class="icon" ng-class="{'ion-ios-keypad':categoryIsShow,'ion-ios-keypad-outline':indexIsShow || shoppingCarIsShow || proIsShow}"></i>
+            分 类
+        </div>
+
+        <div class="tab-item" ng-click="tabBarToPage(3)">
+            <i class="icon" ng-class="{'ion-ios-cart':shoppingCarIsShow,'ion-ios-cart-outline':indexIsShow || categoryIsShow || proIsShow}"></i>
+            购物车
+        </div>
+
+         <div class="tab-item" ng-click="toPersonal()">
+            <i class="icon ion-ios-person-outline"></i>
+            批发商
+        </div>
+    </div>
+
+
+<script id="index.html" type="text/ng-template">
+    <ion-view title="杭州淘冠科技">
+        <ion-content>
+            <div  ng-hide="bodyHide" style="height: 100%;width:100%;background-color: #f9f9f9;position: fixed;top: 0; z-index: 9999999;"></div>
+            <ion-refresher on-refresh="indexRefresh()" pulling-text="下拉刷新..." refreshing-text="正在加载..." pulling-icon="ion-ios-arrow-thin-down" refreshing-class="spinner spinner-ios">
+            </ion-refresher>
+                <div class="bannerImg" id="indexSwiperView">
+                    <div id="indexSwiper"></div>
+                </div>
+
+            <div class="row iBar">
+                <button ng-click="toAbout()" class="button button-clear col col-33">
+                    <span class="iBarIcon" id="aboutItem">
+                        <i class="ion-ios-information-empty"></i>
+                    </span>
+                    <span class="ibarText">企业介绍</span>
+                </button>
+                <button ng-click="toContact()" class="button button-clear col col-33">
+                    <span class="iBarIcon" id="contactItem">
+                        <i class="ion-ios-telephone"></i>
+                    </span>
+                    <span class="ibarText">联系方式</span>
+                </button>
+                <button ng-click="toMessage()" class="button button-clear col col-33">
+                    <span class="iBarIcon" id="message">
+                        <i class="ion-chatboxes"></i>
+                    </span>
+                    <span class="ibarText">评价留言</span>
+                </button>
+            </div>
+            <div id="mainContent">
+            <div class="newProPanel" ng-if="newProIsHide === false">
+                <div class="newProRow row floorMain">
+                    <div class="col col-34 newProItem newProPadding-right">
+                        <div class="newProItemBlock" id="newProItemTitle">新品推荐</div>
+                    </div>
+                    <div class="col col-34 newProItem newProPadding-center">
+                        <div class="newProItemBlock">
+                            <img _lazysrc="{{newProDatas.newIndexImgs[0].newProImg}}" ng-click="showDetailed(newProDatas.newIndexImgs[0].newProNum)" onerror=this.src=errImg>
+                        </div>
+                    </div>
+                    <div class="col col-34 newProItem newProPadding-left">
+                        <div class="newProItemBlock" >
+                            <img  _lazysrc="{{newProDatas.newIndexImgs[1].newProImg}}" ng-click="showDetailed(newProDatas.newIndexImgs[1].newProNum)" onerror=this.src=errImg>
+                        </div>
+                    </div>
+                </div>
+
+
+                <div class="row newProRow floorMain" ng-repeat="newImgs in newProDatas.newProImgs">
+                    <div class="col col-34 newProItem newProPadding-right">
+                        <div class="newProItemBlock">
+                            <img  _lazysrc="{{newImgs[0].newProImg}}" ng-click="showDetailed(newImgs[0].newProNum)" onerror=this.src=errImg>
+                        </div>
+                    </div>
+                    <div class="col col-34 newProItem newProPadding-center">
+                        <div  class="newProItemBlock" >
+                            <img  _lazysrc="{{newImgs[1].newProImg}}" ng-click="showDetailed(newImgs[1].newProNum)" onerror=this.src=errImg>
+                        </div>
+                    </div>
+                    <div class="col col-34 newProItem newProPadding-left">
+                        <div class="newProItemBlock">
+                            <img  _lazysrc="{{newImgs[2].newProImg}}" ng-click="showDetailed(newImgs[2].newProNum)" onerror=this.src=errImg>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+                    <div class="row newProRow" style="margin-top: 20px;background-color: transparent">
+                        <div style="height: 35px; line-height: 35px; font-size:16px; font-weight: 500; color:#848383;">全部产品</div>
+                    </div>
+                    <div class="row">
+                        <div class="col col-50">
+                            <div class="indexImgLayout">
+                                <div class="iProList floorMain" ng-repeat="proLeftDatas in proDatas.proLeftInfos">
+                                    <img src="img/nopic.jpg" _lazysrc="{{proLeftDatas.proImg}}" ng-click="proLeftClick($index)"  onerror=this.src=errImg>
+                                    <h2 ng-bind="proLeftDatas.proPrice" class="proPrice margin-top-none margin-bottom-none"></h2>
+                                    <h2 class='proName_style1 margin-bottom-none margin-top-none' ng-bind="proLeftDatas.proName"></h2>
+                                </div>
+                            </div>
+                            
+                        </div>
+
+                        <div class="col col-50">
+                            <div class="indexImgLayout">
+                                <div class="iProList floorMain" ng-repeat="proRightDatas in proDatas.proRightInfos">
+                                    <img src="img/nopic.jpg" _lazysrc="{{proRightDatas.proImg}}" ng-click="proRightClick($index)" onerror=this.src=errImg>
+                                    <h2 ng-bind="proRightDatas.proPrice" class="proPrice margin-top-none margin-bottom-none"></h2>
+                                    <h2 class="proName_style1 margin-bottom-none margin-top-none" ng-bind="proRightDatas.proName"></h2>
+                                </div>
+                            </div>
+                            
+                        </div>
+                    </div>
+                </div>
+
+                <h2 class="noMore margin-top-none" ng-hide="noMoreHide">已经到底啦</h2>
+                <ion-infinite-scroll class="spinner spinner-ios" distance="0px" on-infinite="productLoadMore()" ng-hide="loadingHide"></ion-infinite-scroll>
+            <!--</div>-->
+            <div style="height: 50px;"></div>
+        </ion-content>
+
+
+        <div class="tabs tabs-icon-top tabs-light">
+            <div class="tab-item">
+                <i class="icon ion-ios-home"></i>
+                首 页
+            </div>
+
+            <div class="tab-item">
+                <i class="icon ion-ios-list-outline"></i>
+                产 品
+            </div>
+
+            <div class="tab-item">
+                <i class="icon ion-ios7-keypad-outline"></i>
+                分 类
+            </div>
+
+            <div class="tab-item">
+                <i class="icon ion-ios7-cart-outline"></i>
+                购物车
+            </div>
+            <div class="tab-item">
+                <i class="icon ion-ios7-person-outline"></i>
+                批发商
+            </div>
+        </div>
+    </ion-view>
+</script>
+    <script src="mobileJs/publicParameter.js" type="text/javascript" ></script>
+    <script src="mobileJs/privateVerifiction.js" type="text/javascript" ></script>
+    <script src="mobileJs/getOrPostRequest.js" ></script>
+    <script src="mobileJs/CJL.0.1.min.js" ></script>
+    <script src="mobileJs/loadingImg.js" ></script>
+    <script src="mobileJs/ibanner.js" ></script>
+    <script src="mobileJs/ibanners.js"></script>
+    <script src="mobileJs/bcrypt.min.js"></script>
+
+    <script src="mobileJs/ionic.bundle.min.js"></script>
+    <script src="js/pageAll.js" type="text/javascript"></script>
+</body>
+</html>
+

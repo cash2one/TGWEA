@@ -1,0 +1,23 @@
+<div class="modal adminLogin" ng-controller="adminLoginCtrl">
+    <ion-header-bar class="bar bar-header ibarColor ">
+        <h1 class="title">卖家登陆</h1>
+    </ion-header-bar>
+    <ion-content>
+        <div class="list list-inset iLogin">
+            <label class="item item-input iLabel">
+                <i class="icon ion-person dark placeholder-icon" ng-style="anameStyle" style="padding-top:2px;"></i>
+                <input type="text" placeholder="卖家账号" style="font-size: 16px;" ng-model="alogin.adminName" ng-focus="adminNameFocus()" ng-blur="adminNameBlur()"/>
+            </label>
+        </div>
+        <div class="list list-inset">
+            <label class="item item-input iLabel">
+                <i class="icon ion-ios-locked dark placeholder-icon" ng-style="apassStyle" ></i>
+                <input type="password" placeholder="密 码" style="margin-left: 5px;font-size: 16px;" ng-model="alogin.adminPass" ng-focus="adminPassFocus()" ng-blur="adminPassBlur()"/>
+            </label>
+        </div>
+        <div class="row padding">
+            <button class="button button-block button-positive" id="sendMessage" ng-click="adminLoginBtnEvt()">登 录</button>
+        </div>
+    </ion-content>
+
+</div>

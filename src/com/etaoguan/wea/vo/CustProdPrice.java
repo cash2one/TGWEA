@@ -1,0 +1,33 @@
+package com.etaoguan.wea.vo;
+
+public class CustProdPrice extends ProdPrice{
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	private String custNum;
+	private Customer cust;
+	private double stdProdPrice;
+	
+	public String getCustNum() {
+		return custNum;
+	}
+	public void setCustNum(String custNum) {
+		this.custNum = custNum;
+	}
+	public double getStdProdPrice() {
+		return stdProdPrice;
+	}
+	public void setStdProdPrice(double stdProdPrice) {
+		this.stdProdPrice = stdProdPrice;
+	}
+	public Customer getCust() {
+		return cust;
+	}
+	public void setCust(Customer cust) {
+		this.cust = cust;
+	}
+
+
+
+}

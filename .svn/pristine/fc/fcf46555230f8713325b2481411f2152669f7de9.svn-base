@@ -1,0 +1,220 @@
+/**
+*  下拉刷新、滚动翻页样式
+*  SnoopyChen (ceo@vmeitime.com)
+*  2013-04-26
+*/
+
+/*------------- S 默认必须样式  -------------*/
+/**
+ *
+ * 下拉样式 Pull down styles
+ *
+ */
+#pullDown, #pullUp,
+#propullUp,#allPropullUp,
+#indexPullDown,#proPullDown,
+#allProPullDown{
+	background:#fff;
+	height:40px;
+	line-height:40px;
+	padding:0px 10px;
+	font-weight:bold;
+	font-size:14px;
+	color:#888;
+}
+#pullDown .pullDownIcon, #pullUp .pullUpIcon,
+#propullUp .pullUpIcon,#allPropullUp .pullUpIcon,
+#indexPullDown .pullDownIcon,#proPullDown .pullDownIcon,
+#allProPullDown .pullDownIcon{
+	display:block; float:left;
+	width:40px; height:40px;
+	background:url(../img/public/pull-icon@2x.png) 0 0 no-repeat;
+	-webkit-background-size:40px 80px;
+    -moz-background-size:40px 80px;
+    -ms-background-size:40px 80px;
+    -o-background-size:40px 80px;
+    background-size:40px 80px;
+
+	-webkit-transition-property:-webkit-transform;
+    -moz-transition-property:-moz-transform;
+    -ms-transition-property:-ms-transform;
+    -o-transition-property:-o-transform;
+    transition-property:transform;
+
+	-webkit-transition-duration:250ms;
+    -moz-transition-duration:250ms;
+    -ms-transition-duration:250ms;
+    -o-transition-duration:250ms;
+    transition-duration:250ms;
+
+}
+#pullDown .pullDownIcon,
+#indexPullDown .pullDownIcon,
+#proPullDown .pullDownIcon,
+#allProPullDown .pullDownIcon{
+	-webkit-transform:rotate(0deg) translateZ(0);
+    -moz-transform:rotate(0deg) translateZ(0);
+    -ms-transform:rotate(0deg) translateZ(0);
+    -o-transform:rotate(0deg) translateZ(0);
+    transform:rotate(0deg) translateZ(0);
+}
+#pullUp .pullUpIcon,
+#propullUp .pullUpIcon,
+#allPropullUp .pullUpIcon{
+	-webkit-transform:rotate(-180deg) translateZ(0);
+    -moz-transform:rotate(-180deg) translateZ(0);
+    -ms-transform:rotate(-180deg) translateZ(0);
+    -o-transform:rotate(-180deg) translateZ(0);
+    transform:rotate(-180deg) translateZ(0);
+}
+
+#pullDown.flip .pullDownIcon,
+#indexPullDown.flip .pullDownIcon,
+#proPullDown.flip .pullDownIcon,
+#allProPullDown.flip .pullDownIcon{
+	-webkit-transform:rotate(-180deg) translateZ(0);
+    -moz-transform:rotate(-180deg) translateZ(0);
+    -ms-transform:rotate(-180deg) translateZ(0);
+    -o-transform:rotate(-180deg) translateZ(0);
+    transform:rotate(-180deg) translateZ(0);
+}
+
+#pullUp.flip .pullUpIcon,
+#propullUp.flip .pullUpIcon,
+#allPropullUp.flip .pullUpIcon{
+	-webkit-transform:rotate(0deg) translateZ(0);
+    -moz-transform:rotate(0deg) translateZ(0);
+    -ms-transform:rotate(0deg) translateZ(0);
+    -o-transform:rotate(0deg) translateZ(0);
+    transform:rotate(0deg) translateZ(0);
+}
+
+#pullDown.loading .pullDownIcon, #pullUp.loading .pullUpIcon,
+#propullUp.loading .pullUpIcon,
+#allPropullUp.loading .pullUpIcon,
+#indexPullDown.loading .pullDownIcon,
+#proPullDown.loading .pullDownIcon,
+#allProPullDown.loading .pullDownIcon{
+	background-position:0 100%;
+    /*-webkit-transform-origin:;*/
+    /*-moz-transform-origin:;*/
+    /*-ms-transform-origin:;*/
+    /*-o-transform-origin:;*/
+    /*transform-origin:;*/
+
+	-webkit-transform:rotate(0deg) translateZ(0);
+    -moz-transform:rotate(0deg) translateZ(0);
+    -ms-transform:rotate(0deg) translateZ(0);
+    -o-transform:rotate(0deg) translateZ(0);
+    transform:rotate(0deg) translateZ(0);
+	-webkit-transition-duration:0ms;
+    -moz-transition-duration:0ms;
+    -ms-transition-duration:0ms;
+    -o-transition-duration:0ms;
+    transition-duration:0ms;
+
+	-webkit-animation-name:loading;
+    -moz-animation-name:loading;
+    -ms-animation-name:loading;
+    -mo-animation-name:loading;
+    animation-name:loading;
+
+	-webkit-animation-duration:2s;
+    -moz-animation-duration:2s;
+    -ms-animation-duration:2s;
+    -o-animation-duration:2s;
+    animation-duration:2s;
+
+	-webkit-animation-iteration-count:infinite;
+    -moz-animation-iteration-count:infinite;
+    -ms-animation-iteration-count:infinite;
+    -o-animation-iteration-count:infinite;
+    animation-iteration-count:infinite;
+
+	-webkit-animation-timing-function:linear;
+    -moz-animation-timing-function:linear;
+    -ms-animation-timing-function:linear;
+    -o-animation-timing-function:linear;
+    animation-timing-function:linear;
+
+}
+
+@-webkit-keyframes loading {
+	from { -webkit-transform:rotate(0deg) translateZ(0); }
+	to { -webkit-transform:rotate(360deg) translateZ(0); }
+}
+@-moz-keyframes loading {
+    from { -moz-transform:rotate(0deg) translateZ(0); }
+    to { -moz-transform:rotate(360deg) translateZ(0); }
+}
+@-ms-keyframes loading {
+    from { -ms-transform:rotate(0deg) translateZ(0); }
+    to { -ms-transform:rotate(360deg) translateZ(0); }
+}
+@-o-keyframes loading {
+    from { -o-transform:rotate(0deg) translateZ(0); }
+    to { -o-transform:rotate(360deg) translateZ(0); }
+}
+@keyframes loading {
+    from { transform:rotate(0deg) translateZ(0); }
+    to { transform:rotate(360deg) translateZ(0); }
+}
+/*------------- E 默认必须样式  -------------*/		
+		
+
+
+
+/*------------- S 以下css主要是仿IOS滚动条样式(可选样式)  -------------*/		
+/**
+ * Horizontal Scrollbar
+ */
+.myScrollbarH {
+	position:absolute;
+	z-index:100;
+	height:7px;
+	bottom:1px;
+	left:2px;
+	right:7px
+}
+
+.myScrollbarH > div {
+	height:100%;
+}
+
+/**
+ * Vertical Scrollbar
+ */
+.myScrollbarV {
+	position:absolute;
+	z-index:100;
+	width:7px;bottom:7px;top:2px;right:1px
+}
+
+.myScrollbarV > div {
+	width:100%;
+}
+
+/**
+ * Both Scrollbars
+ */
+.myScrollbarH > div,
+.myScrollbarV > div {
+	position:absolute;
+	z-index:100;
+
+	/* The following is probably what you want to customize */
+	-webkit-box-sizing:border-box;
+	-moz-box-sizing:border-box;
+	-o-box-sizing:border-box;
+    -ms-box-sizing:border-box;
+	box-sizing:border-box;
+
+	border-width:4px;
+	-webkit-border-image:url(../img/public/scrollbar.png) 6 6 6 6;
+	-moz-border-image:url(../img/public/scrollbar.png) 6 6 6 6;
+	-o-border-image:url(../img/public/scrollbar.png) 6 6 6 6;
+    -ms-border-image:url(../img/public/scrollbar.png) 6 6 6 6;
+	border-image:url(../img/public/scrollbar.png) 6 6 6 6;
+}
+/*------------- E 以上css主要是仿IOS滚动条样式  -------------*/
+

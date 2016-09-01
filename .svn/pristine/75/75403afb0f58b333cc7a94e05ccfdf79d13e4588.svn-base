@@ -1,0 +1,6 @@
+package com.etaoguan.wea.service;
+
+public interface IPaymentService {
+
+	public void pay(String orderNum);
+}

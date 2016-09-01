@@ -1,0 +1,15 @@
+package com.etaoguan.wea.client.web.service;
+
+import com.etaoguan.wea.service.IWechatCodeSuccessService;
+import com.etaoguan.wea.vo.WeChatCodeSuccess;
+
+/**
+ * @author cunli 微信订单返回的结果
+ *
+ */
+public interface IWWechatCodeSuccessService extends IWechatCodeSuccessService{
+	/**
+	 * @param wechatOrder 保存微信订单返回的结果
+	 */
+	void addWechatCodeSuccess(WeChatCodeSuccess weChatCodeSuccess);
+}

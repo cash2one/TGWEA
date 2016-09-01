@@ -1,0 +1,57 @@
+package com.etaoguan.wea.vo;
+
+
+/**
+ * @author cunli 所有客户的支付宝的 密钥
+ * 
+ */
+public class AlipayKeys extends BaseVo {
+
+	private String userId;
+	private String userPartner;
+	private String userKey;
+	private String ownerAccountName;
+	
+	private String companyName;
+
+	public String getCompanyName() {
+		return companyName;
+	}
+
+	public void setCompanyName(String companyName) {
+		this.companyName = companyName;
+	}
+
+	public String getOwnerAccountName() {
+		return ownerAccountName;
+	}
+
+	public void setOwnerAccountName(String ownerAccountName) {
+		this.ownerAccountName = ownerAccountName;
+	}
+
+	public String getUserKey() {
+		return userKey;
+	}
+
+	public void setUserKey(String userKey) {
+		this.userKey = userKey;
+	}
+
+	public String getUserId() {
+		return userId;
+	}
+
+	public void setUserId(String userId) {
+		this.userId = userId;
+	}
+
+	public String getUserPartner() {
+		return userPartner;
+	}
+
+	public void setUserPartner(String userPartner) {
+		this.userPartner = userPartner;
+	}
+
+}

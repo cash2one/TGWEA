@@ -1,0 +1,57 @@
+package com.etaoguan.wea.service.impl;
+
+import javax.annotation.Resource;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.etaoguan.wea.client.web.service.IWOrderService;
+import com.etaoguan.wea.dao.IAlipayWapRequestDao;
+import com.etaoguan.wea.service.IAlipayWapPaymentService;
+import com.etaoguan.wea.util.Uuid;
+import com.etaoguan.wea.vo.AlipayWapRequest;
+import com.etaoguan.wea.vo.Order;
+
+@Service("alipayWapPaymentService")
+public class AlipayWapPaymentService implements IAlipayWapPaymentService {
+	
+	@Resource(name="worderService")
+	private IWOrderService iwOrderService;
+	
+	@Autowired
+	private IAlipayWapRequestDao iAlipayWapRequestDao;
+
+	/* (non-Javadoc)提交订单并保存提交的订单到数据库
+	 * @see com.etaoguan.wea.service.IPaymentService#pay(java.lang.String)
+	 */
+	@Override
+	public void pay(String orderNum) {
+		Order order = iwOrderService.getOrder(orderNum);
+		double totalFee = order.getRealPriceTotal();
+		String outUser = order.getCustNum();
+		String sellerAccountName = "";
+		String partner = "";
+		String reqData = "";
+		
+		
+		
+		
+		
+		AlipayWapRequest alipayWapRequest = new AlipayWapRequest();
+		alipayWapRequest.setTotalFee(totalFee);
+		alipayWapRequest.setOutTradeNo(orderNum);
+		alipayWapRequest.setReqId(Uuid.javaUuid());
+		alipayWapRequest.setOutUser(outUser);
+		alipayWapRequest.setSellerAccountName(sellerAccountName);
+		alipayWapRequest.setPartner(partner);
+		alipayWapRequest.setReqData(reqData);
+		
+		iAlipayWapRequestDao.saveAlipayWapRequest(alipayWapRequest);
+	}
+
+	@Override
+	public void processAlipayWapResp(String notifyData) {
+		// TODO Auto-generated method stub
+		
+	}
+}

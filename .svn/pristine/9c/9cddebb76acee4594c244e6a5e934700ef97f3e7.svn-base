@@ -1,0 +1,79 @@
+<ion-view title="购物车">
+    <ion-nav-buttons side="left">
+        <button ng-click="back(-1)" ng-hide="spBackHide" class="button button-clear button-light ion-ios-arrow-back barIcon"></button>
+    </ion-nav-buttons>
+
+    <ion-nav-buttons side="right">
+        <button ng-click="openOrCloseEditPrice()" class="button button-clear" ng-hide="editBtn">
+            <span id="doneBtn" ng-hide="editPriceHide">编 辑</span>
+            <span id="doneBtn" ng-hide="!editPriceHide">完 成</span>
+        </button>
+    </ion-nav-buttons>
+
+    <ion-content>
+       <div id="mainContent">
+       <div class="list list-inset margin-bottom-none shoppingList" ng-repeat="spList in spLists">
+           <div class="item item-thumbnail-left shoppingItem floorMain">
+              <img id="shoppingImg" _lazysrc="{{spList.img}}" onerror=this.src=errImg ng-click="showDetailed(spList.id)">
+               <button class="delete" ng-click="showConfirm($index)"><i class="ion-ios-trash" style="font-size:30px;"></i><span class="deleteText">删除</span> </button>
+               <div class="updatePricePanel" ng-class="{'open':openEditPrice,'close':closeEditPrice}">
+                   <button class="updateNumBtn" ng-click="changeProNumber('minus',$index)"><i class="ion-minus" style="font-size: 23px;"></i></button>
+                   <input type="text" class="shoppingNum" ng-model="spList.num" ng-change="changeVal($index)" ng-class="{'border-2x':spList.border2x,'border-none':spList.boderNone}">
+                   <button class="updateNumBtn" ng-click="changeProNumber('add',$index)"><i class="ion-plus" style="font-size: 23px;"></i></button>
+               </div>
+               <p><span ng-bind="spList.name"></span></p>
+               <p>¥<span ng-bind="spList.price"></span></p>
+           </div>
+       </div>
+       </div>
+
+       <div class="row padding" ng-hide="sendBtnHide">
+           <div class="sendShoppingCar">
+               <div class="col" id="countPrice">
+                   小计: <span>¥</span><span ng-bind="countNum"></span>
+               </div>
+               <div class="col">
+                   <button class="button" id="sendShoppingBtn" ng-click="sendOrder()">
+                       <i class="icon-check"></i>
+                       提交订单
+                   </button>
+               </div>
+
+           </div>
+       </div>
+
+        <div class="shopping-none-car margin-top-none" ng-hide="isNone">
+            <div style="text-align: center"><i class="ion-ios-cart-outline"></i></div>
+            <div><span>购物车是空的, 赶快去看看产品吧~</span></div>
+            <button class="button button-assertive" id="toProd" ng-click="tabBarToPage(1)">去产品中心</button>
+        </div>
+        <div style="height: 30px;"></div>
+
+    </ion-content>
+
+    <div class="tabs tabs-icon-top tabs-light">
+        <div class="tab-item">
+            <i class="icon ion-ios-home-outline"></i>
+            首 页
+        </div>
+
+        <div class="tab-item">
+            <i class="icon ion-ios-list-outline"></i>
+            产 品
+        </div>
+
+        <div class="tab-item">
+            <i class="icon ion-ios-keypad-outline"></i>
+            分 类
+        </div>
+
+        <div class="tab-item">
+            <i class="icon ion-ios-cart"></i>
+            购物车
+        </div>
+        <div class="tab-item">
+            <i class="icon ion-ios-person-outline"></i>
+            批发商
+        </div>
+    </div>
+</ion-view>

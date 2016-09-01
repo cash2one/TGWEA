@@ -1,0 +1,73 @@
+package com.etaoguan.wea.vo;
+
+import java.util.Date;
+
+/**
+ * @author cunli 记录支付宝订单状态
+ * 
+ */
+public class OrderPayInfo extends BaseVo {
+	private String orderNum;
+	private String ownerNum;
+	private String custNum;
+	private String payType;
+	private String payTransId;
+	private Date createDate;
+	private String createBy;
+
+	public String getOrderNum() {
+		return orderNum;
+	}
+
+	public void setOrderNum(String orderNum) {
+		this.orderNum = orderNum;
+	}
+
+	public String getOwnerNum() {
+		return ownerNum;
+	}
+
+	public void setOwnerNum(String ownerNum) {
+		this.ownerNum = ownerNum;
+	}
+
+	public String getCustNum() {
+		return custNum;
+	}
+
+	public void setCustNum(String custNum) {
+		this.custNum = custNum;
+	}
+
+	public String getPayType() {
+		return payType;
+	}
+
+	public void setPayType(String payType) {
+		this.payType = payType;
+	}
+
+	public String getPayTransId() {
+		return payTransId;
+	}
+
+	public void setPayTransId(String payTransId) {
+		this.payTransId = payTransId;
+	}
+
+	public Date getCreateDate() {
+		return createDate;
+	}
+
+	public void setCreateDate(Date createDate) {
+		this.createDate = createDate;
+	}
+
+	public String getCreateBy() {
+		return createBy;
+	}
+
+	public void setCreateBy(String createBy) {
+		this.createBy = createBy;
+	}
+}

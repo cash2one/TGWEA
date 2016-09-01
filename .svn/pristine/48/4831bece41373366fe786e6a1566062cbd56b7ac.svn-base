@@ -1,0 +1,37 @@
+<ion-view title="我的客户">
+    <ion-nav-buttons side="left">
+        <button ng-click="back()" class="button button-clear button-light ion-ios7-arrow-back barIcon"></button>
+    </ion-nav-buttons>
+    <ion-content>
+        <div class="button-bar bar-light iBtnBar" >
+            <button class="button" ng-click="clickKey(1)"> <span ng-class="isNameClick?keyColor:keyColors">按姓名</span></button>
+            <button class="button" style=" border-left-width:2px;border-right: 0;" ng-click="clickKey(2)"> <span ng-class="isPhoneClick?keyColor:keyColors">按手机号</span></button>
+        </div>
+
+        <div class="bar item-input-inset admBarColor">
+            <label class="item-input-wrapper light-bg">
+                <i class="ion-ios7-search searchBarIcon"></i>
+                <input type="text" placeholder="请输入搜索条件" style="font-size: 16px;" ng-model="aClient.searchKey" ng-change="searchTextChange()"/>
+            </label>
+            <button class="button button-clear button-light" id="searchBtn" style="color: #454545" ng-click="searchUser()">搜 索</button>
+        </div>
+
+        <div class="list waitingList" ng-repeat="aClients in iClients">
+            <a class="item item-icon-right waitingHead" ng-click="searchUserOrder($index)">
+                联系人 : <span ng-bind="aClients.contactPerson"></span>
+                <i class="icon ion-chevron-right" style="font-size: 25px; color: #3a3735;"></i>
+            </a>
+            <div class="clientList">
+                <div class="item">公司 : <span ng-bind="aClients.companyName"></span></div>
+                <div class="item">账号 : <span ng-bind="aClients.custName"></span></div>
+                <div class="item">手机 : <span ng-bind="aClients.phoneNum"></span></div>
+                <div class="item">地址 : <span ng-bind="aClients.address"></span></div>
+            </div>
+        </div>
+
+        <h2 class="noMore margin-top-none" ng-hide="noMoreHide">已经到底啦</h2>
+        <ion-infinite-scroll icon="icon-spinner icon-spin" distance="0px" on-infinite="adminClientLoadMore()" ng-hide="loadingHide"></ion-infinite-scroll>
+        <div style="height: 30px;"></div>
+
+    </ion-content>
+</ion-view>

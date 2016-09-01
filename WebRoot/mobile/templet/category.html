@@ -1,0 +1,55 @@
+<ion-view>
+    <ion-content class="iContent">
+        <div  ng-hide="bodyHide" style="height: 100%;width:100%;background-color: #f9f9f9;position: fixed;top: 0; z-index: 9999999;"></div>
+        <div class="bar item-input-inset searchBar" id="searchColor">
+            <label class="item-input-wrapper searchBarInput" id="searchLabelColor">
+                <i class="ion-ios7-search searchBarIcon" id="searchInputIconColor"></i>
+                <input type="text" placeholder="搜索产品" class="padding-right-30" ng-model="catePro.searchText" ng-change="cateSearchChange()"/>
+            </label>
+            <a href="javascript:void(0)" ng-hide="clearBtnShow" class="icon ion-close-round button-clear" id="clearInput" ng-click="clearData()"></a>
+            <button class="button button-clear button-light" id="searchBtn" ng-click="searchPro()">搜 索</button>
+        </div>
+
+        <div class="row menuPanel" ng-repeat="menuDatas in menuDatas">
+            <div class="col col-95 menuBar">
+                <div class="col col-90 item item-icon-right menuItemHeader" ng-class="{'border-bottom-1':menuDatas.menuHeaderShow,'border-bottom-none':menuDatas.menuHeaderHide}" ng-click="OpenOrCloseMenu($index)">
+                    <i class="icon" ng-class="{'ion-plus-round':menuDatas.menuBarOff,'ion-minus-round':menuDatas.menuBarOn}"></i>
+                    <span ng-bind="menuDatas.itemHead"></span>
+                </div>
+
+                <div class="menuItemPanel" ng-hide="menuDatas.itemHide">
+                    <div class="col col-90 item menuItem" ng-repeat="itemDatas in menuDatas.itemDatas" ng-click="searchCate(itemDatas.itemData,itemDatas.itemId)">
+                        <span ng-bind="itemDatas.itemData"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div style="height: 40px;"></div>
+    </ion-content>
+
+    <div class="tabs tabs-icon-top tabs-light">
+        <div class="tab-item">
+            <i class="icon ion-ios7-home-outline"></i>
+            首 页
+        </div>
+
+        <div class="tab-item">
+            <i class="icon ion-ios-list-outline"></i>
+            产 品
+        </div>
+
+        <div class="tab-item">
+            <i class="icon ion-ios7-keypad"></i>
+            分 类
+        </div>
+
+        <div class="tab-item">
+            <i class="icon ion-ios7-cart-outline"></i>
+            购物车
+        </div>
+        <div class="tab-item">
+            <i class="icon ion-ios7-person-outline"></i>
+            批发商
+        </div>
+    </div>
+</ion-view>

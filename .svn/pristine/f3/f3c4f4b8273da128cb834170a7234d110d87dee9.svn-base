@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+
+<!-- author 刘卿 -->
+<!-- 感谢ibatis的持久层框架 -->
+
+<sqlMap>
+
+	<typeAlias alias="MAXKEYVALUE" type="com.etaoguan.wea.vo.MaxKeyValue"/>
+
+	<resultMap id="maxKeyValue" class="MAXKEYVALUE">
+		<result property="keyName" column="key_name"/>
+		<result property="maxKeyValue" column="max_keyvalue"/>
+		<result property="remark" column="remark"/>
+	</resultMap>
+
+	<insert id="createMaxKeyValue"  parameterClass="MAXKEYVALUE">
+		insert into max_keyvalue 
+		(
+		   	key_name,
+			max_keyvalue,
+			remark
+		)
+		values(
+			#keyName#,
+			#maxKeyValue#	
+			<isNotEmpty property="remark" prepend=",">
+			#remark#
+			</isNotEmpty>
+			<isEmpty property="remark" prepend=",">
+			''
+			</isEmpty>		
+		
+		)
+
+	</insert>
+
+	<update id="updateMaxKeyValue"  parameterClass="MAXKEYVALUE">
+			update max_keyvalue set 
+			<isNotEmpty property="maxKeyValue">
+				max_keyvalue = #maxKeyValue#
+			</isNotEmpty>
+			<isEmpty property="maxKeyValue" >
+				max_keyvalue = max_keyvalue
+			</isEmpty>
+			<isNotEmpty property="remark" prepend=",">
+				remark = #remark#
+			</isNotEmpty>
+
+		where
+			key_name=#keyName#
+
+	</update>
+	
+	
+	<select id="getMaxKeyValue" parameterClass="java.util.HashMap" resultMap="maxKeyValue">
+		select    	
+			key_name,
+			max_keyvalue,
+			remark from max_keyvalue where key_name=#keyName#
+
+	</select>
+	
+</sqlMap>

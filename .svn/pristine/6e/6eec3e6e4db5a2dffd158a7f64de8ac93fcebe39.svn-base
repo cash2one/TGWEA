@@ -1,0 +1,283 @@
+package com.etaoguan.wea.service.impl;
+
+import java.net.URLDecoder;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+
+import javax.annotation.Resource;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.dom4j.Document;
+import org.dom4j.DocumentHelper;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.alipay.config.AlipayConfig;
+import com.alipay.util.AlipayNotify;
+import com.alipay.util.AlipaySubmit;
+import com.etaoguan.wea.client.web.service.IWOrderService;
+import com.etaoguan.wea.dao.IAlipayWapPayResultDao;
+import com.etaoguan.wea.dao.IAlipayWapRequestDao;
+import com.etaoguan.wea.dao.IOrderPayInfoDao;
+import com.etaoguan.wea.service.IAlipayKeysService;
+import com.etaoguan.wea.service.IAlipayWapPaymentService;
+import com.etaoguan.wea.util.AlipayOrder;
+import com.etaoguan.wea.util.Uuid;
+import com.etaoguan.wea.vo.AlipayKeys;
+import com.etaoguan.wea.vo.AlipayWapPayResult;
+import com.etaoguan.wea.vo.AlipayWapRequest;
+import com.etaoguan.wea.vo.Order;
+import com.etaoguan.wea.vo.OrderPayInfo;
+import com.etaoguan.wea.wechat.util.WeChatXppDriver;
+import com.thoughtworks.xstream.XStream;
+
+@Service("alipayWapPaymentService")
+public class AlipayWapPaymentService implements IAlipayWapPaymentService{
+
+	@Resource(name = "worderService")
+	private IWOrderService iwOrderService;
+
+	@Resource(name = "alipayKeysService")
+	private IAlipayKeysService iAlipayKeysService;
+
+	@Autowired
+	private IAlipayWapRequestDao iAlipayWapRequestDao;
+	
+	@Autowired
+	private IAlipayWapPayResultDao iAlipayWapPayResultDao;
+	
+	@Autowired
+	private IOrderPayInfoDao iOrderPayInfoDao;
+	
+	private final static Log logger = LogFactory.getLog(AlipayWapPaymentService.class);
+
+	/*
+	 * (non-Javadoc)提交订单并保存提交的订单到数据库
+	 * 
+	 * @see com.etaoguan.wea.service.IPaymentService#pay(java.lang.String)
+	 */
+	@Override
+	public String processPay(String orderNum,String domainBaseUrl) {
+		
+		Order order = iwOrderService.getOrder(orderNum);
+		double totalFee = order.getRealPriceTotal();
+		String outUser = order.getCustNum();
+
+		String ownerNum = order.getOwnerNum();
+		AlipayKeys alipayKeys = iAlipayKeysService.alipayKeysInformation(ownerNum);
+
+		String sellerAccountName = alipayKeys.getOwnerAccountName();
+		String partner = alipayKeys.getOwnerPartner();
+		
+		XStream xstream = new XStream(new WeChatXppDriver());
+		xstream.alias("direct_trade_create_req", AlipayOrder.class);
+		String notify_url = domainBaseUrl+"/common/alipayWapCallback.action";
+		String call_back_url = "http://taoguan.zhizhangtong.com/owner/login.jsp";
+		String seller_email = sellerAccountName;
+		String out_trade_no = orderNum;
+		String subject = orderNum;
+		String total_fee = String.valueOf(totalFee);
+		String merchant_url = domainBaseUrl;
+		
+		AlipayOrder alipayOrder = new AlipayOrder();
+		alipayOrder.setOut_trade_no(orderNum);
+		alipayOrder.setSubject(orderNum);
+		alipayOrder.setTotal_fee(total_fee);
+		alipayOrder.setSeller_account_name(sellerAccountName);
+		alipayOrder.setCall_back_url(call_back_url);
+		alipayOrder.setNotify_url(notify_url);
+		alipayOrder.setOut_user(outUser);
+		alipayOrder.setMerchant_url(merchant_url);
+		alipayOrder.setPay_expire("");//默认值15天
+		alipayOrder.setAgent_id("");
+
+		String xml = xstream.toXML(alipayOrder).replaceAll("__", "_");
+		
+		
+		String reqData = xml;
+		String req_id = Uuid.javaUuid();
+
+		AlipayWapRequest alipayWapRequest = new AlipayWapRequest();
+		alipayWapRequest.setTotalFee(totalFee);
+		alipayWapRequest.setOutTradeNo(orderNum);
+		alipayWapRequest.setReqId(req_id);
+		alipayWapRequest.setOutUser(outUser);
+		alipayWapRequest.setSellerAccountName(sellerAccountName);
+		alipayWapRequest.setPartner(partner);
+		alipayWapRequest.setReqData(reqData);
+
+		iAlipayWapRequestDao.saveAlipayWapRequest(alipayWapRequest);
+		
+		//请求业务参数详细
+				String req_dataToken = "<direct_trade_create_req><notify_url>" + notify_url + "</notify_url><call_back_url>" + call_back_url + "</call_back_url><seller_account_name>" + seller_email + "</seller_account_name><out_trade_no>" + out_trade_no + "</out_trade_no><subject>" + subject + "</subject><total_fee>" + total_fee + "</total_fee><merchant_url>" + merchant_url + "</merchant_url></direct_trade_create_req>";
+				//必填
+				
+				//////////////////////////////////////////////////////////////////////////////////
+				
+				//支付宝网关地址
+				String ALIPAY_GATEWAY_NEW = "http://wappaygw.alipay.com/service/rest.htm?";
+				//返回格式
+				String format = "xml";
+				//必填，不需要修改
+				
+				//返回格式
+				String v = "2.0";
+				//必填，不需要修改
+				
+				
+				
+				//把请求参数打包成数组
+				Map<String, String> sParaTempToken = new HashMap<String, String>();
+				sParaTempToken.put("service", "alipay.wap.trade.create.direct");
+				sParaTempToken.put("partner", AlipayConfig.partner);
+				sParaTempToken.put("_input_charset", AlipayConfig.input_charset);
+				sParaTempToken.put("sec_id", AlipayConfig.sign_type);
+				sParaTempToken.put("format", format);
+				sParaTempToken.put("v", v);
+				sParaTempToken.put("req_id", req_id);
+				sParaTempToken.put("req_data", req_dataToken);
+				
+				String request_token = "";
+				
+				try {
+					//建立请求
+					String sHtmlTextToken = AlipaySubmit.buildRequest(ALIPAY_GATEWAY_NEW,"", "",sParaTempToken);
+					//URLDECODE返回的信息
+					sHtmlTextToken = URLDecoder.decode(sHtmlTextToken,AlipayConfig.input_charset);
+					//获取token
+					request_token = AlipaySubmit.getRequestToken(sHtmlTextToken);
+					//out.println(request_token);
+				} catch (Exception e) {
+					// TODO: handle exception
+				}
+				
+				////////////////////////////////////根据授权码token调用交易接口alipay.wap.auth.authAndExecute//////////////////////////////////////
+		
+			//业务详细
+				String req_data = "<auth_and_execute_req><request_token>" + request_token + "</request_token></auth_and_execute_req>";
+				//必填
+				
+				
+				//把请求参数打包成数组
+				Map<String, String> sParaTemp = new HashMap<String, String>();
+				sParaTemp.put("service", "alipay.wap.auth.authAndExecute");
+				sParaTemp.put("partner", AlipayConfig.partner);
+				sParaTemp.put("_input_charset", AlipayConfig.input_charset);
+				sParaTemp.put("sec_id", AlipayConfig.sign_type);
+				sParaTemp.put("format", format);
+				sParaTemp.put("v", v);
+				sParaTemp.put("req_data", req_data);
+				
+				//建立请求
+				String sHtmlText = AlipaySubmit.buildRequest(ALIPAY_GATEWAY_NEW, sParaTemp, "get", "确认");
+		
+		return sHtmlText;//发送订单数据给支付宝
+		
+	}
+
+	@SuppressWarnings("rawtypes")
+	@Override
+	public String processAlipayWapResp(Map requestParams) {
+		
+		//获取支付宝POST过来反馈信息
+		Map<String,String> params = new HashMap<String,String>();
+		for (Iterator iter = requestParams.keySet().iterator(); iter.hasNext();) {
+			String name = (String) iter.next();
+			String[] values = (String[]) requestParams.get(name);
+			String valueStr = "";
+			for (int i = 0; i < values.length; i++) {
+				valueStr = (i == values.length - 1) ? valueStr + values[i]
+						: valueStr + values[i] + ",";
+			}
+			//乱码解决，这段代码在出现乱码时使用。如果mysign和sign不相等也可以使用这段代码转化
+			//valueStr = new String(valueStr.getBytes("ISO-8859-1"), "gbk");
+			params.put(name, valueStr);
+		}
+
+		String result = "";
+
+		try {
+			
+			//获取支付宝的通知返回参数，可参考技术文档中页面跳转同步通知参数列表(以下仅供参考)//
+			
+			//RSA签名解密
+			if(AlipayConfig.sign_type.equals("0001")) {
+				params = AlipayNotify.decrypt(params);
+			}
+			
+			//获取支付宝的通知返回参数，可参考技术文档中页面跳转同步通知参数列表(以上仅供参考)//
+			if(AlipayNotify.verifyNotify(params)){//验证成功
+				
+				logger.info("******* params ********* "+params.toString());
+				
+				//XML解析notify_data数据
+				Document doc_notify_data = DocumentHelper.parseText(params.get("notify_data"));
+				
+				//商户订单号
+				String out_trade_no = doc_notify_data.selectSingleNode( "//notify/out_trade_no" ).getText();
+
+				//支付宝交易号
+//				String trade_no = doc_notify_data.selectSingleNode( "//notify/trade_no" ).getText();
+
+				//交易状态
+				String trade_status = doc_notify_data.selectSingleNode( "//notify/trade_status" ).getText();
+
+				String buyer_email = doc_notify_data.selectSingleNode( "//notify/buyer_email" ).getText();
+				String gmt_create = doc_notify_data.selectSingleNode( "//notify/gmt_create" ).getText();
+				String notify_time = doc_notify_data.selectSingleNode( "//notify/notify_time" ).getText();
+				String total_fee = doc_notify_data.selectSingleNode( "//notify/total_fee" ).getText();
+				String gmt_payment = doc_notify_data.selectSingleNode( "//notify/gmt_payment" ).getText();
+				
+				AlipayWapPayResult alipayWapPayResult = new AlipayWapPayResult();
+				alipayWapPayResult.setNotifyNotifyData(doc_notify_data.toString());
+				alipayWapPayResult.setBuyerEmail(buyer_email);
+				alipayWapPayResult.setGmtCreate(gmt_create);
+				alipayWapPayResult.setOutTradeNo(out_trade_no);
+				alipayWapPayResult.setNotifyTime(notify_time);
+				alipayWapPayResult.setTradeStatus(trade_status);
+				alipayWapPayResult.setTotalFee(Double.valueOf(total_fee));
+				alipayWapPayResult.setGmtPayment(gmt_payment);
+
+				int payTransId = iAlipayWapPayResultDao.saveAlipayWapPayResult(alipayWapPayResult);
+				
+				if(trade_status.equals("TRADE_FINISHED")){
+						
+					OrderPayInfo orderPayInfo = new OrderPayInfo();
+					orderPayInfo.setPayTransId(payTransId);
+					orderPayInfo.setOrderNum(out_trade_no);
+					orderPayInfo.setPayType(0);
+					orderPayInfo.setCreateBy("支付宝");
+					
+					iOrderPayInfoDao.saveOrderPayInfoDao(orderPayInfo);
+					
+						
+				} else if (trade_status.equals("TRADE_SUCCESS")){
+					
+					OrderPayInfo orderPayInfo = new OrderPayInfo();
+					orderPayInfo.setPayTransId(payTransId);
+					orderPayInfo.setOrderNum(out_trade_no);
+					orderPayInfo.setPayType(0);
+					orderPayInfo.setCreateBy("支付宝");
+					
+					iOrderPayInfoDao.saveOrderPayInfoDao(orderPayInfo);
+					
+				}
+				
+				result = "success";
+				
+			}else{//验证失败
+				result = "fail";
+			}
+		} catch (Exception e) {
+			logger.info("**************** 验证报错 ***************");
+			result = "fail";
+			e.printStackTrace();
+		}
+		
+		return result;
+
+	}
+	
+}

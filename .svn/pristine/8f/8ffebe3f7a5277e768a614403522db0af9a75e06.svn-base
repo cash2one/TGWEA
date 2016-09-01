@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+
+<sqlMap>
+
+	<typeAlias alias="OrderPayInfo" type="com.etaoguan.wea.vo.OrderPayInfo" />
+
+	<resultMap id="OPIMap" class="OrderPayInfo">
+	     
+		<result property="orderNum" column="order_num" />
+		<result property="ownerNum" column="owner_num" />
+		<result property="custNum" column="cust_num" />
+		<result property="payType" column="pay_type" />
+		<result property="payTransId" column="pay_trans_id" />
+		<result property="createDate" column="create_date" />
+		<result property="createBy" column="create_by" />
+		
+	</resultMap>
+
+	
+</sqlMap>

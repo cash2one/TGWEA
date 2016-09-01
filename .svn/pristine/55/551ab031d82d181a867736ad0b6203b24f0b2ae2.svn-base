@@ -1,0 +1,131 @@
+package com.etaoguan.wea.client.web.service.impl;
+
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.etaoguan.wea.client.vo.SortParam;
+import com.etaoguan.wea.client.web.service.IWCustService;
+import com.etaoguan.wea.client.web.service.IWOrderService;
+import com.etaoguan.wea.client.web.service.IWOrigOrderService;
+import com.etaoguan.wea.client.web.service.IWWareHouseService;
+import com.etaoguan.wea.client.web.vo.OrderSearch;
+import com.etaoguan.wea.client.web.vo.WPage;
+import com.etaoguan.wea.client.web.vo.WPagingRequest;
+import com.etaoguan.wea.common.DataCriteria;
+import com.etaoguan.wea.common.DataSet;
+import com.etaoguan.wea.common.OffsetRequest;
+import com.etaoguan.wea.common.WeaDataCache;
+import com.etaoguan.wea.constant.WeaConstant;
+import com.etaoguan.wea.service.impl.OrderService;
+import com.etaoguan.wea.vo.Customer;
+import com.etaoguan.wea.vo.Order;
+import com.etaoguan.wea.vo.OrderItem;
+import com.etaoguan.wea.vo.OrigOrder;
+import com.etaoguan.wea.vo.OrigOrderItem;
+import com.etaoguan.wea.vo.ProdQty;
+import com.etaoguan.wea.vo.WareHouse;
+
+@Service("worderService")
+public class WOrderService extends OrderService implements IWOrderService{
+
+	@Autowired
+	IWOrigOrderService iWOrigOrderService;
+	
+	@Autowired
+	IWWareHouseService iWWareHouseService;
+	
+	@Autowired
+	IWCustService iWCustService;
+
+	
+	@SuppressWarnings({ "rawtypes"})
+	public WPage listOrders(OrderSearch orderSearch, SortParam sortParam,
+			WPagingRequest wpagingRequest) {
+		OffsetRequest offsetRequest = wpagingRequest.format2OffsetRequest();
+		Date createDateTo = orderSearch.getCreateDateTo();
+		if(createDateTo!=null){
+			String dt = sd.format(createDateTo);
+			try{
+				createDateTo = sdt.parse(dt = dt + " 23:59:59");
+				orderSearch.setCreateDateTo(createDateTo);
+			}catch(Exception ex){
+				ex.printStackTrace();
+			}
+		}
+		DataCriteria dataCriteria= DataCriteria.parseObjProp2Params(orderSearch);
+		if("settleStatus".equalsIgnoreCase(sortParam.getSortBy())){
+			sortParam.setSortBy("settle_status");
+		}else if("cashStatus".equalsIgnoreCase(sortParam.getSortBy())){
+			sortParam.setSortBy("cash_status");
+		}else if("deliverStatus".equalsIgnoreCase(sortParam.getSortBy())){
+			sortParam.setSortBy("deliver_status");
+		}else if("updateDate".equalsIgnoreCase(sortParam.getSortBy())){
+			sortParam.setSortBy("update_date");
+		}else{
+			
+			sortParam.setSortBy("");
+		}
+		dataCriteria.extractSortParam(sortParam);
+		DataSet dataSet = listOrders(dataCriteria, offsetRequest);
+		
+		return new WPage(wpagingRequest,dataSet);
+	}
+	
+	public void delOrderItem(OrderItem orderItem){
+		delOrderItem(orderItem.getOrderNum(), orderItem.getProdNum());
+		
+	}
+
+	public void updateOrderItem(OrderItem orderItem) {
+		ProdQty prodQty = new ProdQty();
+		prodQty.setProdNum(orderItem.getProdNum());
+		prodQty.setProdName(orderItem.getProdName());
+		prodQty.setCases(orderItem.getCases());
+		prodQty.setPieces(orderItem.getPieces());
+		updateOrderItemProdQty(orderItem.getOrderNum(),prodQty);
+	}
+
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	public Map getListOrdersSearchInitData(String ownerNum) {
+		Map dataMap = new HashMap();
+		dataMap.put("deliverStatus", WeaDataCache.getCache().getOrderDeliverStatusCodeNameMap());
+		dataMap.put("cashStatus", WeaDataCache.getCache().getOrderCashStatusCodeNameMap());
+		dataMap.put("settleStatus", WeaDataCache.getCache().getOrderSettleStatusCodeNameMap());
+		List<WareHouse> wareHouseList = iWWareHouseService.getAllWarehouses(ownerNum);
+		dataMap.put("warehouses",wareHouseList);
+		return dataMap;
+	}
+
+	public void addWebOrder(Order order) {
+		/*
+		List<OrigOrderItem> origOrderItemList = new ArrayList<OrigOrderItem>();
+		List<OrderItem> orderItems= order.getOrderItemList();
+		for(OrderItem orderItem:orderItems){
+			OrigOrderItem origOrderItem = new OrigOrderItem();
+			origOrderItem.setProdNum(orderItem.getProdNum());
+			origOrderItem.setProdName(orderItem.getProdName());
+			origOrderItem.setUnit(orderItem.getUnit());
+			origOrderItem.setCases(orderItem.getCases());
+			origOrderItemList.add(origOrderItem);
+		}
+		OrigOrder origOrder = new OrigOrder();
+		origOrder.setOrigOrderItemList(origOrderItemList);
+		origOrder.setOwnerNum(order.getOwnerNum());
+		origOrder.setCustNum(order.getCustNum());
+		origOrder.setDeliverAddr(order.getDeliverAddr());
+		iWOrigOrderService.addOrigOrder(origOrder);
+		*/
+		Customer customer = iWCustService.getCust(order.getCustNum());
+		order.setCustName(customer.getCustName());
+		order.setCreateFrom(WeaConstant.CLIENT_TYPE_WEB);
+		order.setOrigReferOrderNum("");
+		addOrder(order);
+	}
+
+}

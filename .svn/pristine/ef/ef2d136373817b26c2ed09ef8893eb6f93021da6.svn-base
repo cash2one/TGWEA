@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+
+<sqlMap>
+
+	<typeAlias alias="WechatMassMessage" type="com.etaoguan.wea.wechat.vo.WechatMassMessage" />
+
+
+	<resultMap id="wmmMap" class="WechatMassMessage">
+		<result property="massMessageId" column="mass_message_id" />
+		<result property="ownerNum" column="owner_num" />
+		<result property="wechatSubject" column="subject" />
+		<result property="msgType" column="msg_type" />
+		<result property="filterType" column="filter_type" />
+		<result property="filterText" column="filter_text" />
+		<result property="content" column="content" />
+		<result property="remark" column="remark" />
+		<result property="createDate" column="create_date" />
+		<result property="createBy" column="create_by" />
+		<result property="updateDate" column="update_date" />
+		<result property="updateBy" column="update_by" />
+	</resultMap>
+	
+	
+   <resultMap id="wmMap" class="WechatMassMessage" extends="wmmMap">
+		<result property="wechatMassMsgRequest.requestId" column="request_id" />
+		<result property="wechatMassMsgRequest.wechatMsgId" column="wechat_msg_id" />
+		<result property="wechatMassMsgRequest.processStatus" column="process_status" />
+		<result property="wechatMassMsgRequest.requestErrorCode" column="request_error_code" />
+		<result property="wechatMassMsgRequest.responseStatus" column="response_status" />
+		<result property="wechatMassMsgRequest.responseErrorCount" column="response_error_count" />
+		<result property="wechatMassMsgRequest.requestDate" column="request_date" />
+		<result property="wechatMassMsgRequest.requestBy" column="request_by" />
+		<result property="wechatMassMsgRequest.responseDate" column="response_date" /> 
+		<result property="wechatMassMsgRequest.responseBy" column="response_by" />
+	</resultMap>
+
+
+
+ <delete id="deleteWechatMassMessage" parameterClass="java.util.HashMap">
+		DELETE  FROM wechat_mass_message where wechat_mass_message.mass_message_id = #massMessageId#
+
+	</delete>
+
+	<select id="getMassMessageById" parameterClass="java.util.HashMap" resultMap="wmmMap">
+		SELECT
+		wechat_mass_message.mass_message_id,
+		wechat_mass_message.owner_num,
+		wechat_mass_message.`subject`,
+		wechat_mass_message.msg_type,
+		wechat_mass_message.filter_type,
+		wechat_mass_message.filter_text,
+		wechat_mass_message.content,
+		wechat_mass_message.remark,
+		wechat_mass_message.create_date,
+		wechat_mass_message.create_by,
+		wechat_mass_message.update_date,
+		wechat_mass_message.update_by
+		FROM
+		wechat_mass_message
+		WHERE
+		wechat_mass_message.mass_message_id = #massMessageId#
+
+	</select>
+
+	<update id="updateWechatMassMessage" parameterClass="java.util.HashMap">
+
+		UPDATE wechat_mass_message SET content = #content# WHERE mass_message_id = #massMessageId#
+
+
+	</update>
+
+
+	<select id="getWechatMassMessageCount" parameterClass="java.util.HashMap"
+		resultClass="java.lang.Integer">
+		select count(1) from wechat_mass_message where owner_num =
+		#ownerNum#
+	</select>
+
+	<select id="getWechatMassMessageDataSet" parameterClass="java.util.HashMap"
+		resultMap="wmMap">
+		
+		SELECT 
+		t1.mass_message_id,
+		t1.owner_num,
+		t1.`subject`,
+		t1.msg_type,
+		t1.filter_type,
+		t1.filter_text,
+		t1.content,
+		t1.remark,
+		t1.create_date,
+		t1.create_by,
+		t1.update_date,
+		t1.update_by,
+		t4.request_id,
+		t4.wechat_msg_id,
+		t4.process_status,
+		t4.request_error_code,
+		t4.response_status,
+		t4.response_error_count,
+		t4.request_date,
+		t4.request_by,
+		t4.response_date, 
+		t4.response_by
+		FROM
+		(select * 
+		from 
+		wechat_mass_message 
+		where owner_num = #ownerNum# 
+		ORDER BY wechat_mass_message.create_date DESC 
+		limit #limit# offset #offset#
+		) t1 
+		LEFT JOIN (select t3.* from (select mass_message_id,
+				max(
+					request_id
+				) max_request_id
+			FROM
+				wechat_mass_msg_request WHERE owner_num = #ownerNum# 
+			group by mass_message_id) t2,wechat_mass_msg_request t3
+		 where t2.max_request_id = t3.request_id) t4 
+		 ON t1.mass_message_id = t4.mass_message_id
+	</select>
+
+	<insert id="createWechatMassMessage" parameterClass="WechatMassMessage">
+
+		INSERT INTO wechat_mass_message (
+		wechat_mass_message.owner_num,
+		wechat_mass_message.`subject`,
+		wechat_mass_message.msg_type,
+		wechat_mass_message.filter_type,
+		wechat_mass_message.filter_text,
+		wechat_mass_message.create_date,
+		wechat_mass_message.create_by,
+		wechat_mass_message.update_date,
+		wechat_mass_message.update_by
+		)
+		VALUE
+		(
+		#ownerNum#,
+		#wechatSubject#,
+		#msgType#,
+		#filterType#,
+		#filterText#,
+		#createDate#,
+		#createBy#,
+		#updateDate#,
+		#updateBy#
+		)
+
+		<selectKey resultClass="java.lang.Integer">
+			SELECT @@IDENTITY AS id
+		</selectKey>
+	</insert>
+
+
+
+
+</sqlMap>

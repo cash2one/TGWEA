@@ -1,0 +1,948 @@
+<!doctype html>
+    <html>
+    <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8">
+    <meta http-equiv="Access-Control-Allow-Origin" content="*">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no" />
+	
+	    <title>TGwea</title>
+ 	<script type="text/javascript" src="http://api.map.baidu.com/api?type=quick&ak=0pNtN4cUMQFSGKzgHUDV07LZ&v=1.0"></script>
+
+   	<link rel="stylesheet" href="css/idangerous.swiper.css">
+   	<link rel="stylesheet" href="css/jquery.mobile-1.4.2.min.css">
+   	<link rel="stylesheet" type="text/css" href="css/index.css" />
+    <script src="js/jquery-1.9.1.min.js" type="text/javascript"></script>
+    <script src="js/jquery.mobile-1.4.2.min.js"> </script>
+    <script src="js/index.js" type="text/javascript"></script>
+    <script src="js/idangerous.swiper-2.1.min.js"></script>
+
+	<link rel="stylesheet" href="css/bootstrap.min.css">
+	<script src="js/bootstrap.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="./css/scrollbar.css">
+    <script type="application/javascript" src="./js/iscroll.js"></script>
+
+    <script language="javascript">
+    	    try{
+	    	if(getUrlParm("cordovaFlag") === "1"){
+	    		document.write("<script type='text/javascript' charset='utf-8' src='cordova.js'><\/script>");
+	    		document.close();
+	    	}else{}
+	    }catch (error) {}
+    </script>
+    </head>
+    <body>
+    <div class="conPrompt">
+    	<span>网络连接或服务器已断开...</span>
+    </div>
+    <script>$(".conPrompt").hide();</script>
+    
+    
+    <div id="container1">
+    <div id="in" ></div>
+    </div>
+    
+    <div class="right-menu-list">
+    <ul>       
+    	<li><a href="javascript:void(0)" class="index" data-Rmenu="true"><img src="img/public/home-bg.png" ondragstart="return false;">首页</a></li>
+    	 <li><a href="javascript:void(0)" class="product" data-Rmenu="true"><img src="img/public/pro.png" ondragstart="return false;">产品</a></li>
+    	 <li><a href="javascript:void(0)" class="leave" data-Rmenu="true"><img src="img/public/leave.png" ondragstart="return false;">留言</a></li>
+        <li><a href="javascript:void(0)" class="phone" data-Rmenu="true"><img src="img/public/contact.png" ondragstart="return false;">联系</a></li>
+        <li><a href="javascript:void(0)" class="about" data-Rmenu="true"><img src="img/public/enterprise.png" ondragstart="return false;">企业</a></li>
+        <li><a href="javascript:void(0)" class="buyers" data-Rmenu="true"><img src="img/public/buyers.png" ondragstart="return false;">买家</a></li>
+        <li><a href="javascript:void(0)" class="seller" data-Rmenu="true"><img src="img/public/seller.png" ondragstart="return false;">卖家</a></li>
+    </ul>   
+    </div>
+
+    <!--首页-->
+     <div data-role="page" data-ajax="false" id="index" align="center">
+         <div id="indexViewHide"></div>
+	      <div  data-theme="y" data-role="header" data-position="fixed" class='myheader'  data-tap-toggle="false">
+	          <h3 >首&nbsp;&nbsp;&nbsp;&nbsp;页</h3>
+	  	  </div>
+
+         <div id="wrapper">
+	     <div data-role="content" class="content">
+             <div id="indexPullDown">
+                 <span class="pullDownIcon"></span><span class="pullDownLabel">下拉刷新...</span>
+             </div>
+             <div id="clickBlock"></div>
+		     <div class="indexSwiper"><div class="swiper-container" ></div></div>
+		     <div class="all-tittle" ><div class="mod-hd-l" id="newProId"><ul><li class="tit-h5"><h5>新品动态</h5></li></ul></div></div>
+		     <div class="newProDynamic"></div>
+		     <div class="all-tittle"><div class="mod-hd-l" id="allProId"><ul><li class="tit-h5"><h5>全部产品</h5></li></ul></div></div>
+		     <div class="allProShow"></div>
+		     <div class="buttonClass-a" id="moreProBtnId"><a href="javascript:void(0)" class="product" data-role="none" >更多产品</a></div>
+		     <div style="width:100%; height: 50px; "></div>
+             <div id="pullUp" style="display: none;"></div>
+            </div>
+         </div>
+
+      <footer id="#footerid">
+      	 <div class="indexMenuIcon">
+      	<div class="indexMenuBg">
+      		<a href="javascript:void(0)" class="indexMenuIconBtn" ><img id="indexMenuImg" src="img/indexview/ttop.png" ondragstart="return false;" ></a>
+      		<div class="imtop"><div class="imtop-1"><div style="width: 40px;height: 40px;"></div></div></div>
+      	</div>
+      	 
+         </div>
+         
+      	<div class="classindexmenu" id="indexMenuId" data-isInit="false" >
+
+              <div class="indexmenubg">
+              <div class="indexmenu-1">
+              <ul>       
+                   <li><a href="javascript:void(0)" class="product"><img src="img/public/pro.png" ondragstart="return false;">产品</a></li>
+                     <li><a href="javascript:void(0)" class="leave"><img src="img/public/leave.png" ondragstart="return false;">留言</a></li>
+                      <li><a href="javascript:void(0)" class="about"><img src="img/public/enterprise.png" ondragstart="return false;">企业</a></li>
+                  </ul>
+                  <ul>       
+                    <li><a href="javascript:void(0)" class="buyers"><img src="img/public/buyers.png" ondragstart="return false;">买家</a></li>
+                     <li><a href="javascript:void(0)" class="phone"><img src="img/public/contact.png" ondragstart="return false;">联系</a></li>
+                      <li><a href="javascript:void(0)" class="seller" ><img src="img/public/seller.png" ondragstart="return false;">卖家</a></li>
+                  </ul>
+                  </div>  
+              </div>
+              
+       	  </div>
+       	 <!-- <div class="indexMenuBg"></div>-->
+       	</footer>
+    	</div>
+      
+      <!--产品展示-->
+      <div data-role="page" data-url="demo-page" id="product" align="center">
+      		<div data-theme="y" data-role="header" data-position="fixed" class='myheader' data-tap-toggle="false">
+      			<div class="navigationLeftBtn">
+      				<div class="navigationItem"><a href="javascript:void(0)" class="toProSearch"><img src="img/public/menu.png" ondragstart='return false'></a></div>
+      		   </div>
+      		   <div class="navigationRightBtn">
+      		   		<div class="navigationItem"><a href="javascript:void(0)" id="toAllListProShow" data-role="none"><img src="img/public/listShow.png" ondragstart='return false'></a></div>
+      		   </div>
+      		   <div class="navigationImg"></div>
+      		   <div class="navigationMenuBtn">
+      		   		<div class="navigationItem"><a href="javascript:void(0)" data-role="none" class="rigthMenu" data-isMenuBtnOpen="false"><img src="img/public/menuBtn.png" ondragstart='return false'  class="rigthMenuImg"></a></div>
+      		   </div>
+      		   <h3>产品展示</h3>
+      		</div>
+                <div data-role="content" class="content">
+                    <div class='repair'>.</div>
+                    <div class="productcontent"></div>
+                    <div class="noMore">没有更多产品。</div>
+                </div>
+	</div>
+	
+	<div data-role="page" id="proSearch" align="center">
+		<div data-theme="y" data-role="header" data-position="fixed" class="myheader" data-tap-toggle="false">
+			<div class="navigationLeftBtn">
+				<div class="navigationItem"><a href="javascript:void(0)" class="back" data-role="none"><img src="img/public/back.png" ondragstart='return false'></a></div>
+			</div>
+			<div class="navigationMenuBtn">
+					<div class="navigationItem"><a href="javascript:void(0)" data-role="none" class="rigthMenu"  data-isMenuBtnOpen="false"><img src="img/public/menuBtn.png" ondragstart='return false' class="rigthMenuImg"></a></div>
+			</div>
+			<h3>产品搜索</h3>
+		</div>
+
+			<div data-role="content" class="content">
+				<div class="proCateMenu">
+					<div class="shou">
+						<ul>
+					    	<li><input class="shou-bg" placeholder="请输入搜索关键字" type="text" data-role="none"></li>
+					        <li>
+                                <a class="proCateSearch" href="javascript:void(0)" onclick=searchclass.userSearchIsNull(this,$(".shou-bg").val(),$(".shou-bg").val(),"") data-role="none">
+                                    <input class="shou-icon" type="image" src="img/shou-icon.png" data-role="none">
+                                </a>
+                            </li>
+						</ul>
+					</div>
+					<div class="alpha2"><ul class="proCateMenuContent"><li><b class="meun-little">产品分类</b></li></ul></div>
+			</div>
+           </div>
+	</div>
+
+    <!--产品展示列表形式-->
+    <div data-role="page" id="allListProShow" align="center">
+    	<div data-theme="y" data-role="header" data-position="fixed" class="myheader" data-tap-toggle="false">
+    		<div class="navigationLeftBtn"><div class="navigationItem"><a href="javascript:void(0)" class="toProSearch"><img src="img/public/menu.png" ondragstart='return false'></a></div></div>
+    		<div class="navigationRightBtn">
+    			<div class="navigationItem"><a href="javascript:void(0)" class="back" data-role="none" ><img src="img/public/imageShow.png" ondragstart='return false'></a></div>
+    		</div>
+    		 <div class="navigationImg"></div>
+    		<div class="navigationMenuBtn">
+    				<div class="navigationItem"><a href="javascript:void(0)" data-role="none" class="rigthMenu"  data-isMenuBtnOpen="false"><img src="img/public/menuBtn.png" ondragstart='return false' class="rigthMenuImg"></a></div>
+    		</div>
+    		<h3>全部产品</h3>
+    	</div>
+        <div data-role="content" class="content">
+            <div class="all-tittle">
+                <div class="mod-hd-l"><ul><li class="tit-h5"><h5>全部产品</h5></li></ul></div></div>
+            <div class="allProList" align="left"><div class="pro-list"><ul></ul></div>
+            </div>
+            <div class="proListMore">没有更多产品。</div>
+        </div>
+    </div>
+
+	<!--搜索产品-->
+	 <div data-role="page" id="page2-1" align="center">
+     	<div data-theme="y" data-role="header" data-position="fixed" class='myheader' data-tap-toggle="false">
+     		<div class="navigationLeftBtn">
+     			<div class="navigationItem"><a href="javascript:void(0)" class="back" data-role="none"><img src="img/public/back.png" ondragstart='return false'></a></div>
+     		</div>
+        	<h3></h3>
+       </div>
+         <div data-role="content" class="content">
+             <div class="proSearchResults">
+                 <div class="pro-list" align="left"><ul></ul></div>
+                 <div class="fproMore">没有更多产品。</div>
+             </div>
+             <div class='repair'>.</div>
+         </div>
+    </div>
+    
+    <!--用户登陆-->
+    <div data-role="page" id="userlogin" align="center">
+    <div id="userLoginHide"></div>
+    <div data-theme="y" data-role="header"  data-position="fixed" class='myheader' data-tap-toggle="false">
+    	<div class="navigationLeftBtn">
+    		<div class="navigationItem"><a href="javascript:void(0)" class="back"  data-role="none"><img src="img/public/back.png" ondragstart='return false'></a></div>
+    	</div>
+    	<div class="navigationMenuBtn">
+    			<div class="navigationItem"><a href="javascript:void(0)" data-role="none" class="rigthMenu" data-isMenuBtnOpen="false"><img src="img/public/menuBtn.png" ondragstart='return false' class="rigthMenuImg"></a></div>
+    	</div>
+         <h3>登 陆</h3>
+    </div>
+
+    <div data-role="content" class="content">
+    	<div class="fromView-a">
+    		<div class='repair'>
+    			.
+    		</div>
+	    	<div class="inputTextView-a">
+	    		<img src="img/Icon/userName.png" class="userName loginIcon" ondragstart="return false;"/>
+	        	<input type="text" name="username" data-role="none" placeholder="手机号" id="username" onfocus="inputFocusOrInputBlur('.userName','img/icon/userNameClick.png')" onblur="inputFocusOrInputBlur('.userName','img/icon/userName.png')" />
+	        </div>
+	        
+	        <div class="inputTextView-b">
+	        	<img src="img/Icon/userPass.png" class="userPass loginIcon" ondragstart="return false;"/>
+	        	<input type="password" name="userpassword" data-role="none" placeholder="密码" id="userpassword" onfocus="inputFocusOrInputBlur('.userPass','img/icon/userPassClick.png')" onblur="inputFocusOrInputBlur('.userPass','img/icon/userPass.png')" />
+	        </div>
+	    </div>
+	  	
+	  	<div style="height: 10px;"></div>
+	  	<div class="buttonClass-a"><a href="javascript:void(0)" data-role="none" id="userloginsend">登 陆</a></div>
+	    <div class="buttonClass-b"><a href="javascript:void(0)" id="toregister" data-role="none">注册新账户</a></div>
+     </div>
+    </div>    
+    
+    <!--产品详细信息展示-->
+    <div data-role="page" id="page2-2" align="center">
+     	<div data-theme="y" data-role="header" data-position="fixed" class='myheader' data-tap-toggle="false">
+     	 <div class="navigationLeftBtn">
+         	<div class="navigationItem"><a href="javascript:void(0)" class="back" data-role="none"><img src="img/public/back.png" ondragstart='return false'></a></div>
+         </div>
+        <h3>产品详细信息</h3>
+       </div>
+
+      <div data-role="content" class="content" id="contentslider" >
+        <div class="detailed">
+        	<div class="detailed-tittle" align="left"><h5></h5></div>
+			<div class="swiper-container"></div>
+            <div class="cqcs" align='left'><ul></ul></div>
+            <div class="proLongImg"></div>
+         </div>
+	 </div>
+        <div class="ampImgLayer"></div>
+        <div class="closeAmpImg"><a href="javascript:void(0)" id="closeAmpBtn">×</a></div>
+        <div class='ampImgBg' align="center"></div>
+        <div class="shopping-cart" align="left">
+            <div class="quantity">
+                <span class="number">购买数量：</span>
+                <a class="tb-stock" id="tb-stockminus" data-role="none" href="javascript:void(0)" data-inputId="#addNum">-</a>
+                <input class="tb-amount" data-role="none" type="text" value="0" id="addNum" title="请输入购买量">
+                <a class="tb-stock" id="tb-stockadd" title="add"  data-role="none" href="javascript:void(0)" data-inputId="#addNum" >+</a>
+            </div>
+            <div>
+                <a href="javascript:void(0)" id="send" data-role="none" data-myindex="">加入购物车</a>
+                <a href="javascript:void(0)" id="goToDetailed" data-role="none">查看购物车</a>
+            </div>
+            <div class="buy"><a href="javascript:void(0)" id="goToTaoBao" data-role="none">直接去1688购买</a></div></div>
+    </div>
+
+	<!--个人中心-->
+    <div data-role="page" id="personal" align="center">
+    	<div data-theme="y" data-role="header" data-position="fixed" class='myheader' data-tap-toggle="false">
+    	<div class="navigationLeftBtn">
+    		<div class="navigationItem"><a href="javascript:void(0)" class="back" data-role="none"><img src="img/public/back.png" ondragstart='return false'></a></div>
+    	</div>
+    	<div class="navigationMenuBtn">
+    			<div class="navigationItem"><a href="javascript:void(0)" data-role="none" class="rigthMenu"  data-isMenuBtnOpen="false"><img src="img/public/menuBtn.png" ondragstart='return false' class="rigthMenuImg"></a></div>
+    	</div>
+        <h3>个人中心</h3>
+    </div>
+
+    <div data-role="content" class="content">
+	    	<!--<div class="personal-tittle"></div>-->
+
+            <div class="personal-cen" align="left">
+              <p><span>用 户 名：</span>未登录</p>
+              <p><span>企业名称：</span>未登录</p>
+            </div>
+
+          <div class="personal" align='left'>
+	    	<ul>       
+	            <li><a href="javascript:void(0)" id="toShopping" data-role="none"><img src="img/personal/4.png" ondragstart="return false;">购物车<span>></span></a></li>
+	            <li><a href="javascript:void(0)" id="toUserWaitingAudit" data-role="none"><img src="img/personal/5.png" ondragstart="return false;">待审核订单<span>></span></a></li>
+                <li><a href="javascript:void(0)" id="toMyOrder" data-role="none"><img src="img/personal/2.png" ondragstart="return false;">已下订单<span>></span></a></li>
+	        </ul>
+            <ul>
+                <li><a href="javascript:void(0)" id="toSuperPro" data-role="none"><img src="img/personal/superPro.png" ondragstart="return false;">特供商品<span>></span></a></li>
+	        </ul>
+            <ul>
+                <li><a href="javascript:void(0)" id="toUserModifyInfo" data-role="none"><img src="img/personal/6.png" ondragstart="return false;">修改信息<span>></span></a></li>
+	            <li><a href="javascript:void(0)" id="toUserModifyPass" data-role="none"><img src="img/personal/3.png" ondragstart="return false;">修改密码<span>></span></a></li>
+	        </ul>
+            <ul>
+                <li><a href="javascript:void(0)" id="myOutLogin" data-role="none"><img src="img/personal/7.png" ondragstart="return false;">注销<span>></span></a></li>
+	        </ul>   
+	        </div>
+        <div class='repair'>.</div>
+	  
+	  <div class="alertViewBg"></div>
+	  <div class="alertViewBg2">
+	  	<div class="alertViewBg3">
+	  		<div class="alertView">
+	  			<div class="alertTitle">
+	  				提&nbsp;&nbsp;&nbsp;&nbsp;示
+	  			</div>
+	  			<div class="alertMessage">
+	  				您确定要退出登陆吗?
+	  			</div>
+	  			<div class="alertBtnView">
+	  				<div class="alertBtnCancel" style="width: 50%;"><a href="javascript:void(0)" onclick="closeAlert('#personal')"  data-role="none" class="cancelBtn">取&nbsp;&nbsp; 消</a></div>
+	  				<div class="alertBtnConfirm" style="width: 50%;"><a href="javascript:void(0)" onclick="confirmEnvent('#personal',classlogin.userLoginOut())"  data-role="none" class="confirmBtn">确&nbsp;&nbsp; 定</a></div>
+	  			</div>
+	  		</div>
+	  	</div>
+	  </div>
+    </div>
+    </div>
+
+     <!--我的购物车-->
+     <div data-role="page" id="page5" align="center">
+     	<div data-theme="y" data-role="header" data-position="fixed" class='myheader' data-tap-toggle="false">
+     	<div class="navigationLeftBtn">
+     		<div class="navigationItem"><a href="javascript:void(0)" class="back" data-role="none"><img src="img/public/back.png" ondragstart='return false'></a></div>
+        </div>
+        <h3>购物车</h3>
+       </div>
+
+       <div data-role="content" class="content">
+   		<div class="promptText">购物车是空的，快去购物吧~</div>
+     	<div class="shoppingBg" align="left"></div>
+     	
+   			<div class='repair'>.</div>
+   			<div class="buttonView-a">
+   			<div class="buttonClass-a"><a id="orderSendBtn" href="javascript:void(0)" data-role="none">提交订单</a></div>
+        	</div>
+        	
+        	<div class="alertViewBg"></div>
+        	<div class="alertViewBg2">
+        		<div class="alertViewBg3">
+        		 <div class="alertView">
+        		 <div class="alertTitle">
+        		 提&nbsp;&nbsp;&nbsp;&nbsp;示
+        		 </div>
+        		 <div class="alertMessage">
+        		 	您确定提交订单吗？
+        		 </div>
+        		 <div class="alertBtnView">
+        		 <div class="alertBtnCancel" style="width: 50%;"><a href="javascript:void(0)" onclick="closeAlert('#page5')"  data-role="none" class="cancelBtn">取&nbsp;&nbsp; 消</a></div>
+        		<div class="alertBtnConfirm" style="width: 50%;"><a href="javascript:void(0)" onclick="confirmEnvent('#page5',userproduct.sendOrder())" data-role="none" class="confirmBtn">确&nbsp;&nbsp; 定</a></div>
+        		</div>
+        	</div>
+        	</div>
+   	    </div>
+        </div>
+      </div>
+     </div>
+      
+      <!--待审核订单-->
+      <div data-role="page" id="userWaitingAudit" align="center">
+      	<div data-theme="y" data-role="header" data-position="fixed" class="myheader" data-tap-toggle="false">
+      		<div class="navigationLeftBtn">
+      			<div class="navigationItem"><a href="javascript:void(0)" class="back" data-role="none"><img src="img/public/back.png" ondragstart='return false'></a></div>
+      		</div>
+      		<h2>待审核订单</h2>
+      	</div>
+      		<div data-role="content" class="content">
+      			<div class="all-tittle">
+      				<div class="mod-hd-l"><ul><li class="tit-h5"><h5></h5></li></ul></div>
+      			</div>
+      			<div class="userWaitingOrder" align="left"></div>
+      			<div class="noMyWaitingOrder">没有更多的订单了</div>
+      		</div>
+
+      </div>
+      
+      
+      <!--订单列表-->
+      <div data-role="page" id="myorder" align="center">
+      	<div data-theme="y" data-role="header" data-position="fixed" class='myheader' data-tap-toggle="false">
+	      	<div class="navigationLeftBtn">
+	      		<div class="navigationItem"><a href="javascript:void(0)" class="back" data-role="none"><img src="img/public/back.png" ondragstart='return false'></a></div>
+	       	</div>
+	        <h2>已下订单</h2>
+       	</div>
+
+        <div data-role="content" class="content">
+        	<div class="all-tittle">
+        		<div class="mod-hd-l"><ul><li class="tit-h5"><h5></h5></li></ul></div>
+        	</div>
+	        <div class="userOrderList" align='left'></div>
+	        <div class="noMyOrder">没有更多的订单了</div>
+	        <div class='repair'>.</div>
+        </div>
+      </div>
+      
+      <!--特供商品-->
+      <div data-role="page" id="superPro" align="center">
+      	<div data-role="header" data-theme="y" data-position="fixed" class="myheader" data-tap-toggle="false">
+      		<div class="navigationLeftBtn">
+      			<div class="navigationItem">
+      				<a href="javascript:void(0)" class="back" data-role="none"><img src="img/public/back.png" ondragstart="return false"></a>
+      			</div>
+      		</div>
+      		<h3>特供商品</h3>	
+      	</div>
+
+          <div data-role="content" class="content">
+              <div class="waterfall-list" align="left">
+                  <div class="waterfall-le"> </div>
+                  <div class="waterfall-ri"></div>
+              </div>
+          <div class="superProMore">没有更多产品。</div>
+      </div>
+      </div>
+      
+      <!--用户修改个人信息-->
+      <div data-role="page" id="userModifyInfo" align="center">
+      		<div data-role="header" data-theme="y" data-position="fixed" class='myheader' data-tap-toggle="false">
+      			<div class="navigationLeftBtn">
+      				<div class="navigationItem"><a href="javascript:void(0)" class="back" data-role="none"><img src="img/public/back.png" ondragstart='return false'></a></div>
+           		</div>
+                <h3>修改个人信息</h3>
+            </div>
+
+            	<div data-role="content" class="content">
+	            	<div class="fromView-a">
+	            		<div class='repair'>.</div>
+	            		<div class="fromTitleView">
+	            			<img src="img/Icon/userName.png" class="loginIcon" style="margin-top:-5px;" ondragstart="return false;"/>
+		            		<div class="fromTitle">用户名：<code id="sUserName" style="color:#888888;background:none;"></code></div>
+		                 </div>
+
+		                  <div class="inputTextView-a">
+		                  		 <img src="img/Icon/companyName.png"  class="companyName loginIcon" ondragstart="return false;"/>
+		                		<input type="text" name="companyName" data-role="none" placeholder="公司名" id="companyName" onfocus="inputFocusOrInputBlur('.companyName','img/icon/companyNameClick.png')" onblur="inputFocusOrInputBlur('.companyName','img/icon/companyName.png')" />
+		                	</div>
+		                	
+		                  	<div class="inputTextView-a">
+		                  		<img src="img/Icon/name.png" class="contactName loginIcon" ondragstart="return false;"/>
+		                		<input type="text" name="contactName" data-role="none" placeholder="联系人" id="contactName" onfocus="inputFocusOrInputBlur('.contactName','img/icon/nameClick.png')" onblur="inputFocusOrInputBlur('.contactName','img/icon/name.png')" />
+		                	</div>
+		                	
+		                  <div class="inputTextView-a">
+		                  		<img src="img/Icon/phoneNum.png" class="contactPhone loginIcon" ondragstart="return false;"/>
+		                		<input type="text" name="contactPhone" data-role="none" placeholder="联系电话" id="contactPhone" onfocus="inputFocusOrInputBlur('.contactPhone','img/icon/phoneNumClick.png')" onblur="inputFocusOrInputBlur('.contactPhone','img/icon/phoneNum.png')" />
+		                	</div>
+		                	
+		                  	<div class="inputTextView-a">
+		                  		<img src="img/Icon/companyAddress.png" class="companyAddress loginIcon" ondragstart="return false;"/>
+		                		<input type="text" name="companyAddress" data-role="none" placeholder="公司地址" id="companyAddress" onfocus="inputFocusOrInputBlur('.companyAddress','img/icon/companyAddressClick.png')" onblur="inputFocusOrInputBlur('.companyAddress','img/icon/companyAddress.png')" />
+		                	</div>
+		                  </div>
+		                  
+		                  <div style="height: 15px;"></div>
+		                  <div class="buttonClass-a">
+		                  	<a href="javascript:void(0)" data-role="none" id="updateInfoDone">保存信息</a>
+		                  </div>
+               </div>
+      </div>
+      
+      
+      <!--用户修改密码-->
+      <div data-role="page" id="userModifyPass" align="center">
+    	<div data-role="header" data-theme="y" data-position="fixed" class='myheader' data-tap-toggle="false">
+    		<div class="navigationLeftBtn">
+	    		<div class="navigationItem"><a href="javascript:void(0)" class="back" data-role="none"><img src="img/public/back.png" ondragstart='return false'></a></div>
+       		</div>
+            <h3>修改密码</h3>
+       </div>
+       <div data-role="content" class="content">
+	       <div class="fromView-a">
+	       		<div class='repair'>.</div>
+	       		<div class="inputTextView-c">
+	       			<img src="img/Icon/userPass.png" class="oldPass loginIcon" ondragstart="return false;"/>
+	           		<input type="password" name="oldPass" placeholder="旧密码" data-role="none" id="oldPass" 	onfocus="inputFocusOrInputBlur('.oldPass','img/icon/userPassClick.png')" onblur="inputFocusOrInputBlur('.oldPass','img/icon/userPass.png')" />
+	           	</div>
+	           	<div class="inputTextView-c">
+	           		<img src="img/Icon/newPass.png" class="newPass loginIcon" ondragstart="return false;"/>
+	           		<input type="password" name="newPass" placeholder="新密码" data-role="none" id="newPass" onfocus="inputFocusOrInputBlur('.newPass','img/icon/newPassClick.png')" onblur="inputFocusOrInputBlur('.newPass','img/icon/newPass.png')" />
+	           	</div>
+	           	<div class="inputTextView-b">
+	           	<img src="img/Icon/newPass.png" class="newPassConfirm loginIcon" ondragstart="return false;"/>
+	           	<input type="password" name="confirmNewPass" placeholder="确认新密码" data-role="none" id="confirmNewPass" onfocus="inputFocusOrInputBlur('.newPassConfirm','img/icon/newPassClick.png')" onblur="inputFocusOrInputBlur('.newPassConfirm','img/icon/newPass.png')" />
+	           	</div>
+	    </div>
+	           	<div style="height:15px;"></div>
+	           	
+	           	<div class="buttonClass-a"><a href="javascript:void(0)" id="updateUpassDone" data-role="none">确认修改</a></div>
+       </div>
+    </div>
+   
+      <!--管理员登陆-->
+      <div data-role="page" id="pageadminlogin" align="center">
+        <div id="adminLoginHide"></div>
+     	<div data-theme="y" data-role="header" data-position="fixed" class='myheader' data-tap-toggle="false">
+     	<div class="navigationLeftBtn">
+     		<div class="navigationItem"><a href="javascript:void(0)" class="back" data-role="none"><img src="img/public/back.png" ondragstart='return false'></a></div>
+        </div>
+        <div class="navigationMenuBtn">
+        		<div class="navigationItem"><a href="javascript:void(0)" data-role="none" class="rigthMenu" data-isMenuBtnOpen="false"><img src="img/public/menuBtn.png" ondragstart='return false' class="rigthMenuImg"></a></div>
+        </div>
+        <h3>管理员登陆</h3>
+       </div>
+
+       <div data-role="content" class="content">
+       
+   		 <div class="fromView-a">
+   		 	<div class='repair'>.</div>
+       		<div class="inputTextView-a">
+       			<img src="img/Icon/adminName.png" class="adminName loginIcon"  ondragstart="return false;"/>
+                <input type="text" name="adminname" data-role="none" placeholder="管理员账号" id="adminname"  onfocus="inputFocusOrInputBlur('.adminName','img/icon/adminNameClick.png')" onblur="inputFocusOrInputBlur('.adminName','img/icon/adminName.png')" />
+            </div>
+            
+           <div class="inputTextView-b">
+           		<img src="img/Icon/adminPass.png" class="adminPass loginIcon"  ondragstart="return false;"/>
+          		<input type="password" name="adminpassword" data-role="none" placeholder="管理员密码" id="adminpassword" onfocus="inputFocusOrInputBlur('.adminPass','img/icon/adminPassClick.png')" onblur="inputFocusOrInputBlur('.adminPass','img/icon/adminPass.png')" />
+           </div>
+         </div>
+           <div style="height: 10px;"></div>
+           <div class="buttonClass-a"><a href="javascript:void(0)" data-role="none" id="adminLoginBtn">登陆</a></div>
+       </div>
+       </div>
+       
+       <!--管理员界面-->
+       <div data-role="page" id="adminMenu" align="center">
+       		<div data-role="header" data-theme="y" data-position="fixed" class='myheader' data-tap-toggle="false">
+       		<div class="navigationLeftBtn">
+       			<div class="navigationItem"><a href="javascript:void(0)" class="back" data-role="none"><img src="img/public/back.png" ondragstart='return false'></a></div>
+           </div>
+           <div class="navigationMenuBtn">
+           		<div class="navigationItem"><a href="javascript:void(0)" data-role="none" class="rigthMenu" data-isMenuBtnOpen="false"><img src="img/public/menuBtn.png" ondragstart='return false' class="rigthMenuImg"></a></div>
+           </div>
+            	<h3>管理员界面</h3>
+           </div>
+
+           <div data-role="content" class="content">
+		       	<!--<div class="adminMenu-tittle"></div>-->
+               <div class="admin-cen" align="left">
+                   <p><span></span>暂无登陆数据</p>
+               </div>
+	        	<div class="personal" align='left'>
+	        	<ul>
+	        	   <li><a href="javascript:void(0)" id="toAdminSelectOrder"><img src="img/personal/11.png" ondragstart="return false;">订单管理<span>></span></a></li>
+	        	    <li><a href="javascript:void(0)" id="toAdminProManage"><img src="img/personal/12.png" ondragstart="return false;">产品管理<span>></span></a></li>
+	        	</ul>
+                <ul>
+                    <li><a href="javascript:void(0)" id="toAdminModifyPass"><img src="img/personal/3.png" ondragstart="return false;">修改管理员密码<span>></span></a></li>
+	        	</ul>
+                <ul>
+                    <li><a href="javascript:void(0)" id="toClientSearch"><img src="img/personal/13.png" ondragstart="return false;">我的客户<span>></span></a></li>
+	        	</ul>
+                <ul>
+                    <li><a  href="javascript:void(0)" id="adminOutLogin"><img src="img/personal/7.png" ondragstart="return false;">注销<span>></span></a></li>
+	        	 </ul>   
+	        	 </div>
+
+                <div class='repair'>.</div>
+                <div class="alertViewBg"></div>
+                <div class="alertViewBg2">
+                	<div class="alertViewBg3">
+                		<div class="alertView">
+                			<div class="alertTitle">
+                				提&nbsp;&nbsp;&nbsp;&nbsp;示
+                			</div>
+                			<div class="alertMessage">
+                				您确定要退出登陆吗?
+                			</div>
+                			<div class="alertBtnView">
+                				<div class="alertBtnCancel" style="width: 50%;">
+                					<a href="javascript:void(0)" onclick="closeAlert('#adminMenu')"  data-role="none" class="cancelBtn">取&nbsp;&nbsp; 消
+                					</a>
+                				</div>
+                				<div class="alertBtnConfirm" style="width: 50%;">
+                					<a href="javascript:void(0)" onclick="confirmEnvent('#adminMenu',classlogin.adminLoginOut())"  data-role="none" class="confirmBtn">确&nbsp;&nbsp; 定</a>
+                				</div>
+                			</div>
+                			
+                		</div>
+                	</div>
+                </div>
+           </div>
+       </div>
+       
+      <!--管理员产品管理-->
+      <div data-role="page" id="adminProManage" align="center">
+      <div data-role="header" data-theme="y" data-position="fixed" class='myheader' data-tap-toggle="false">
+      <div class="navigationLeftBtn">
+      	<div class="navigationItem">
+      		<a href="javascript:void(0)" class="back" data-role="none"><img src="img/public/back.png" ondragstart='return false'></a>
+      	</div>
+      	</div>
+      	<h3>产品管理</h3>
+      </div>
+          <div class="search-pro">
+              <input name="proSearchKey" id="proSearchKey" placeholder="请输入产品名" data-role="none" maxlength="120">
+              <a class="right-search" href="javascript:void(0)" id="adminSearchPro" data-role="none"><img src="img/search-p.png" ondragstart='return false'></a>
+          </div>
+      	<div data-role="content" class="content">
+      		<div class="proShowList" align="left">
+      			<div class="pro-manage"><ul></ul></div>
+      		</div>
+      		<div class="anoMorePro">没有更多地产品</div>
+      		<div class="alertViewBg"></div>
+      		<div class="alertViewBg2">
+      			<div class="alertViewBg3">
+      				<div class="alertView">
+      					<div class="alertTitle">
+      						请输入数量
+      					</div>
+      					<div class="alertMessage">
+      						<div class="inputTextView-e">
+      						<input type="text" name="proManage"  data-role="none" id="proManage"  value="1">	    	
+      						</div>
+      					</div>
+      					
+      					<div class="alertBtnView">
+      						<div class="alertBtnCancel" style="width: 50%;">
+      							<a href="javascript:void(0)" onclick="closeAlert('#adminProManage')"  data-role="none" class="cancelBtn">取&nbsp;&nbsp; 消
+      							</a>
+      						</div>
+      							<div class="alertBtnConfirm" style="width: 50%;">
+      							<a href="javascript:void(0)" data-role="none" class="confirmBtn">确&nbsp;&nbsp; 定</a>
+      						</div>
+      					</div>
+      					
+      				</div>
+      			</div>
+      		</div>
+       </div>
+      </div>
+      
+      <!--管理员编辑产品-->
+    <div data-role="page" id="adminEditProInfo" align="center">
+     	<div data-theme="y" data-role="header" data-position="fixed" class='myheader' data-tap-toggle="false">
+	     	<div class="navigationLeftBtn">
+	     		<div class="navigationItem"><a href="javascript:void(0)" class="back" data-role="none"><img src="img/public/back.png" ondragstart='return false'></a></div>
+	        </div>
+	        <h3>编辑产品信息</h3>
+      	</div>
+	      <div data-role="content" class="content" id="acontentslider" >
+	     	 <div class="swiper-container"></div>
+	         <div class="proText"></div>
+			 <div class='repair'>.</div>
+	      </div>
+    </div>
+     
+      <!--管理员查看订单-->
+      <div data-role="page" id="adminselectorder" align="center">
+	      <div data-theme="y" data-role="header" data-position="fixed" class='myheader' data-tap-toggle="false">
+	      	<div class="navigationLeftBtn">
+	      		<div class="navigationItem"><a href="javascript:void(0)" class="back" data-role="none"><img src="img/public/back.png" ondragstart='return false'></a> </div>
+	      	</div>
+	       <h3>客户订单</h3>
+	      </div>
+   <div class="search-order">
+   <div class="search-o"><a class="left-search" href="javascript:void(0)" data-role="none"  data-searchKey="1" data-isShow="false"><keyText class="left-searchText">按公司</keyText><img src="img/search-o.png" ondragstart='return false' class="left-searchImg"></a></div>
+   <div class="search-order2" ><input class="search-order2-1" data-role="none"></div>
+   <a class="right-search" href="javascript:void(0)"><img src="img/search-p.png" ondragstart='return false'></a></div>
+   
+   <div class="left-search-list">
+   	   <ul>
+      		<li><a href="javascript:void(0)" class="orderSearchKey" data-state="true" data-keyValue="1" data-role="none">按公司</a></li>
+      		<li><a href="javascript:void(0)" class="orderSearchKey" data-state="false" data-keyValue="2" data-role="none">手机号码</a></li>
+       </ul>
+       </div>
+   
+      <div style="height: 55px;"></div>
+      <div data-role="content" class="content">
+        <div data-role="content" class="content">
+        	<div class="aorderList" align="left"></div>
+        	<div class="noOrder">没有更多的订单</div>
+        </div>
+        <div class="repair">.</div>
+	  </div>
+    </div>
+      
+      <!--修改管理员密码-->
+      <div data-role="page" id="adminModifyPass" align="center">
+     	<div data-theme="y" data-role="header" data-position="fixed" class='myheader' data-tap-toggle="false">
+	     	<div class="navigationLeftBtn">
+	     		<div class="navigationItem"><a href="javascript:void(0)" class="back" data-role="none"><img src="img/public/back.png" ondragstart='return false'></a></div>
+	        </div>
+	        <h3>修改管理员密码</h3>
+       </div>
+
+       <div data-role="content" class="content">
+       	  <div class="fromView-a">
+       	  	<div class='repair'>.</div>
+       		<div class="inputTextView-c">
+       			 <img src="img/Icon/userPass.png" class="adminOldPass loginIcon"  ondragstart="return false;"/>
+           		<input type="password" name="adminOldPass" placeholder="旧密码" data-role="none" id="adminOldPass" onfocus="inputFocusOrInputBlur('.adminOldPass','img/icon/userPassClick.png')" onblur="inputFocusOrInputBlur('.adminOldPass','img/icon/userPass.png')" />
+           </div>
+           
+           <div class="inputTextView-c">
+           		 <img src="img/Icon/newPass.png" class="adminNewPass loginIcon"  ondragstart="return false;"/>
+           		<input type="password" name="adminNewPass" placeholder="新密码" data-role="none" id="adminNewPass" onfocus="inputFocusOrInputBlur('.adminNewPass','img/icon/newPassClick.png')" onblur="inputFocusOrInputBlur('.adminNewPass','img/icon/newPass.png')" />
+           	</div>
+           	
+           <div class="inputTextView-c">
+           		 <img src="img/Icon/newPass.png" class="adminNewPassConfirm loginIcon"  ondragstart="return false;"/>
+           		<input type="password" name="confirmAdminNewPass" placeholder="确认新密码" data-role="none" id="confirmAdminNewPass" onfocus="inputFocusOrInputBlur('.adminNewPassConfirm','img/icon/newPassClick.png')" onblur="inputFocusOrInputBlur('.adminNewPassConfirm','img/icon/newPass.png')" />
+           </div>
+           
+           </div>
+           
+           <div style="height: 10px;"></div>
+           <div class="buttonClass-a"><a href="javascript:void(0)" id="updateAdminPassBtn" data-role="none">保存修改</a></div>
+       </div>
+       </div>
+       
+     <!--搜索客户-->
+    <div data-role="page" id="clientsearch" align="center">
+    <div data-role="header" data-theme="y" data-position="fixed" class='myheader' data-tap-toggle="false">
+	    <div class="navigationLeftBtn">
+	    	<div class="navigationItem"><a href="javascript:void(0)" class="back" data-role="none"><img src="img/public/back.png" ondragstart='return false'></a></div>
+	    </div>
+	    <h3>搜索客户</h3>
+    </div>
+
+    <div data-role="content" class="content" >
+		<div class="search-custoner">	
+		<div class="search-custoner-top">
+		  <div class="w30 aSearchItem" data-optionItem="itemSelected" data-myVal="1">
+		  	<a href="javascript:void(0)" data-role="none"><img src="img/8.png" ondragstart="return false;"><span>按姓名</span></a> 
+		  </div>
+		  <div class="w40 aSearchItem" data-optionItem="item" data-myVal="2">
+		  	<a href="javascript:void(0)" data-role="none"><img src="img/9.png" ondragstart="return false;"><span>按联系方式</span ></a>
+		  </div>
+		   <div class="w30 aSearchItem" data-optionItem="item" data-myVal="3">
+		   	<a href="javascript:void(0)" data-role="none"><img src="img/10.png" ondragstart="return false;"><span>按地址</span></a>
+		   </div>
+		</div>
+		<div class="search-custoner-inp"> 
+		<input type="text" placeholder="请输入联系人姓名" id="custSearch" data-role="none">
+		<div class="w20"><a href="javascript:void(0)" id="aSearchBtn"><img src="img/shou-icon-2.png" ondragstart="return false;"><span>搜索</span></a></div>
+		</div>
+		</div>
+		
+	 	<div>
+	 		<div style="height: 15px;"></div>
+             <div align="left"><div class="center-order"></div></div>
+             <div class="searUserMore">没有更多客户</div>
+       </div>
+	   	<div style="height: 100px;"></div>
+    </div>
+    </div> 
+     
+     <!--企业信息-->
+     <!--=企业简介=-->
+      <div  data-role="page" id="about" align="center">
+        <div data-theme="y" data-role="header" data-position="fixed" class='myheader' data-tap-toggle="false">
+        	<div class="navigationMenuBtn">
+        			<div class="navigationItem"><a href="javascript:void(0)" data-role="none" class="rigthMenu" data-isMenuBtnOpen="false"><img src="img/public/menuBtn.png" ondragstart='return false' class="rigthMenuImg"></a></div>
+        	</div>
+     	  <h3>企业简介</h3>
+      </div>
+      <div class="segmentedView">
+      <div class="segmentedBg">
+      	  <div class="info">
+      	  	<div class="segmenteLeftBtnClick"><a href="javascript:void(0)" data-role="none">企业简介</a></div>
+    	  </div>
+    	  <div class="contact" >
+			<div class="segmenteRightBtnDefault"><a href="javascript:void(0)" id="toContact" data-role="none">联系我们</a></div>
+     	  </div>
+      </div>
+      </div>
+      <div class="scrollerBg">
+      
+      <div data-role="content" class="content" id="contenttext">
+      	<div class="aboutImg"></div>
+      	<code id="codetext"></code>
+      </div>
+      </div>
+      
+    	
+      </div> 
+      
+    <!--=联系我们=-->
+       <div  data-role="page" id="contact" align="center">
+        <div data-theme="y" data-role="header" data-position="fixed" class='myheader'  data-tap-toggle="false">
+        <div class="navigationMenuBtn">
+        		<div class="navigationItem"><a href="javascript:void(0)" data-role="none" class="rigthMenu" data-isMenuBtnOpen="false"><img src="img/public/menuBtn.png" ondragstart='return false' class="rigthMenuImg"></a></div>
+        </div>
+        <h3>联系我们</h3>
+        </div>
+
+      <div class="segmentedView">
+   		 <div class="segmentedBg">
+    	  <div class="info">
+    	  	<div class="segmenteLeftBtnDefault"><a href="javascript:void(0)" id="toAbout" data-role="none">企业简介</a></div>
+    	  </div>
+    	  <div class="contact" >
+    	  	<div class="segmenteRightBtnClick"><a href="javascript:void(0)" data-role="none">联系我们</a></div>
+		  </div>
+		 </div>
+	    </div>
+      <div class="scrollerBg">
+      <div id="contactInfo" align="left"></div>
+      <div data-role="content" class="content" id="contenttexts">
+      </div>
+      </div>
+      </div> 
+     
+     <!--留言板-->
+        <div  data-role="page" id="message" align="center">
+        <div data-theme="y" data-role="header" data-position="fixed" class='myheader' data-tap-toggle="false">
+        <div class="navigationMenuBtn">
+        		<div class="navigationItem"><a href="javascript:void(0)" data-role="none" class="rigthMenu" data-isMenuBtnOpen="false"><img src="img/public/menuBtn.png" ondragstart='return false' class="rigthMenuImg"></a></div>
+        </div>
+     	  <h3>留言板</h3>
+      </div>
+      <div data-role="content" class="content">
+      <div class="allMessageList" align="left"></div>
+      <div class="noMessage">没有更多评论</div>
+      <div style="height: 105px;">
+      </div>
+      </div>
+
+       <div class="message-bot">
+      	<div class="message-bot-inp">
+      		<input type="text" id="messagetext" placeholder="请输入评论..." data-role="none">
+      	</div>
+          <div class="message-bot-but">
+          	<a href="javascript:void(0)" id="addmessagebtn">
+          		<img src="img/messageview/sendMessage.png" ondragstart='return false'>
+          	</a>
+          </div>
+      </div>
+      
+      <div class="alertViewBg"></div>
+      <div class="alertViewBg2">
+      	<div class="alertViewBg3">
+      		<div class="alertView">
+      			<div class="alertTitle">提&nbsp;&nbsp;&nbsp;&nbsp;示</div>
+      			<div class="alertMessage"></div>
+      			<div class="alertBtnView">
+      				<div class="alertBtnCancel" style="width: 50%;"><a href="javascript:void(0)" onclick="closeAlert('#message')"  data-role="none" class="cancelBtn">取&nbsp;&nbsp; 消</a></div>
+      				<div class="alertBtnConfirm" style="width: 50%;"><a href="javascript:void(0)" onclick="confirmEnvent('#message','')" data-role="none" class="confirmBtn">确&nbsp;&nbsp; 定</a></div>
+      			</div>
+      		</div>
+      	</div>
+      </div>
+    
+    </div> 
+      
+      <!--用户注册-->
+      <div  data-role="page" id="register" align="center">
+      	<div data-theme="y" data-role="header" data-position="fixed" class='myheader' data-tap-toggle="false">
+	      	<div class="navigationLeftBtn">
+	       		<div class="navigationItem"><a href="javascript:void(0)" class="back" data-role="none"><img src="img/public/back.png" ondragstart='return false'></a></div>
+	        </div>
+	        <div class="navigationMenuBtn">
+	        		<div class="navigationItem"><a href="javascript:void(0)" data-role="none" class="rigthMenu" data-isMenuBtnOpen="false"><img src="img/public/menuBtn.png" ondragstart='return false' class="rigthMenuImg"></a></div>
+	        </div>
+	        <h3>账户注册</h3>
+        </div>
+
+        <div data-role="content" class="content">
+	       <div class="fromView-a">
+	       		<div class='repair'>.</div>
+	        	<div class="inputTextView-a">
+	        		<img src="img/Icon/phoneNum.png" class="ruserName loginIcon" ondragstart="return false;"/>
+	        		<input type="text" name="raccount" placeholder="手机号码" data-role="none" id="raccount" onfocus="inputFocusOrInputBlur('.raccount','img/icon/phoneNumClick.png')" onblur="inputFocusOrInputBlur('.raccount','img/icon/phoneNum.png')" />
+	        	</div>
+	        	<div class="inputTextView-c">
+	        		<img src="img/Icon/userPass.png" class="ruserPass loginIcon" ondragstart="return false;"/>
+	        		<input type="password" name="rpassword" placeholder="账户密码" data-role="none" id="rpassword" onfocus="inputFocusOrInputBlur('.ruserPass','img/icon/userPassClick.png')" onblur="inputFocusOrInputBlur('.ruserPass','img/icon/userPass.png')" />
+	        	</div>
+	        	<div class="inputTextView-c">
+	        		<img src="img/Icon/userPass.png" class="ruserPassConfirm loginIcon" ondragstart="return false;"/>
+	        		<input type="password" name="rpasswordok" placeholder="确认账户密码" data-role="none" id="rpasswordok" onfocus="inputFocusOrInputBlur('.ruserPassConfirm','img/icon/userPassClick.png')" onblur="inputFocusOrInputBlur('.ruserPassConfirm','img/icon/userPass.png')" />
+	        	</div>
+	           <div class="inputTextView-a">
+	           		<img src="img/Icon/name.png" class="rmame loginIcon" ondragstart="return false;"/>
+	           		<input type="text" name="" placeholder="姓名" data-role="none" id="rname" onfocus="inputFocusOrInputBlur('.rmame','img/icon/nameClick.png')" onblur="inputFocusOrInputBlur('.rmame','img/icon/name.png')" />
+	           </div>
+	           <div class="inputTextView-d">
+	           		<img src="img/Icon/companyName.png" class="rcompanyName loginIcon" ondragstart="return false;"/>
+	           		<input type="text" name="rcompanyName" placeholder="商家名/公司名" data-role="none" id="rcompanyName" onfocus="inputFocusOrInputBlur('.rcompanyName','img/icon/companyNameClick.png')" onblur="inputFocusOrInputBlur('.rcompanyName','img/icon/companyName.png')" />
+	           </div>
+	        </div>
+           <div style="height: 15px;"></div>
+           <div class="buttonClass-a">
+        	<a href="javascript:void(0)" id="sendRegisterBtn" data-role="none">提交注册信息</a>
+        	</div>
+        </div>
+      </div>
+      
+	  <!--客户订单详细信息-->
+      <div data-role="page" id="orderinfo" align="center">
+      	<div data-theme="y" data-role="header" data-position="fixed" class='myheader' data-tap-toggle="false">
+	      	<div class="navigationLeftBtn">
+	      		<div class="navigationItem"><a href="javascript:void(0)" class="back"  data-role="none" ><img src="img/public/back.png" ondragstart='return false'></a></div>
+	        </div>
+	        <h3>客户订单详细信息</h3>
+        </div>
+        <div data-role="content" class="content">
+			<div class="ordercontent" align="left"> </div>
+            <div style="height: 20px"></div>
+      	</div>
+     </div>	
+      	
+
+      <div align="center">
+      <div class="allMessage">
+      <div class="alertViewBg"></div>
+      <div class="alertViewBg2">
+      	<div class="alertViewBg3">
+      	 <div class="alertView">
+      	 <div class="alertTitle">提&nbsp;&nbsp;&nbsp;&nbsp;示</div>
+      	 <div class="alertMessage"></div>
+      	 <div class="alertBtnView">
+      	 <div class="alertBtnConfirm" style="width:100%;"><a href="javascript:void(0)" onclick="confirmEnvent('.allMessage','','')" data-role="none" class="confirmBtn">确&nbsp;&nbsp; 定</a></div>
+      	 </div>
+      	 </div>
+      	</div>
+      </div>
+      </div>
+       
+   	  <div>
+      <div class="myAlertView">
+      	<div class="myAlertMessage"></div>
+      </div>
+      </div>
+      </div>
+    </body>
+	<script src="js/jquery.jscrollpane.min.js"></script>
+	<script src="js/jquery.bookblock.js"></script>
+	<!--<script src="js/page.js"></script>-->
+    <script>
+	    $(window).load(function(){
+	    	ios7navInit();
+            isCom();
+			$.mobile.defaultPageTransition ="none";
+	    });
+	    setTimeout(function(){mapInit();},500);
+
+    </script>
+</html>

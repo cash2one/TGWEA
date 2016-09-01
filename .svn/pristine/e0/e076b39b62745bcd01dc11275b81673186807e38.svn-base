@@ -1,0 +1,861 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+
+<!-- author 刘卿 -->
+<!-- 感谢ibatis的持久层框架 -->
+
+<sqlMap>
+
+	<typeAlias alias="PRODUCT" type="com.etaoguan.wea.vo.Product" />
+	<typeAlias alias="PRODFEATURE" type="com.etaoguan.wea.vo.ProdFeature" />
+	<typeAlias alias="PRODEXTERNAL" type="com.etaoguan.wea.vo.ProdExternal" />
+	<typeAlias alias="PRODIMG" type="com.etaoguan.wea.vo.ProdImg" />
+
+	<resultMap id="product" class="PRODUCT">
+		<result property="prodNum" column="prod_num" />
+		<result property="prodName" column="prod_name" />
+		<result property="ownerNum" column="owner_num" />
+		<result property="prodCatId" column="prod_cat_id" />
+		<result property="posSeq" column="pos_sequence" />
+		<result property="topFlag" column="top_flag" />
+		<result property="newFlag" column="new_flag" />
+		<result property="hotFlag" column="hot_flag" />
+		<result property="showFlag" column="show_flag" />
+		<result property="stdPrice" column="std_price" />
+		<result property="dispStockBalance" column="disp_stock_balance" />
+		<result property="unit" column="unit" />
+		<result property="remark" column="remark" />
+		<result property="firstProdImg" column="first_prodimg" />
+		<result property="externalSysCode" column="external_syscode" />
+		<result property="createDate" column="create_date" />
+		<result property="createBy" column="create_by" />
+		<result property="updateDate" column="update_date" />
+		<result property="updateBy" column="update_by" />
+		<result property="isPublic" column="is_public" />
+	</resultMap>
+	<resultMap id="productwithfea" class="PRODUCT">
+		<result property="prodNum" column="prod_num" />
+		<result property="prodName" column="prod_name" />
+		<result property="ownerNum" column="owner_num" />
+		<result property="prodCatId" column="prod_cat_id" />
+		<result property="posSeq" column="pos_sequence" />
+		<result property="topFlag" column="top_flag" />
+		<result property="newFlag" column="new_flag" />
+		<result property="hotFlag" column="hot_flag" />
+		<result property="showFlag" column="show_flag" />
+		<result property="stdPrice" column="std_price" />
+		<result property="dispStockBalance" column="disp_stock_balance" />
+		<result property="unit" column="unit" />
+		<result property="remark" column="remark" />
+		<result property="firstProdImg" column="first_prodimg" />
+		<result property="externalSysCode" column="external_syscode" />
+		<result property="createDate" column="create_date" />
+		<result property="createBy" column="create_by" />
+		<result property="updateDate" column="update_date" />
+		<result property="updateBy" column="update_by" />
+		<result property="isPublic" column="is_public" />
+		<result property="featureName" column="feature_name" />
+	</resultMap>
+
+	<resultMap id="compProduct" extends="product" class="PRODUCT">
+		<result property="prodExternals" column="prod_num" select="selectProdExternals" />
+	</resultMap>
+
+
+	<resultMap id="prodFeature" class="PRODFEATURE">
+		<result property="prodNum" column="prod_num" />
+		<result property="featureName" column="feature_name" />
+		<result property="featureValue" column="feature_value" />
+	</resultMap>
+
+	<resultMap id="prodImg" class="PRODIMG">
+		<result property="prodNum" column="prod_num" />
+		<result property="imgUrl" column="img_url" />
+		<result property="imgSeq" column="img_sequence" />
+		<result property="thumbUrl" column="thumb_url" />
+		<result property="remark" column="remark" />
+	</resultMap>
+
+	<resultMap id="prodExternal" class="PRODEXTERNAL">
+		<result property="prodNum" column="prod_num" />
+		<result property="externalName" column="external_name" />
+		<result property="externalValue" column="external_value" />
+	</resultMap>
+
+	<!-- 特供产品页数 -->
+	<select id="getProductbyidCount" parameterClass="java.util.HashMap" resultClass="java.lang.Integer">
+		SELECT count(*)
+		FROM wea.product,wea.special_prod_cust_ref
+		WHERE product.prod_num = special_prod_cust_ref.prod_num
+		AND
+		special_prod_cust_ref.cust_num = #custNum#
+
+	</select>
+
+	<!-- 特供产品列表信息 -->
+	<select id="getProductbyidDatSet" parameterClass="java.util.HashMap" resultMap="product">
+
+		SELECT product.prod_num, product.prod_name,
+		product.owner_num,
+		product.prod_cat_id, product.std_price,
+		product.pos_sequence, product.top_flag,
+		product.new_flag,product.hot_flag,
+		product.show_flag,
+		product.disp_stock_balance,
+		product.unit,product.external_syscode,
+		product.first_prodimg,
+		product.remark,
+		product.create_date,
+		product.create_by,
+		product.update_date, product.update_by,
+		product.is_public
+		FROM wea.product,wea.special_prod_cust_ref
+		WHERE
+		product.prod_num = special_prod_cust_ref.prod_num
+		AND
+		special_prod_cust_ref.cust_num = #custNum#
+
+		limit #limit# offset #offset#
+
+	</select>
+
+
+	<select id="getProductCount" parameterClass="java.util.HashMap" resultClass="java.lang.Integer">
+		SELECT
+		count(1)
+		FROM
+		product where owner_num = #ownerNum#
+		<dynamic>
+			<isNotEmpty property="prodName" prepend="and">
+				prod_name like
+				CONCAT('%',#prodName#, '%')
+			</isNotEmpty>
+			<isNotEmpty property="prodCatIds" prepend="and">
+				prod_cat_id IN
+				<iterate property="prodCatIds" open="(" close=")" conjunction=",">
+					#prodCatIds[]#
+				</iterate>
+			</isNotEmpty>
+			<isNotEmpty property="showFlag">
+				<isNotEqual property="showFlag" compareValue="-1" prepend="and">
+					show_flag = #showFlag#
+				</isNotEqual>
+			</isNotEmpty>
+			<isNotEmpty property="newFlag">
+				<isNotEqual property="newFlag" compareValue="-1" prepend="and">
+					new_flag = #newFlag#
+				</isNotEqual>
+			</isNotEmpty>
+			<isNotEmpty property="hotFlag">
+				<isNotEqual property="hotFlag" compareValue="-1" prepend="and">
+					hot_flag = #hotFlag#
+				</isNotEqual>
+			</isNotEmpty>
+			<isNotEmpty property="isPublic">
+				<isNotEqual property="isPublic" compareValue="-1" prepend="and">
+					is_public = #isPublic#
+				</isNotEqual>
+			</isNotEmpty>
+			<isNotEmpty property="productNums" prepend="and">
+				prod_num NOT IN
+				<iterate property="productNums" open="(" close=")" conjunction=",">
+					#productNums[]#
+				</iterate>
+			</isNotEmpty>
+		</dynamic>
+	</select>
+
+
+	<select id="getProductDatSet" parameterClass="java.util.HashMap" resultMap="product">
+
+		SELECT is_public,prod_num,
+		prod_name, owner_num, prod_cat_id, std_price,
+		pos_sequence, top_flag,
+		new_flag, hot_flag, show_flag,
+		disp_stock_balance, unit,
+		external_syscode, first_prodimg, remark,
+		create_date, create_by,
+		update_date, update_by
+		FROM wea.product where product.owner_num =
+		#ownerNum#
+
+		<dynamic>
+			<isNotEmpty property="prodName" prepend="and">
+				prod_name like
+				CONCAT('%',#prodName#, '%')
+			</isNotEmpty>
+			<isNotEmpty property="prodCatIds" prepend="and">
+				prod_cat_id IN
+				<iterate property="prodCatIds" open="(" close=")" conjunction=",">
+					#prodCatIds[]#
+				</iterate>
+			</isNotEmpty>
+			<isNotEmpty property="showFlag">
+				<isNotEqual property="showFlag" compareValue="-1" prepend="and">
+					show_flag = #showFlag#
+				</isNotEqual>
+			</isNotEmpty>
+			<isNotEmpty property="newFlag">
+				<isNotEqual property="newFlag" compareValue="-1" prepend="and">
+					new_flag = #newFlag#
+				</isNotEqual>
+			</isNotEmpty>
+			<isNotEmpty property="hotFlag">
+				<isNotEqual property="hotFlag" compareValue="-1" prepend="and">
+					hot_flag = #hotFlag#
+				</isNotEqual>
+			</isNotEmpty>
+			<isNotEmpty property="isPublic">
+				<isNotEqual property="isPublic" compareValue="-1" prepend="and">
+					is_public = #isPublic#
+				</isNotEqual>
+			</isNotEmpty>
+
+
+			<isNotEmpty property="productNums" prepend="and">
+				prod_num NOT IN
+				<iterate property="productNums" open="(" close=")" conjunction=",">
+					#productNums[]#
+				</iterate>
+			</isNotEmpty>
+
+
+		</dynamic>
+
+		<isNotEmpty property="desc">
+			order by $desc$ desc
+		</isNotEmpty>
+
+		<isNotEmpty property="asc">
+			order by $asc$ asc
+		</isNotEmpty>
+
+		<isNull property="asc">
+			<isNull property="desc">order by top_flag desc,pos_sequence asc,new_flag DESC,hot_flag DESC,update_date DESC
+			</isNull>
+		</isNull>
+
+		limit #limit# offset #offset#
+
+
+	</select>
+
+
+	<select id="getCompProductCount" parameterClass="java.util.HashMap" resultClass="java.lang.Integer">
+		SELECT
+		count(1)
+		FROM
+		product where owner_num = #ownerNum#
+		<dynamic>
+			<isNotEmpty property="prodName" prepend="and">
+				prod_name like
+				CONCAT('%',#prodName#, '%')
+			</isNotEmpty>
+		</dynamic>
+	</select>
+
+
+	<select id="getCompProductDatSet" parameterClass="java.util.HashMap" resultMap="compProduct">
+
+		SELECT
+		product.prod_num,
+		product.prod_name,
+		product.owner_num,
+		product.prod_cat_id,
+		product.std_price,
+		product.pos_sequence,
+		product.top_flag,
+		product.new_flag,
+		product.hot_flag,
+		product.show_flag,
+		product.disp_stock_balance,
+		product.unit,
+		product.external_syscode,
+		product.first_prodimg,
+		product.remark,
+		product.create_date,
+		product.create_by,
+		product.update_date,
+		product.update_by,
+		product.is_public
+		FROM
+		product
+		where owner_num = #ownerNum#
+
+		<dynamic>
+			<isNotEmpty property="prodName" prepend="and">
+				prod_name like
+				CONCAT('%',#prodName#, '%')
+			</isNotEmpty>
+		</dynamic>
+
+		<isNotEmpty property="desc">
+			order by $desc$ desc
+		</isNotEmpty>
+
+		<isNotEmpty property="asc">
+			order by $asc$ asc
+		</isNotEmpty>
+
+		<isNull property="asc">
+			<isNull property="desc">order by top_flag desc,pos_sequence asc
+			</isNull>
+		</isNull>
+
+		limit #limit# offset #offset#
+
+	</select>
+
+	<select id="selectProdExternals" resultMap="prodExternal">
+		SELECT
+		prod_num,
+		external_name,
+		external_value
+		FROM
+		product_external where
+		prod_num =
+		#prod_num#
+	</select>
+
+
+	<insert id="createProduct" parameterClass="PRODUCT">
+		insert into product
+		(
+		prod_num,
+		prod_name,
+		owner_num,
+		prod_cat_id,
+		pos_sequence,
+		top_flag,
+		new_flag,
+		hot_flag,
+		show_flag,
+		std_price,
+		disp_stock_balance,
+		unit,
+		remark,
+		external_syscode,
+		first_prodimg,
+		create_date,
+		create_by,
+		update_date,
+		update_by
+		)
+		values(
+		#prodNum#,
+		#prodName#,
+		#ownerNum#,
+		#prodCatId#,
+		#posSeq#,
+		#topFlag#,
+		#newFlag#,
+		#hotFlag#,
+		1
+
+		<isNotEmpty property="stdPrice" prepend=",">
+			#stdPrice#
+		</isNotEmpty>
+		<isEmpty property="stdPrice" prepend=",">
+			0
+		</isEmpty>
+		<isNotEmpty property="dispStockBalance" prepend=",">
+			#dispStockBalance#
+		</isNotEmpty>
+		<isEmpty property="dispStockBalance" prepend=",">
+			0
+		</isEmpty>
+		<isNotEmpty property="unit" prepend=",">
+			#unit#
+		</isNotEmpty>
+		<isEmpty property="unit" prepend=",">
+			''
+		</isEmpty>
+		<isNotEmpty property="remark" prepend=",">
+			#remark#
+		</isNotEmpty>
+		<isEmpty property="remark" prepend=",">
+			''
+		</isEmpty>
+		,'wea'
+		<isNotEmpty property="firstProdImg" prepend=",">
+			#firstProdImg#
+		</isNotEmpty>
+		<isEmpty property="firstProdImg" prepend=",">
+			''
+		</isEmpty>
+		<isNotEmpty property="createDate" prepend=",">
+			#createDate#
+		</isNotEmpty>
+		<isEmpty property="createDate" prepend=",">
+			now()
+		</isEmpty>
+		<isNotEmpty property="createBy" prepend=",">
+			#createBy#
+		</isNotEmpty>
+		<isEmpty property="createBy" prepend=",">
+			''
+		</isEmpty>
+		<isNotEmpty property="updateDate" prepend=",">
+			#updateDate#
+		</isNotEmpty>
+		<isEmpty property="updateDate" prepend=",">
+			now()
+		</isEmpty>
+		<isNotEmpty property="updateBy" prepend=",">
+			#updateBy#
+		</isNotEmpty>
+		<isEmpty property="updateBy" prepend=",">
+			''
+		</isEmpty>
+
+		)
+
+	</insert>
+
+	<insert id="createProdImg" parameterClass="PRODIMG">
+		insert into product_images
+		(
+		prod_num,
+		img_url,
+		img_sequence,
+		thumb_url,
+		remark
+		)
+		values(
+		#prodNum#,
+		#imgUrl#
+		<isNotEqual property="imgSeq" compareValue="0" prepend=",">
+			#imgSeq#
+		</isNotEqual>
+		<isEqual property="imgSeq" compareValue="0" prepend=",">
+			(SELECT
+			IFNULL(max(img_sequence),1)
+			FROM
+			product_images where prod_num =
+			#prodNum#)
+		</isEqual>
+		<isNotEmpty property="thumbUrl" prepend=",">
+			#thumbUrl#
+		</isNotEmpty>
+		<isEmpty property="thumbUrl" prepend=",">
+			''
+		</isEmpty>
+		<isNotEmpty property="remark" prepend=",">
+			#remark#
+		</isNotEmpty>
+		<isEmpty property="remark" prepend=",">
+			''
+		</isEmpty>
+
+		)
+
+	</insert>
+
+	<delete id="delProdImgByMap" parameterClass="java.util.HashMap">
+		DELETE
+		FROM
+		product_images where prod_num = #prodNum#
+		<isNotEmpty property="imgSeq" prepend="and">
+			img_sequence =
+			#imgSeq#
+		</isNotEmpty>
+
+	</delete>
+
+	<statement id="delProduct" parameterClass="java.util.HashMap">
+		DELETE
+		FROM
+		product
+		where prod_num = #prodNum#;
+		DELETE
+		FROM
+		product_features where prod_num =
+		#prodNum#;
+		DELETE
+		FROM
+		product_images where prod_num =
+		#prodNum#;
+		DELETE
+		FROM
+		product_external where prod_num = #prodNum#;
+
+	</statement>
+
+
+	<select id="getProdImgList" parameterClass="java.util.HashMap" resultMap="prodImg">
+
+		SELECT
+		prod_num,
+		img_url,
+		img_sequence,
+		thumb_url,
+		remark
+		FROM
+		product_images where prod_num = #prodNum#
+		order by img_sequence
+		asc
+
+	</select>
+
+	<select id="getProdImg" parameterClass="java.util.HashMap" resultMap="prodImg">
+
+		SELECT
+		prod_num,
+		img_url,
+		img_sequence,
+		thumb_url,
+		remark
+		FROM
+		product_images where prod_num = #prodNum# and img_sequence =
+		#imgSeq#
+
+	</select>
+
+	<select id="getProdMaxImgSequence" parameterClass="java.util.HashMap" resultClass="java.lang.Integer">
+
+		SELECT
+		IFNULL(max(img_sequence),1)
+		FROM
+		product_images where
+		prod_num =
+		#prodNum#
+
+	</select>
+
+	<select id="getProdMaxPosSeqence" parameterClass="java.util.HashMap" resultClass="java.lang.Integer">
+
+		SELECT
+		IFNULL(max(pos_sequence),1)
+		FROM
+		product where
+		owner_num = #ownerNum#
+
+	</select>
+
+	<update id="updateProdImg" parameterClass="java.util.HashMap">
+		update product_images set
+		<isNotEmpty property="newImgSeq">
+			img_sequence = #newImgSeq#
+		</isNotEmpty>
+		<isEmpty property="newImgSeq">
+			img_sequence = img_sequence
+		</isEmpty>
+		<isNotEmpty property="imgUrl">
+			img_url = #imgUrl#
+		</isNotEmpty>
+		<isNotEmpty property="thumbUrl">
+			thumb_url = #thumbUrl#
+		</isNotEmpty>
+		<isNotEmpty property="remark">
+			remark = #remark#
+		</isNotEmpty>
+		where prod_num = #prodNum# and img_sequence = #imgSeq#
+	</update>
+
+	<update id="updateProductByMap" parameterClass="java.util.HashMap">
+		update product set
+		<isNotEmpty property="prodName">
+			prod_name = #prodName#
+		</isNotEmpty>
+		<isEmpty property="prodName">
+			prod_name = prod_name
+		</isEmpty>
+		<isNotEmpty property="prodCatId" prepend=",">
+			prod_cat_id =
+			#prodCatId#
+		</isNotEmpty>
+		<isNotEmpty property="posSeq" prepend=",">
+			pos_sequence =
+			#posSeq#
+		</isNotEmpty>
+		<isNotEmpty property="topFlag" prepend=",">
+			top_flag = #topFlag#
+		</isNotEmpty>
+		<isNotEmpty property="newFlag" prepend=",">
+			new_flag = #newFlag#
+		</isNotEmpty>
+		<isNotEmpty property="hotFlag" prepend=",">
+			hot_flag = #hotFlag#
+		</isNotEmpty>
+		<isNotEmpty property="showFlag" prepend=",">
+			show_flag =
+			#showFlag#
+		</isNotEmpty>
+		<isNotEmpty property="isPublic" prepend=",">
+			is_public =
+			#isPublic#
+		</isNotEmpty>
+		<isNotEmpty property="stdPrice" prepend=",">
+			std_price =
+			#stdPrice#
+		</isNotEmpty>
+		<isNotEmpty property="dispStockBalance" prepend=",">
+			disp_stock_balance = #dispStockBalance#
+		</isNotEmpty>
+		<isNotEmpty property="unit" prepend=",">
+			unit = #unit#
+		</isNotEmpty>
+		<isNotEmpty property="remark" prepend=",">
+			remark = #remark#
+		</isNotEmpty>
+		<isNotEmpty property="firstProdImg" prepend=",">
+			first_prodimg =
+			#firstProdImg#
+		</isNotEmpty>
+		<isNotEmpty property="updateDate" prepend=",">
+			update_date =
+			#updateDate#
+		</isNotEmpty>
+		<isEmpty property="updateDate" prepend=",">
+			update_date = now()
+		</isEmpty>
+		<isNotEmpty property="updateBy" prepend=",">
+			update_by =
+			#updateBy#
+		</isNotEmpty>
+		<isEmpty property="updateBy" prepend=",">
+			update_by = ''
+		</isEmpty>
+
+		where
+		<isNotEmpty property="prodNum">
+			prod_num=#prodNum#
+		</isNotEmpty>
+		<isNotEmpty property="prodNums">
+			prod_num IN
+			<iterate property="prodNums" open="(" close=")" conjunction=",">
+				#prodNums[]#
+			</iterate>
+		</isNotEmpty>
+
+	</update>
+	<update id="updateProduct" parameterClass="PRODUCT">
+		update product set
+		<isNotEmpty property="prodName">
+			prod_name = #prodName#
+		</isNotEmpty>
+		<isEmpty property="prodName">
+			prod_name = prod_name
+		</isEmpty>
+		<isNotEmpty property="prodCatId" prepend=",">
+			prod_cat_id =
+			#prodCatId#
+		</isNotEmpty>
+		<isNotEmpty property="posSeq" prepend=",">
+			pos_sequence =
+			#posSeq#
+		</isNotEmpty>
+		<isNotEmpty property="topFlag" prepend=",">
+			top_flag = #topFlag#
+		</isNotEmpty>
+		<isNotEmpty property="newFlag" prepend=",">
+			new_flag = #newFlag#
+		</isNotEmpty>
+		<isNotEmpty property="hotFlag" prepend=",">
+			hot_flag = #hotFlag#
+		</isNotEmpty>
+		<isNotEmpty property="showFlag" prepend=",">
+			show_flag =
+			#showFlag#
+		</isNotEmpty>
+		<isNotEmpty property="stdPrice" prepend=",">
+			std_price =
+			#stdPrice#
+		</isNotEmpty>
+		<isNotEmpty property="dispStockBalance" prepend=",">
+			disp_stock_balance = #dispStockBalance#
+		</isNotEmpty>
+		<isNotEmpty property="unit" prepend=",">
+			unit = #unit#
+		</isNotEmpty>
+		<isNotEmpty property="remark" prepend=",">
+			remark = #remark#
+		</isNotEmpty>
+		<isNotEmpty property="firstProdImg" prepend=",">
+			first_prodimg =
+			#firstProdImg#
+		</isNotEmpty>
+		<isNotEmpty property="updateDate" prepend=",">
+			update_date =
+			#updateDate#
+		</isNotEmpty>
+		<isEmpty property="updateDate" prepend=",">
+			update_date = now()
+		</isEmpty>
+		<isNotEmpty property="updateBy" prepend=",">
+			update_by =
+			#updateBy#
+		</isNotEmpty>
+
+		where prod_num=#prodNum#
+
+	</update>
+
+	<select id="getProduct" parameterClass="java.util.HashMap" resultMap="product">
+		SELECT
+		prod_num,
+		prod_name,
+		owner_num,
+		prod_cat_id,
+		std_price,
+		pos_sequence,
+		top_flag,
+		new_flag,
+		hot_flag,
+		show_flag,
+		disp_stock_balance,
+		unit,
+		remark,
+		external_syscode,
+		first_prodimg,
+		create_date,
+		create_by,
+		update_date,
+		update_by,
+		is_public
+		FROM
+		product where prod_num = #prodNum#
+
+	</select>
+
+	<select id="getProducts" parameterClass="java.util.HashMap" resultMap="product">
+
+		SELECT
+		prod_num,
+		prod_name,
+		owner_num,
+		prod_cat_id,
+		std_price,
+		pos_sequence,
+		top_flag,
+		new_flag,
+		hot_flag,
+		show_flag,
+		disp_stock_balance,
+		unit,
+		remark,
+		external_syscode,
+		first_prodimg,
+		create_date,
+		create_by,
+		update_date,
+		update_by,
+		is_public
+		FROM
+		product where 1=1
+		<isNotEmpty property="prodNums" prepend="and">
+			prod_num IN
+			<iterate property="prodNums" open="(" close=")" conjunction=",">
+				#prodNums[]#
+			</iterate>
+		</isNotEmpty>
+		<isNotEmpty property="updateDate" prepend="and">
+			update_date &gt;= #updateDate#
+		</isNotEmpty>
+		<isNotEmpty property="ownerNum" prepend="and">
+			owner_num = #ownerNum#
+		</isNotEmpty>
+	</select>
+
+	<select id="getProdNums" parameterClass="java.util.HashMap" resultClass="java.lang.String">
+
+		SELECT
+		prod_num 
+		FROM
+		product where 1=1
+		<isNotEmpty property="updateDate" prepend="and">
+			update_date &gt;= #updateDate#
+		</isNotEmpty>
+		<isNotEmpty property="ownerNum" prepend="and">
+			owner_num = #ownerNum#
+		</isNotEmpty>
+	</select>
+
+
+	<delete id="delProdFeatureByMap" parameterClass="java.util.HashMap">
+		DELETE
+		FROM
+		product_features where prod_num = #prodNum#
+		<isNotEmpty property="featureName" prepend="and">
+			feature_name =
+			#featureName#
+		</isNotEmpty>
+
+	</delete>
+
+	<select id="getProdFeatureList" parameterClass="java.util.HashMap" resultMap="prodFeature">
+
+		SELECT
+		prod_num,
+		feature_name,
+		feature_value
+		FROM
+		product_features where prod_num
+		= #prodNum#
+
+	</select>
+	<select id="getProdFeature" parameterClass="java.util.HashMap" resultMap="prodFeature">
+
+		SELECT
+		prod_num,
+		feature_name,
+		feature_value
+		FROM
+		product_features where prod_num
+		= #prodNum# and feature_name =
+		#featureName#
+
+	</select>
+
+	<select id="getProdExternalList" parameterClass="java.util.HashMap" resultMap="prodExternal">
+
+		SELECT
+		prod_num,
+		external_name,
+		external_value
+		FROM
+		product_external where
+		prod_num = #prodNum#
+
+	</select>
+
+
+	<select id="getProdExternal" parameterClass="java.util.HashMap" resultMap="prodExternal">
+
+		SELECT
+		prod_num,
+		external_name,
+		external_value
+		FROM
+		product_external where
+		prod_num = #prodNum# and external_name =
+		#externalName#
+
+	</select>
+
+	<insert id="createProdFeature" parameterClass="PRODFEATURE">
+		insert into
+		product_features
+		(
+		prod_num,
+		feature_name,
+		feature_value
+		)
+		values(
+		#prodNum#,
+		#featureName#,
+		#featureValue#
+
+		)
+
+	</insert>
+
+	<update id="updateProdFeature" parameterClass="PRODFEATURE">
+		update
+		product_features set
+		feature_value = #featureValue#
+		where prod_num =
+		#prodNum# and feature_name = #featureName#
+	</update>
+
+</sqlMap>

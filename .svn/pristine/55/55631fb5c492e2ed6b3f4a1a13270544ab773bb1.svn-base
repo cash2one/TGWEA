@@ -1,0 +1,31 @@
+<decorators defaultdir="/decorators">
+    <excludes>
+    	<pattern>/40*.jsp</pattern>
+        <pattern>/*/ajax*.htm*</pattern>
+        <pattern>/scripts/dojo/*</pattern>
+        <pattern>/struts/dojo/*</pattern> 
+        <pattern>/resources/*</pattern>
+        <pattern>/admin/login.htm*</pattern>
+        <pattern>/admin/submitLogin.htm*</pattern>
+        <pattern>/admin/ajax*.*</pattern>
+        <pattern>/ajax*.*</pattern>
+        <pattern>/download.*</pattern>
+        <pattern>/admin/include*.*</pattern>
+        <!-- <pattern>/index.htm*</pattern> -->
+     </excludes>
+    <decorator name="default" page="head_footer.jsp">
+        <pattern>/*</pattern>
+    </decorator>
+    <decorator name="admin" page="admin_head_footer.jsp">
+        <pattern>/admin/*</pattern>
+    </decorator>
+    
+   <decorator name="head_footer" page="head_footer.jsp">
+       <pattern>/privilege/addSignup.htm*</pattern>
+       <pattern>/privilege/saveAddSignup.htm*</pattern>
+       <pattern>/privilege/browseSignupTerms.htm*</pattern>
+  </decorator>
+  
+</decorators>
+
+

@@ -1,0 +1,22 @@
+package com.etaoguan.wea.service.impl;
+
+import org.springframework.stereotype.Service;
+
+import com.etaoguan.wea.service.IAlipayWapPaymentService;
+
+@Service("alipayWapPaymentService")
+public class AlipayWapPaymentService implements IAlipayWapPaymentService {
+
+	@Override
+	public void pay(String orderNum) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void processAlipayWapResp(String notifyData) {
+		// TODO Auto-generated method stub
+		
+	}
+
+}

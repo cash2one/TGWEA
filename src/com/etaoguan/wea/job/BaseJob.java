@@ -1,0 +1,7 @@
+package com.etaoguan.wea.job;
+
+
+public interface BaseJob {
+
+    public void execute();
+}

@@ -1,0 +1,13 @@
+#########################  database ####################################
+database_url = jdbc\:mysql\://202.75.215.135\:6033/wea?useUnicode\=true&allowMultiQueries\=true&characterEncoding\=UTF-8
+database_username =root
+database_password =etaoguanp1,
+logMethod=true
+imgsvraddr=http://localhost
+imageMagickPath=C\:\\Program Files\\ImageMagick-6.8.8-Q16
+
+fileSvrAddr=http://file.zhizhangtong.com
+fileSaveAddr=D\:\\TGFileCahe\\file.zhizhangtong.com\\
+
+1688AppSecretKey=w9MdOpJO9e
+1688ClientId=1009493

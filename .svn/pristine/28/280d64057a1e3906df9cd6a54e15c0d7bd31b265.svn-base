@@ -1,0 +1,1018 @@
+
+var requestClass = {
+   //服务器交互请求
+   asynAjaxRequest: function(type,param,url,method,http,scope,index) {
+       if(type.toLowerCase() === "post"){
+           http({
+               method: "post",
+               url: url,
+               data: param,
+               headers:{'Content-Type': 'application/x-www-form-urlencoded'},
+               transformRequest: function(obj){
+                   var str = [];
+                   for(var p in obj){
+                       str.push(encodeURIComponent(p) + "=" + encodeURIComponent(obj[p]));
+                   }
+                   return str.join("&");
+               }
+           }).success(function (data, status, headers, config) {
+               method(data, index);
+           }).error(function (data, status, headers, config) {
+           });
+       }else if(type.toLowerCase() === "get"){
+           http({
+               method: "get",
+               url:url,
+               params: param
+           }).success(function (data, status, headers, config) {
+               method(data, index);
+           }).error(function (data, status, headers, config) {});
+       }
+   }
+};
+
+var indexConnectClass = {
+    isIndex: false,
+    isIndexMenuOpen :false,
+    indexSwiper:null,
+    //初始化首页电话按钮
+    initPhoneBtn: function(){
+        var param =	{};
+        var eurl = publicParameterObj.parameters.adminUrlHead + publicParameterObj.parameters.getOwnerInfo;
+        var fun = function(data){
+            if(data.status === "S"){
+//                myenvetclass.phonenum = "tel://"+data.respData.phoneNum.replace(/\s/g, "");
+            }else{}
+        };
+        getOrPostRequestObj.ajaxRquest.asynAjaxRequest("post",param,eurl,fun);
+    },
+
+    /** 获取banner条图片类方法**/
+    getIndexBanner: function(scope,http){
+        var param = {};
+        var eurl =  publicParameterObj.parameters.adminUrlHead + publicParameterObj.parameters.getBannerImg;
+        var fun = function(data){
+            if(data.status === "S"){
+                scope.bannerInit_CallBack(data);
+            }
+        };
+        getOrPostRequestObj.ajaxRquest.asynAjaxRequest("post",param,eurl,fun,http,scope);
+    },
+
+    /** 获取新产品内容类方法**/
+    getIndexNewProduct: function(scope,http){
+        var param = {
+            "prodSearch.prodName":"",
+            "prodSearch.newFlag":1,
+            "mpagingRequest.perPageUnitNum":8,
+            "mpagingRequest.currentPage":1
+        };
+        var eurl = publicParameterObj.parameters.userUrlHead + publicParameterObj.parameters.userGetProductList;
+        var fun = function(data){
+            if(data.status === "S"){
+                scope.newProInit_CallBack(data);
+            }
+        };
+        getOrPostRequestObj.ajaxRquest.asynAjaxRequest("post",param,eurl,fun,http,scope);
+
+    },
+
+    //首页全部产品摘要
+    indexAllProBreviary: function(scope,http){
+        var param = {
+            "prodSearch.prodName":"",
+            "prodSearch.newFlag":-1,
+            "prodSearch.hotFlag":-1,
+            "mpagingRequest.perPageUnitNum":9,
+            "mpagingRequest.currentPage":1
+        };
+        var eurl = publicParameterObj.parameters.userUrlHead + publicParameterObj.parameters.userGetProductList;
+        var fun = function(data){
+            if(data.status === "S"){
+                scope.proInit_CallBack(data);
+            }
+        };
+        getOrPostRequestObj.ajaxRquest.asynAjaxRequest("post",param,eurl,fun,http,scope);
+    }
+};
+
+/*登陆类*/
+var userAndAdminLoginClass = {
+    userLoginState:false,
+    isToShoppingCar: false,
+
+    adminLoginState:false,
+    reLogin:true,
+    isLoginToIndex:false,
+    isUserOrAdminBack:false,
+    isRegister:false,
+
+    //判断是否用户登陆
+    isUserLogin:function(scope,http){
+        var param = {};
+        var eurl = publicParameterObj.parameters.userUrlHead + publicParameterObj.parameters.getIsLogin;
+        var fun =  function(data){
+            if(data.status === "S"){
+                scope.isLogin_CallBack(true);
+            }else{
+                scope.isLogin_CallBack(false);
+            }
+        };
+        getOrPostRequestObj.ajaxRquest.asynAjaxRequest("post",param,eurl,fun,http,scope);
+    },
+
+    //用户登陆
+    userLogin: function(scope,http,username,userpass){
+        var param = {
+            custName: username,
+            custPwd: userpass
+        };
+        var eurl =  publicParameterObj.parameters.userUrlHead + publicParameterObj.parameters.userLogin;
+        var fun = function(data) {
+            if (data.status === "S") {
+                scope.userLoginDone_CallBack(username);
+            } else {
+                scope.showAlert("提 示",data.message);
+            }
+        };
+        getOrPostRequestObj.ajaxRquest.asynAjaxRequest("post",param,eurl,fun,http,scope);
+    },
+
+    testSetJushTagNalias: function(scope,http) {
+
+        var param = {};
+        var eurl = publicParameterObj.parameters.userUrlHead + publicParameterObj.parameters.userGetAliasNTags;
+        var fun = function(data) {
+            if (data.status === "S") {
+                try {
+                    cordova.exec(pluginAlert, pluginAlert, "JpushClient", "setJpushAliasAndTags", [data.respData.alias, data.respData.tags]);
+                } catch(err) {}
+            } else {}
+        };
+        getOrPostRequestObj.ajaxRquest.asynAjaxRequest("post",param,eurl,fun,http,scope);
+    },
+
+    //用户登出
+    userLoginOut: function(scope,http){
+        var param = {};
+        var eurl = publicParameterObj.parameters.userUrlHead + publicParameterObj.parameters.loginOut;
+        var fun = function(data){
+            if(data.status === "S"){
+                  window.history.back();
+            }else{
+                scope.showAlert('提 示',"注销失败!");
+            }
+        };
+        getOrPostRequestObj.ajaxRquest.asynAjaxRequest("post",param,eurl,fun,http,scope);
+    },
+
+    //用户修改密码
+    userModifyPass: function(scope,http,oldpass,newpass){
+            var param = {
+                oldPwd:oldpass,
+                newPwd:newpass
+            };
+            var eurl = publicParameterObj.parameters.userUrlHead + publicParameterObj.parameters.userUpdatePwd;
+            var fun = function(data){
+                if(data.status === "S"){
+                    scope.modifyPassDone_CallBakc();
+                }else{
+                    if(data.message === "您还没有登录"){
+                        scope.userLogin.show();
+                        scope.showiBack();
+                        scope.clearData();
+                    }else{
+                        scope.showAlert('提 示',data.message);
+                    }
+                }
+            };
+            getOrPostRequestObj.ajaxRquest.asynAjaxRequest("post",param,eurl,fun,http,scope);
+    },
+
+    //判断管理是否登陆
+    isAdminLogin: function(scope,http){
+        var param = {};
+        var eurl = publicParameterObj.parameters.adminUrlHead + publicParameterObj.parameters.getIsLogin;
+        var fun = function(data){
+            if(data.status === "S"){
+                scope.isaLogin_CallBack(true);
+            }else{
+                scope.isaLogin_CallBack(false);
+            }
+        };
+        getOrPostRequestObj.ajaxRquest.asynAjaxRequest("post",param,eurl,fun,http,scope);
+    },
+
+    //管理员登陆
+    adminLogin: function(scope,http){
+        var param = {
+            adminName:scope.alogin.adminName,
+            adminPwd:scope.alogin.adminPass
+        };
+        var eurl = publicParameterObj.parameters.adminUrlHead + publicParameterObj.parameters.adminLogin;
+        var fun = function(data){
+            if(data.status == "S" ){
+                scope.adminLoginDone_CallBack();
+            }
+            else{
+                scope.showAlert('提 示',data.message);
+            }
+        };
+        getOrPostRequestObj.ajaxRquest.asynAjaxRequest("post",param,eurl,fun,http,scope);
+    },
+
+    //管理员登出
+    adminLoginOut: function(scope,http){
+        var param = {};
+        var eurl = publicParameterObj.parameters.adminUrlHead + publicParameterObj.parameters.loginOut;
+        var fun = function(data){
+            if(data.status === "S"){
+                window.history.back();
+            }else{
+                scope.showAlert('提 示',"注销失败!");
+            }
+        };
+        getOrPostRequestObj.ajaxRquest.asynAjaxRequest("post",param,eurl,fun,http,scope);
+    },
+
+    //管理员修改密码
+    isAdminLegality: function(scope,http,oldpass,newpass){
+
+            var param = {
+                oldPwd:oldpass,
+                newPwd:newpass
+            };
+            var eurl = publicParameterObj.parameters.adminUrlHead + publicParameterObj.parameters.adminUpdatePwd;
+            var fun = function(data){
+                if(data.status === "S"){
+                    scope.amodifyPassDone_CallBack();
+                }else{
+                    if(data.message === "您还没有登录"){
+                        scope.adminLogin.show();
+     
+                        scope.clearData();
+                    }else{
+                        scope.showAlert('提 示',data.message);
+                    }
+                }
+            };
+            getOrPostRequestObj.ajaxRquest.asynAjaxRequest("post",param,eurl,fun,http,scope);
+    }
+};
+
+/*类名:用户注册类*/
+var registClass = {
+    //用户注册
+    userRegist: function(scope,http) {
+            var param = {
+                custName: scope.register.rPhone
+            };
+            var eurl = publicParameterObj.parameters.userUrlHead + publicParameterObj.parameters.userExistCustname;
+            var fun = function(data) {
+                if (data.status === "S") {
+                    if (data.respData === false) {
+                        var param = {
+                            "customer.custName": scope.register.rPhone,
+                            "customer.password": scope.register.rPass,
+                            "customer.contactPerson": scope.register.rName,
+                            "customer.phoneNum": scope.register.rPhone,
+                            "customer.companyName": scope.register.rCompany
+                        };
+                        var eurl = publicParameterObj.parameters.userUrlHead + publicParameterObj.parameters.userReg;
+                        var fun = function (data) {
+                            if (data.status === "S") {
+                                scope.registerDone_CallBack(scope.register.rPhone, scope.register.rPass);
+                            } else {
+                                scope.showAlert('提 示', data.message);
+                            }
+                        };
+                        getOrPostRequestObj.ajaxRquest.asynAjaxRequest("post", param, eurl, fun, http, scope);
+                    }else {
+                    scope.showAlert('提 示', "该手机号码已存在!");
+                    }
+                }
+
+            };
+            getOrPostRequestObj.ajaxRquest.asynAjaxRequest("post",param,eurl,fun,http,scope);
+    },
+
+    userLoginInfo: function(scope,http){
+        var param = {};
+        var eurl = publicParameterObj.parameters.userUrlHead + publicParameterObj.parameters.userGetCust;
+        var fun = function(data) {
+            if (data.status === "S") {
+                  scope.infoInit_CallBack(data);
+            } else {
+                if(data.message === "您还没有登录"){
+                    scope.userLogin.show();
+                    scope.showiBack();
+                }else{
+                    scope.showAlert('提 示',"服务器繁忙!");
+                }
+            }
+        };
+        getOrPostRequestObj.ajaxRquest.asynAjaxRequest("post",param,eurl,fun,http,scope);
+    },
+
+    //获取用户注册信息
+    userGetInfo: function(scope,http) {
+        var param = {};
+        var eurl = publicParameterObj.parameters.userUrlHead + publicParameterObj.parameters.userGetCust;
+        var fun = function(data) {
+            if (data.status === "S") {
+                  scope.userInfoInit_CallBack(data);
+            } else {
+                if(data.message === "您还没有登录"){
+                    scope.userLogin.show();
+                    scope.showiBack();
+                }else{
+                    scope.showAlert('提 示',"服务器繁忙!");
+                }
+            }
+        };
+        getOrPostRequestObj.ajaxRquest.asynAjaxRequest("post",param,eurl,fun,http,scope);
+    },
+
+    //用户信息
+    userUpdateInfo: function(scope,http) {
+            var param = {
+                "customer.companyName": scope.modify.userCompany,
+                "customer.contactPerson": scope.modify.userName,
+                "customer.phoneNum": scope.modify.userPhone,
+                "customer.address": scope.modify.userAddress
+            };
+            var eurl = publicParameterObj.parameters.userUrlHead + publicParameterObj.parameters.userUpdateCust;
+            var fun = function(data) {
+                if (data.status === "S"){
+                    scope.updateUserInfoDone_CallBack();
+                } else {
+                    if(data.message === "您还没有登录"){
+                        scope.userLogin.show();
+                        scope.showiBack();
+                    }else{
+                        scope.showAlert('提 示',data.message);
+                    }
+                }
+            };
+        getOrPostRequestObj.ajaxRquest.asynAjaxRequest("post",param,eurl,fun,http,scope);
+    }
+};
+
+//产品详细信息类
+var detailedConnectClass = {
+    getDetailed: function(index,scope,http){
+        var param = {
+            prodNum:index
+        };
+        var eurl = publicParameterObj.parameters.userUrlHead + publicParameterObj.parameters.userGetProductInfo;
+        var fun =  function(data){
+            if(data.status === "S"){
+                scope.detailedInit_CallBack(data);
+            }else{
+                scope.showAlert("提 示","服务器繁忙!");
+            }
+        };
+        getOrPostRequestObj.ajaxRquest.asynAjaxRequest("post",param,eurl,fun,http,scope);
+    },
+
+    //是否强制购买
+    isCom: function(scope,http) {
+    var eurl = publicParameterObj.parameters.adminUrlHead + publicParameterObj.parameters.getSetting;
+    var param = {};
+    var fun = function(data) {
+            if (data.status === "S" && data.respData === true) {
+                publicParameterObj.parameters.isComShopping = true;
+            }
+        };
+        getOrPostRequestObj.ajaxRquest.asynAjaxRequest("post",param,eurl,fun,http,scope);
+    }
+};
+
+//产品展示类
+var productClass = {
+    // 获取产品内容
+    getProduct: function(scope ,http) {
+        var param = {
+            "prodSearch.prodName": "",
+            "prodSearch.newFlag": -1,
+            "prodSearch.hotFlag": -1,
+            "mpagingRequest.perPageUnitNum": 10,
+            "mpagingRequest.currentPage":1
+        };
+        var eurl = publicParameterObj.parameters.userUrlHead + publicParameterObj.parameters.userGetProductList;
+        var fun = function(data) {
+            if (data.status === "S") {
+                scope.productInit_CallBack(data);
+            }
+        };
+        getOrPostRequestObj.ajaxRquest.asynAjaxRequest("post",param,eurl,fun,http,scope);
+    },
+
+    //获取更多产品内容
+    getProductMore: function(scope,http){
+        var param = {
+            "prodSearch.prodName": "",
+            "prodSearch.newFlag": -1,
+            "prodSearch.hotFlag": -1,
+            "mpagingRequest.perPageUnitNum": 10,
+            "mpagingRequest.currentPage": publicParameterObj.parameters.loadingPage
+        };
+        var eurl = publicParameterObj.parameters.userUrlHead + publicParameterObj.parameters.userGetProductList;
+        var fun = function(data){
+            if(data.status === "S") {
+                scope.productLoadMore_CallBack(data);
+            }
+        };
+        getOrPostRequestObj.ajaxRquest.asynAjaxRequest("post",param,eurl,fun,http,scope);
+    }
+};
+
+//用户搜索产品类
+var proSearchClass = {
+    proMenuIconLayout: function(scope,http) {
+        var param = {};
+        var eurl = publicParameterObj.parameters.userUrlHead + publicParameterObj.parameters.userGetProCats;
+        var fun = function(data) {
+            if (data.status === "S") {
+                scope.categoryInit_CallBack(data);
+            }
+        };
+        getOrPostRequestObj.ajaxRquest.asynAjaxRequest("post",param,eurl,fun,http,scope);
+    },
+
+    //用户搜索产品
+    userSearchPro: function(proName, proCategoryId,scope,http) {
+        getOrPostRequestObj.adminClientSearchConnect.searchKey = proName;
+        var param = {
+            "prodSearch.prodName": getOrPostRequestObj.adminClientSearchConnect.searchKey,
+            "prodSearch.prodCatId": proCategoryId,
+            "prodSearch.newFlag": -1,
+            "prodSearch.hotFlag": -1,
+            "mpagingRequest.perPageUnitNum": 9,
+            "mpagingRequest.currentPage": 1
+        };
+        var eurl = publicParameterObj.parameters.userUrlHead + publicParameterObj.parameters.userGetProductList;
+        var fun = function(data) {
+            if (data.status === "S") {
+                scope.showSearchResInit_CallBack(data);
+            }
+        };
+        getOrPostRequestObj.ajaxRquest.asynAjaxRequest("get",param,eurl,fun,http,scope);
+    },
+
+    userSearchMore: function(proName,proCategoryId,scope,http){
+        getOrPostRequestObj.adminClientSearchConnect.searchKey = proName;
+        var param = {
+            "prodSearch.prodName": getOrPostRequestObj.adminClientSearchConnect.searchKey,
+            "prodSearch.prodCatId": proCategoryId,
+            "prodSearch.newFlag": -1,
+            "prodSearch.hotFlag": -1,
+            "mpagingRequest.perPageUnitNum": 9,
+            "mpagingRequest.currentPage": publicParameterObj.parameters.loadingPage
+        };
+        var eurl = publicParameterObj.parameters.userUrlHead + publicParameterObj.parameters.userGetProductList;
+        var fun = function(data) {
+            if (data.status === "S") {
+                scope.searchResLoadMore_CallBack(data);
+            }else{
+                scope.showAlert("tishi",data.message);
+            }
+        };
+        getOrPostRequestObj.ajaxRquest.asynAjaxRequest("get",param,eurl,fun,http,scope);
+    }
+};
+
+//留言板类
+var messageClass = {
+    //显示留言板
+    getMessage: function(scope,http) {
+        var param = {
+            "guestBookSearch.createDateFrom": "",
+            "mpagingRequest.perPageUnitNum": 14,
+            "mpagingRequest.currentPage": 1
+        };
+        var eurl = publicParameterObj.parameters.userUrlHead + publicParameterObj.parameters.userGetGuestBooks;
+        var fun = function(data) {
+            if (data.status === "S") {
+                scope.messageInit_CallBack(data);
+            }
+        };
+        getOrPostRequestObj.ajaxRquest.asynAjaxRequest("post",param,eurl,fun,http,scope);
+    },
+
+    messageLoadMore: function(scope,http){
+        var param = {
+            "guestBookSearch.createDateFrom": "",
+            "mpagingRequest.perPageUnitNum": 14,
+            "mpagingRequest.currentPage": publicParameterObj.parameters.loadingPage
+        };
+        var eurl = publicParameterObj.parameters.userUrlHead + publicParameterObj.parameters.userGetGuestBooks;
+        var fun = function(data){
+            if(data.status === "S"){
+                scope.messageLoadMore_CallBack(data);
+            }
+        };
+        getOrPostRequestObj.ajaxRquest.asynAjaxRequest("post",param,eurl,fun,http,scope);
+    },
+
+    //发表留言
+    sendMessage: function(scope,http) {
+        var param = {
+            "guestBook.content": scope.iMeassage
+        };
+        var eurl = publicParameterObj.parameters.userUrlHead + publicParameterObj.parameters.userAddGuestBook;
+        var fun = function(data) {
+            if(data.status === "S") {
+                  scope.sendMessageDone_CallBack();
+            } else {
+                scope.showAlert("提 示","发表留言失败!");
+            }
+        };
+        getOrPostRequestObj.ajaxRquest.asynAjaxRequest("post",param,eurl,fun,http,scope);
+    }
+};
+
+/*类名:企业信息类*/
+var OwnerInfoClass = {
+    lati:0,
+    longi:0,
+    getEnterpriseInfo: function() {},
+
+    getAboutInfo: function(scope,http) {
+        var param = {};
+        var eurl = publicParameterObj.parameters.adminUrlHead + publicParameterObj.parameters.getOwnerInfo;
+        var fun = function (data) {
+            if (data.status === "S") {
+                scope.aboutInit_CallBack(data);
+            }
+        };
+        getOrPostRequestObj.ajaxRquest.asynAjaxRequest("post", param, eurl, fun, http, scope);
+    },
+
+
+    getContactInfo: function(scope,http) {
+        var param = {};
+        var eurl = publicParameterObj.parameters.adminUrlHead + publicParameterObj.parameters.getOwnerInfo;
+        var fun = function(data) {
+            if (data.status === "S") {
+                scope.contactInit_CallBack(data);
+            }
+        };
+        getOrPostRequestObj.ajaxRquest.asynAjaxRequest("post", param, eurl, fun, http, scope);
+    }
+};
+
+//购物车类
+var shoppingCarClass = {
+    getShoppingInfo: function(scope,http) {
+                var param = {
+                    prodNum: scope.iProNum
+                };
+                var eurl = publicParameterObj.parameters.userUrlHead + publicParameterObj.parameters.userGetProductInfo;
+                var fun = function(data,index) {
+                    if (data.status === "S") {
+                          scope.shoppingCarInit_CallBack(data,index);
+                    } else {
+                        if(data.message === "您还没有登录"){
+                            scope.userLogin.show();
+                            scope.showiBack();
+                        }
+                    }
+                };
+                getOrPostRequestObj.ajaxRquest.asynAjaxRequest("post", param, eurl, fun, http, scope, scope.proIndex);
+    },
+
+    //提交购物车
+    sendOrder: function(scope,http) {
+        var param = {
+            prodQtys: scope.sendjson
+        };
+        var eurl = publicParameterObj.parameters.userUrlHead + publicParameterObj.parameters.userAddOrder;
+        var fun = function(data) {
+            if(data.status === "S"){
+                scope.sendOrder_CallBack();
+            }else{
+                if(data.message === "您还没有登录"){
+                    scope.userLogin.show();
+                    scope.showiBack();
+                }else{
+                    scope.showAlert('提 示',"提交订单失败!");
+                }
+            }
+        };
+        getOrPostRequestObj.ajaxRquest.asynAjaxRequest("post", param, eurl, fun, http, scope);
+    }
+};
+
+//商品特供类
+var superProClass = {
+    //商品特供
+    superProList: function(scope,http) {
+        var param = {
+            "prodSearch.prodName": "",
+            "prodSearch.newFlag": -1,
+            "prodSearch.hotFlag": -1,
+            "mpagingRequest.perPageUnitNum": 14,
+            "mpagingRequest.currentPage": 1
+        };
+        var eurl = publicParameterObj.parameters.userUrlHead + publicParameterObj.parameters.userGetSuperPro;
+        var fun = function(data) {
+            if (data.status === "S") {
+                scope.superInit_CallBack(data);
+            } else {
+                if(data.message === "您还没有登录"){
+                    scope.userLogin.show();
+                    scope.showiBack();
+                }
+            }
+        };
+        getOrPostRequestObj.ajaxRquest.asynAjaxRequest("post", param, eurl, fun, http, scope);
+    },
+
+    //特供产品加载更多
+    superProListLoadMore: function(scope,http){
+        var param = {
+            "prodSearch.prodName": "",
+            "prodSearch.newFlag": -1,
+            "prodSearch.hotFlag": -1,
+            "mpagingRequest.perPageUnitNum": 14,
+            "mpagingRequest.currentPage": publicParameterObj.parameters.loadingPage
+        };
+        var eurl = publicParameterObj.parameters.userUrlHead + publicParameterObj.parameters.userGetSuperPro;
+        var fun = function(data){
+            if(data.status === "S"){
+                scope.superLoadMore_CallBack(data);
+            }else{
+                if(data.message === "您还没有登录") {
+                    scope.userLogin.show();
+                    scope.showiBack();
+                }
+            }
+        };
+        getOrPostRequestObj.ajaxRquest.asynAjaxRequest("post", param, eurl, fun, http, scope);
+
+    }
+};
+
+//待审核订单类
+var userWaitingAuditClass = {
+
+    //待审核订单列表
+    userShowWaitingList: function(scope,http) {
+        var param = {
+            "orderSearch.custNum": "",
+            "mpagingRequest.perPageUnitNum": 9,
+            "mpagingRequest.currentPage": 1
+        };
+        var eurl = publicParameterObj.parameters.userUrlHead + publicParameterObj.parameters.userWaitingOrderList;
+        var fun = function(data) {
+            if (data.status === "S") {
+                 scope.waOrderInit_CallBack(data);
+            } else {
+                if(data.message === "您还没有登录"){
+                    scope.userLogin.show();
+                    scope.showiBack();
+                }
+            }
+        };
+        getOrPostRequestObj.ajaxRquest.asynAjaxRequest("post", param, eurl, fun, http, scope);
+    },
+
+    //待审核订单加载更多
+    userWaitingListLoadMore: function(scope,http){
+        var param = {
+            "orderSearch.custNum": "",
+            "mpagingRequest.perPageUnitNum": 9,
+            "mpagingRequest.currentPage": publicParameterObj.parameters.loadingPage
+        };
+        var eurl = publicParameterObj.parameters.userUrlHead + publicParameterObj.parameters.userWaitingOrderList;
+        var fun = function(data){
+           if(data.status === "S"){
+                scope.waOrderLoadMore_CallBack(data);
+           }else{
+               if(data.message === "你还没有登录"){
+                   scope.userLogin.show();
+                   scope.showiBack();
+               }
+           }
+        };
+        getOrPostRequestObj.ajaxRquest.asynAjaxRequest("post", param, eurl, fun, http, scope);
+    }
+};
+
+//已下订单类
+var myOrderClass = {
+    //客户查看订单列表
+    userShowOrderList: function(scope,http) {
+        var param = {
+            "orderSearch.custNum": "",
+            "mpagingRequest.perPageUnitNum": 9,
+            "mpagingRequest.currentPage": 1
+        };
+        var eurl = publicParameterObj.parameters.userUrlHead + publicParameterObj.parameters.userGetOrderList;
+        var fun = function(data) {
+            if (data.status === "S") {
+                scope.myOrderInit_CallBack(data);
+            } else {
+                if(data.message === "您还没有登录"){
+                    scope.userLogin.show();
+                    scope.showiBack();
+                }
+            }
+        };
+        getOrPostRequestObj.ajaxRquest.asynAjaxRequest("post", param, eurl, fun, http, scope);
+    },
+
+    //客户订单加载更多
+    userMyOrderLoadMore: function(scope,http){
+        var param = {
+            "orderSearch.custNum": "",
+            "mpagingRequest.perPageUnitNum": 9,
+            "mpagingRequest.currentPage": publicParameterObj.parameters.loadingPage
+        };
+        var eurl = publicParameterObj.parameters.userUrlHead + publicParameterObj.parameters.userGetOrderList;
+        var fun = function(data){
+            if(data.status === "S"){
+                scope.myOrderLoadMore_CallBack(data);
+            }else{
+                if(data.message === "您还没有登录"){
+                    scope.userLogin.show();
+                    scope.showiBack();
+                }
+            }
+        };
+        getOrPostRequestObj.ajaxRquest.asynAjaxRequest("post", param, eurl, fun, http, scope);
+    }
+};
+
+//管理员信息
+var adminInfoClass = {
+   getAdminInfo : function(scope,http){
+       var param = {};
+       var eurl = publicParameterObj.parameters.adminUrlHead + publicParameterObj.parameters.adminInfo;
+       var fun = function(data){
+           if (data.status === "S") {
+               scope.adminInfo_CallBack(data);
+           } else {
+               if(data.message === "您还没有登录"){
+                   scope.adminLogin.show();
+               }
+           }
+       };
+       getOrPostRequestObj.ajaxRquest.asynAjaxRequest("post", param, eurl, fun, http, scope);
+   }
+};
+
+//管理员订单类
+var adminSelectOrderClass = {
+    aUserCompany: "",
+    aUserPhoneNum: "",
+
+    //管理员查看订单列表
+    adminShowOrderList: function(scope,http) {
+        var param = {
+            "orderSearch.custNum": scope.iCustNum,
+            "orderSearch.custCompanyName": getOrPostRequestObj.adminSelectOrderConnect.aUserCompany,
+            "orderSearch.phoneNum": getOrPostRequestObj.adminSelectOrderConnect.aUserPhoneNum,
+            "mpagingRequest.perPageUnitNum": 9,
+            "mpagingRequest.currentPage": 1,
+            "orderSearch.deliverStatus": -1,
+            "orderSearch.cashStatus": -1,
+            "orderSearch.settleStatus": -1
+        };
+
+        var eurl = publicParameterObj.parameters.adminUrlHead + publicParameterObj.parameters.adminGetOrderList;
+        var fun = function(data) {
+            if (data.status === "S") {
+                scope.adminOrderInit_CallBack(data);
+            } else {
+                if(data.message === "您还没有登录"){
+                    scope.adminLogin.show();
+ 
+                }
+            }
+        };
+        getOrPostRequestObj.ajaxRquest.asynAjaxRequest("post", param, eurl, fun, http, scope);
+    },
+
+    //管理员查看订单加载更多
+    adminSelOrderLoadMore: function(scope,http){
+        var param = {
+            "orderSearch.custNum": scope.iCustNum,
+            "orderSearch.custCompanyName": getOrPostRequestObj.adminSelectOrderConnect.aUserCompany,
+            "orderSearch.phoneNum": getOrPostRequestObj.adminSelectOrderConnect.aUserPhoneNum,
+            "mpagingRequest.perPageUnitNum": 9,
+            "mpagingRequest.currentPage": publicParameterObj.parameters.loadingPage,
+            "orderSearch.deliverStatus": -1,
+            "orderSearch.cashStatus": -1,
+            "orderSearch.settleStatus": -1
+        };
+        var eurl = publicParameterObj.parameters.adminUrlHead + publicParameterObj.parameters.adminGetOrderList;
+        var fun = function(data){
+            if(data.status === "S"){
+                scope.adminOrderLoadMore_CallBack(data);
+            }else{
+               if(data.message === "您还没有登录"){
+                   scope.adminLogin.show();
+
+               }
+            }
+        };
+        getOrPostRequestObj.ajaxRquest.asynAjaxRequest("post", param, eurl, fun, http, scope);
+    },
+
+    //管理员查看订单详细信息
+    adminGetOrderInfo: function(scope,http) {
+        var param = {
+            orderNum: scope.iOrderId
+        };
+        var eurl = publicParameterObj.parameters.adminUrlHead + publicParameterObj.parameters.adminGetOrderInfo;
+        var fun = function(data) {
+            if (data.status === "S") {
+                scope.aOrderInfoInit_CallBack(data.respData.order);
+            } else {
+                if(data.message === "您还没有登录"){
+                    scope.adminLogin.show();
+ 
+                }
+            }
+        };
+        getOrPostRequestObj.ajaxRquest.asynAjaxRequest("post", param, eurl, fun, http, scope);
+    }
+};
+
+var adminProManageClass = {
+    pageNum: 0,
+    aNameKey: "",
+
+    //获取产品列表
+    adminGetProList: function(scope,http) {
+        var param = {
+            "prodSearch.prodName": scope.aProManage.searchVal,
+            "prodSearch.isPublic": -1,
+            "mpagingRequest.perPageUnitNum": 9,
+            "mpagingRequest.currentPage": 1
+        };
+        var eurl = publicParameterObj.parameters.adminUrlHead + publicParameterObj.parameters.userGetProductList;
+        var fun = function(data) {
+            if (data.status === "S") {
+                  scope.adminProManageInit_CallBack(data);
+            } else {
+                if(data.message === "您还没有登录"){
+                    scope.adminLogin.show();
+ 
+                }
+            }
+        };
+        getOrPostRequestObj.ajaxRquest.asynAjaxRequest("post", param, eurl, fun, http, scope);
+    },
+
+    //管理员获取更多产品
+    adminProListLoadMore: function(scope,http){
+        var param = {
+            "prodSearch.prodName": scope.aProManage.searchVal,
+            "prodSearch.isPublic": -1,
+            "mpagingRequest.perPageUnitNum": 9,
+            "mpagingRequest.currentPage":publicParameterObj.parameters.loadingPage
+        };
+        var eurl = publicParameterObj.parameters.adminUrlHead + publicParameterObj.parameters.userGetProductList;
+        var fun = function(data){
+            if(data.status === "S"){
+                scope.adminProManageLoadMore_CallBack(data);
+            }else{
+                if(data.message === "你还没有登录"){
+                    scope.adminLogin.show();
+ 
+                }
+            }
+        };
+        getOrPostRequestObj.ajaxRquest.asynAjaxRequest("post", param, eurl, fun, http, scope);
+    },
+
+    updatePrice: function(scope, http) {
+            var param = {
+                "prodPrice.prodNum": scope.iProId,
+                "prodPrice.prodPrice": scope.iProVlaue
+            };
+            var eurl = publicParameterObj.parameters.adminUrlHead + publicParameterObj.parameters.adminUpadtePrice;
+            var fun = function(data) {
+                if (data.status === "S") {
+                    scope.showAlert('提 示',"更新成功!");
+                    scope.updatePriceDone_CallBack();
+                } else {
+                    if(data.message === "您还没有登录"){
+                        scope.adminLogin.show();
+     
+                    }else{
+                        scope.showAlert('提 示',"价格更新失败!");
+                    }
+                }
+            };
+            getOrPostRequestObj.ajaxRquest.asynAjaxRequest("post", param, eurl, fun, http, scope);
+    },
+
+    updateNum: function(scope,http) {
+            var param = {
+                "product.prodNum": scope.iProId,
+                "product.dispStockBalance": scope.iProVlaue
+            };
+            var eurl = publicParameterObj.parameters.adminUrlHead + publicParameterObj.parameters.adminUpdateStockBalance;
+            var fun = function(data) {
+                if (data.status === "S") {
+                      scope.showAlert('提 示',"更新成功!");
+                      scope.updateNumDone_CallBack();
+
+                } else {
+                    if(data.message === "您还没有登录"){
+                        scope.adminLogin.show();
+     
+                    }else{
+                        scope.showAlert('提 示',"数量更新失败!");
+                    }
+                }
+            };
+            getOrPostRequestObj.ajaxRquest.asynAjaxRequest("post", param, eurl, fun, http, scope);
+        }
+};
+
+var adminClientSearchClass = {
+    isSuccess: false,
+    searchKey: "",
+    searchName: "",
+    searchArea: "",
+    searchPhone: "",
+    searchUserKey:1,
+
+    //管理员搜索客户
+    adminSearchUserInfo: function(scope,http) {
+        var param = {
+            "custSearch.contactPerson": getOrPostRequestObj.adminClientSearchConnect.searchName,
+            "custSearch.address": getOrPostRequestObj.adminClientSearchConnect.searchArea,
+            "custSearch.phoneNum": getOrPostRequestObj.adminClientSearchConnect.searchPhone,
+            "custSearch.orderDate": "",
+            "mpagingRequest.perPageUnitNum": 9,
+            "mpagingRequest.currentPage": 1
+        };
+        var eurl = publicParameterObj.parameters.adminUrlHead + publicParameterObj.parameters.adminUserList;
+        var fun = function(data) {
+            if (data.status === "S") {
+                scope.adminClientInit_CallBack(data);
+            } else {
+                if(data.message === "您还没有登录"){
+                    scope.adminLogin.show();
+ 
+                }else{
+                    scope.showAlert('提 示',"搜素出错!");
+                }
+            }
+        };
+        getOrPostRequestObj.ajaxRquest.asynAjaxRequest("post", param, eurl, fun, http, scope);
+    },
+
+    //加载更多客户信息
+    adminUserInfoLoadMore: function(scope,http){
+        var param = {
+            "custSearch.contactPerson": getOrPostRequestObj.adminClientSearchConnect.searchName,
+            "custSearch.address": getOrPostRequestObj.adminClientSearchConnect.searchArea,
+            "custSearch.phoneNum": getOrPostRequestObj.adminClientSearchConnect.searchPhone,
+            "custSearch.orderDate": "",
+            "mpagingRequest.perPageUnitNum": 9,
+            "mpagingRequest.currentPage": publicParameterObj.parameters.loadingPage
+        };
+        var eurl = publicParameterObj.parameters.adminUrlHead + publicParameterObj.parameters.adminUserList;
+        var fun = function(data){
+            if(data.status === "S"){
+                scope.adminClientLoadMore_CallBack(data);
+            }else{
+                if(data.message === "您还没有登录"){
+                    scope.adminLogin.show();
+ 
+                }
+            }
+        };
+        getOrPostRequestObj.ajaxRquest.asynAjaxRequest("post", param, eurl, fun, http, scope);
+    }
+};
+
+var getOrPostRequest = {
+    ajaxRquest: Object.create(requestClass),
+    indexConnect: Object.create(indexConnectClass),
+    userAndAdminSignIn: Object.create(userAndAdminLoginClass),
+    detailedConnect: Object.create(detailedConnectClass),
+    productConnect: Object.create(productClass),
+    proSearchConnec: Object.create(proSearchClass),
+    messageConnect: Object.create(messageClass),
+    orderInfoConnect: Object.create(OwnerInfoClass),
+    registConnect: Object.create(registClass),
+    shoppingCarConnect: Object.create(shoppingCarClass),
+    superProConnect: Object.create(superProClass),
+    userWaitingAuditConnect: Object.create(userWaitingAuditClass),
+    myOrderConnect: Object.create(myOrderClass),
+    adminSelectOrderConnect: Object.create(adminSelectOrderClass),
+    adminProManageConnect: Object.create(adminProManageClass),
+    adminClientSearchConnect: Object.create(adminClientSearchClass),
+    adminInfoConnect: Object.create(adminInfoClass)
+};
+
+//本js主对象
+var getOrPostRequestObj = Object.create(getOrPostRequest);

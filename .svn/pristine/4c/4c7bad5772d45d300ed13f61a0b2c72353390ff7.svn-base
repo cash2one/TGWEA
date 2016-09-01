@@ -1,0 +1,411 @@
+package com.etaoguan.wea.service.impl;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.annotation.Resource;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.etaoguan.wea.common.DataCriteria;
+import com.etaoguan.wea.common.DataSet;
+import com.etaoguan.wea.common.OffsetRequest;
+import com.etaoguan.wea.common.WeaException;
+import com.etaoguan.wea.constant.WeaConstant;
+import com.etaoguan.wea.dao.IOrderDao;
+import com.etaoguan.wea.service.IKeyGenService;
+import com.etaoguan.wea.service.IOrderService;
+import com.etaoguan.wea.service.IOrigOrderService;
+import com.etaoguan.wea.vo.Order;
+import com.etaoguan.wea.vo.OrderItem;
+import com.etaoguan.wea.vo.OrigOrder;
+import com.etaoguan.wea.vo.OrigOrderItem;
+import com.etaoguan.wea.vo.ProdQty;
+
+@Service("orderService")
+public class OrderService  extends BaseService implements IOrderService {
+
+	@Autowired
+	private IOrderDao iOrderDao;
+	
+	@Resource(name="orderKeyGenService") 
+	protected IKeyGenService  iKeyGenService;
+	
+	@Resource(name="origOrderService") 
+	protected IOrigOrderService  iOrigOrderService;
+	
+	public Order addOrder(Order order) {
+		String orderNum = iKeyGenService.saveNGetKey();
+		order.setOrderNum(orderNum);
+		order.setCreateBy(getCurrentOperator()); 
+		order.setUpdateBy(getCurrentOperator());
+		iOrderDao.addOrder(order);
+		for(OrderItem orderItem:order.getOrderItemList()){
+			orderItem.setOrderNum(orderNum);
+			iOrderDao.addOrderItem(orderItem);
+		}
+		DataCriteria dataCriteria = new DataCriteria();
+		dataCriteria.setParam("orderNum",orderNum);
+		
+		/*设置单件和总价*/
+		iOrderDao.updateOrderItemUnitPrice(dataCriteria);
+		iOrderDao.reCalcOrderPriceTotal(dataCriteria);
+		return order;
+	}
+
+	public void saveGenOrderFromOrigOrder(String origOrderNum){
+		OrigOrder origOrder =iOrigOrderService.getOrigOrder(origOrderNum);
+		if(existsReferOrder(origOrderNum)){
+			throw new WeaException("关联订单已生成");
+		}
+		Order order = new Order();
+		order.setCustNum(origOrder.getCustNum());
+		order.setCustName(origOrder.getCustomer().getCustName());
+		order.setOwnerNum(origOrder.getOwnerNum());
+		order.setOrigReferOrderNum(origOrder.getOrigOrderNum());
+		order.setDeliverAddr(origOrder.getDeliverAddr());
+		List<OrderItem> orderItemList = new ArrayList<OrderItem>();
+		for(OrigOrderItem origOrderItem:origOrder.getOrigOrderItemList()){
+			OrderItem orderItem = new OrderItem();
+			orderItem.setProdNum(origOrderItem.getProdNum());
+			orderItem.setProdName(origOrderItem.getProdName());
+			orderItem.setDifferName(origOrderItem.getDifferName());
+			orderItem.setCases(origOrderItem.getCases());
+			orderItem.setUnit(origOrderItem.getUnit());
+			orderItem.setPieces(origOrderItem.getPieces());
+			orderItemList.add(orderItem);
+		}
+		order.setOrderItemList(orderItemList);
+		addOrder(order);
+        
+	}
+	
+	public void addOrderItem(OrderItem orderItem) {
+		iOrderDao.addOrderItem(orderItem);
+
+	}
+
+	public boolean chkLegalRetInv(String orderNum,List<ProdQty> unsavedRetInvoiceProdQty) {
+
+		DataCriteria dataCriteria = new DataCriteria();
+		dataCriteria.setParam("orderNum",orderNum);
+		List<ProdQty> prodQtyList= iOrderDao.minusDeliverInvNRetInv(dataCriteria);
+		for(ProdQty prodQty:prodQtyList){
+			for(ProdQty retInvoiceprodQty:unsavedRetInvoiceProdQty){
+				if(prodQty.getProdNum().equalsIgnoreCase(retInvoiceprodQty.getProdNum())&&
+				(prodQty.getCases()<0||(prodQty.getCases()-retInvoiceprodQty.getCases())<0)){
+					return false;
+				}
+			}
+		}
+		return true;
+	}
+
+	public void delOrder(String orderNum) {
+		DataCriteria dataCriteria = new DataCriteria();
+		dataCriteria.setParam("orderNum",orderNum);
+		iOrderDao.delOrder(dataCriteria);
+
+	}
+
+	public void delOrderItems(String orderNum) {
+		DataCriteria dataCriteria = new DataCriteria();
+		dataCriteria.setParam("orderNum",orderNum);
+		iOrderDao.delOrderItem(dataCriteria);
+
+	}
+
+	public boolean existsOrder(String orderNum) {
+		DataCriteria dataCriteria = new DataCriteria();
+		dataCriteria.setParam("orderNum",orderNum);
+		if(iOrderDao.getOrder(dataCriteria)==null){
+			return false;
+		}
+		return true;
+	}
+
+	public boolean existsProduct(String prodNum) {
+		DataCriteria dataCriteria = new DataCriteria();
+		dataCriteria.setParam("prodNum",prodNum);
+		if(iOrderDao.getItemCount(dataCriteria)==0){
+			return false;
+		}
+		return true;
+	}
+
+	public boolean existsReferOrder(String origOrderNum) {
+		DataCriteria dataCriteria = new DataCriteria();
+		dataCriteria.setParam("origReferOrderNum",origOrderNum);
+		if(iOrderDao.getOrderCount(dataCriteria)==0){
+			return false;
+		}
+		return true;
+	}
+
+	public int getCashOrderCountByCustNum(String custNum, int cashStatus) {
+		DataCriteria dataCriteria = new DataCriteria();
+		dataCriteria.setParam("custNum",custNum);
+		dataCriteria.setParam("cashStatus",cashStatus);
+		return iOrderDao.getOrderCount(dataCriteria);
+	}
+
+	public int getDeliverOrderCountByCustNum(String custNum, int deliverStatus) {
+		DataCriteria dataCriteria = new DataCriteria();
+		dataCriteria.setParam("custNum",custNum);
+		dataCriteria.setParam("cashStatus",deliverStatus);
+		return iOrderDao.getOrderCount(dataCriteria);
+	}
+
+	public int getOrderCountByCustNum(String custNum) {
+		DataCriteria dataCriteria = new DataCriteria();
+		dataCriteria.setParam("custNum",custNum);
+		return iOrderDao.getOrderCount(dataCriteria);
+	}
+
+	public int getOrderCountByWHNum(String whNum, String ownerNum) {
+		DataCriteria dataCriteria = new DataCriteria();
+		dataCriteria.setParam("ownerNum",ownerNum);
+		dataCriteria.setParam("deliverLocation",whNum);
+		return iOrderDao.getOrderCount(dataCriteria);
+	}
+
+	public OrderItem getOrderItem(String orderNum, String prodNum) {
+		DataCriteria dataCriteria = new DataCriteria();
+		dataCriteria.setParam("orderNum",orderNum);
+		dataCriteria.setParam("prodNum",prodNum);
+		return iOrderDao.getOrderItem(dataCriteria);
+	}
+
+
+	public List<OrderItem> getOrderItems(String orderNum) {
+		DataCriteria dataCriteria = new DataCriteria();
+		dataCriteria.setParam("orderNum",orderNum);
+		return iOrderDao.getOrderItems(dataCriteria);
+	}
+
+	public double getOrderRealPrice(String orderNum) {
+		DataCriteria dataCriteria = new DataCriteria();
+		dataCriteria.setParam("orderNum",orderNum);
+		return iOrderDao.getOrder(dataCriteria).getRealPriceTotal();
+	}
+
+	public double getOrderStdPrice(String orderNum) {
+		DataCriteria dataCriteria = new DataCriteria();
+		dataCriteria.setParam("orderNum",orderNum);
+		return iOrderDao.getOrder(dataCriteria).getStdPriceTotal();
+	}
+
+	public int getSettleOrderCountByCustNum(String custNum, int settleStatus) {
+		DataCriteria dataCriteria = new DataCriteria();
+		dataCriteria.setParam("custNum",custNum);
+		dataCriteria.setParam("settleStatus",settleStatus);
+		return iOrderDao.getOrderCount(dataCriteria);
+	}
+
+	public boolean haveCashed(String orderNum) {
+		DataCriteria dataCriteria = new DataCriteria();
+		dataCriteria.setParam("orderNum",orderNum);
+		return iOrderDao.getOrder(dataCriteria).getCashStatus()==WeaConstant.ORDER_CASHSTATUS_UNCASHED?false:true;
+	}
+
+	public boolean haveDelivered(String orderNum) {
+		DataCriteria dataCriteria = new DataCriteria();
+		dataCriteria.setParam("orderNum",orderNum);
+		return iOrderDao.getOrder(dataCriteria).getDeliverStatus()==WeaConstant.ORDER_DELIVERSTATUS_PUTON?true:false;
+	}
+
+	public boolean haveSettled(String orderNum) {
+		DataCriteria dataCriteria = new DataCriteria();
+		dataCriteria.setParam("orderNum",orderNum);
+		return iOrderDao.getOrder(dataCriteria).getSettleStatus()==WeaConstant.ORDER_SETTLESTATUS_UNSETTLED?false:true;
+	}
+
+	@SuppressWarnings("rawtypes")
+	public DataSet listOrders(DataCriteria dataCriteria,
+			OffsetRequest offsetRequest) {
+		
+		return iOrderDao.getOrders(dataCriteria, offsetRequest);
+	}
+	
+	@SuppressWarnings("rawtypes")
+	public DataSet getOrdersWithItem(DataCriteria dataCriteria,
+			OffsetRequest offsetRequest) {
+		
+		return iOrderDao.getOrdersWithItem(dataCriteria, offsetRequest);
+	}
+
+	public void saveOrderItems4ReturnedInv(String orderNum) {
+		DataCriteria dataCriteria = new DataCriteria();
+		dataCriteria.setParam("orderNum",orderNum);
+		List<ProdQty> prodQtyList= iOrderDao.minusDeliverInvNRetInv(dataCriteria);
+		iOrderDao.delOrderItem(dataCriteria);
+		OrderItem orderItem = new OrderItem();
+		for(ProdQty prodQty:prodQtyList){
+			orderItem.setOrderNum(orderNum);
+			orderItem.setProdNum(prodQty.getProdNum());
+			orderItem.setProdName(prodQty.getProdName());
+			orderItem.setDifferName(prodQty.getDifferName());
+			orderItem.setUnit(prodQty.getUnit());
+			orderItem.setCases(prodQty.getCases());
+			orderItem.setPieces(prodQty.getPieces());
+			iOrderDao.addOrderItem(orderItem);
+		}
+		delInvalidOrderItems(orderNum);
+		iOrderDao.updateOrderItemUnitPrice(dataCriteria);
+		iOrderDao.reCalcOrderPriceTotal(dataCriteria);
+
+	}
+
+	public void updateAllOrderItems(String orderNum,
+			List<OrderItem> orderItemList) {
+		DataCriteria dataCriteria = new DataCriteria();
+		dataCriteria.setParam("orderNum",orderNum);
+		iOrderDao.delOrderItem(dataCriteria);
+		dataCriteria.setParam("updateBy",getCurrentOperator());
+		iOrderDao.updateOrder(dataCriteria);
+		for(OrderItem orderItem:orderItemList){
+			iOrderDao.addOrderItem(orderItem);
+		}
+		iOrderDao.updateOrderItemUnitPrice(dataCriteria);
+		iOrderDao.reCalcOrderPriceTotal(dataCriteria);
+	}
+
+	public void updateOrder2Cashed(String orderNum, int cashType) {
+		DataCriteria dataCriteria = new DataCriteria();
+		dataCriteria.setParam("orderNum",orderNum);
+		dataCriteria.setParam("cashType",cashType);
+		dataCriteria.setParam("cashStatus",WeaConstant.ORDER_CASHSTATUS_CASHED);
+		dataCriteria.setParam("updateBy",getCurrentOperator());
+		iOrderDao.updateOrder(dataCriteria);
+
+	}
+
+
+
+	public void updateOrder2DeliverUnPuton(String orderNum){
+		DataCriteria dataCriteria = new DataCriteria();
+		dataCriteria.setParam("orderNum",orderNum);
+		dataCriteria.setParam("deliverStatus",WeaConstant.ORDER_DELIVERSTATUS_UNPUTON);
+		dataCriteria.setParam("updateBy",getCurrentOperator());
+		iOrderDao.updateOrder(dataCriteria);
+
+	}
+	public void updateOrder2DeliverPuton(String orderNum,String whNum){
+		DataCriteria dataCriteria = new DataCriteria();
+		dataCriteria.setParam("orderNum",orderNum);
+		dataCriteria.setParam("deliverLocation",whNum);
+		dataCriteria.setParam("deliverStatus",WeaConstant.ORDER_DELIVERSTATUS_PUTON);
+		dataCriteria.setParam("updateBy",getCurrentOperator());
+		iOrderDao.updateOrder(dataCriteria);
+
+	}
+
+	public void updateOrder2Settled(String orderNum) {
+		DataCriteria dataCriteria = new DataCriteria();
+		dataCriteria.setParam("orderNum",orderNum);
+		dataCriteria.setParam("settleStatus",WeaConstant.ORDER_SETTLESTATUS_SETTLED);
+		dataCriteria.setParam("updateBy",getCurrentOperator());
+		iOrderDao.updateOrder(dataCriteria);
+
+	}
+
+	public void updateOrder2Uncashed(String orderNum) {
+		DataCriteria dataCriteria = new DataCriteria();
+		dataCriteria.setParam("orderNum",orderNum);
+		dataCriteria.setParam("cashType",0);
+		dataCriteria.setParam("cashStatus",WeaConstant.ORDER_CASHSTATUS_UNCASHED);
+		dataCriteria.setParam("updateBy",getCurrentOperator());
+		iOrderDao.updateOrder(dataCriteria);
+
+	}
+
+	public void updateOrder2Undelivered(String orderNum) {
+		DataCriteria dataCriteria = new DataCriteria();
+		dataCriteria.setParam("orderNum",orderNum);
+		dataCriteria.setParam("deliverStatus",WeaConstant.ORDER_DELIVERSTATUS_UNDELIVERED);
+		dataCriteria.setParam("updateBy",getCurrentOperator());
+		iOrderDao.updateOrder(dataCriteria);
+
+	}
+
+	public void updateOrderItemPriceTotal(String orderNum) {
+		DataCriteria dataCriteria = new DataCriteria();
+		dataCriteria.setParam("orderNum",orderNum);
+		iOrderDao.updateOrderItemPriceTotal(dataCriteria);
+	}
+
+
+
+	public void updateOrderRealPrice(String orderNum, double realPrice,
+			String deliverAddr) {
+		DataCriteria dataCriteria = new DataCriteria();
+		dataCriteria.setParam("orderNum",orderNum);
+		dataCriteria.setParam("realPriceTotal",realPrice);
+		dataCriteria.setParam("deliverAddr",deliverAddr);
+		dataCriteria.setParam("updateBy",getCurrentOperator());
+		iOrderDao.updateOrder(dataCriteria);
+	}
+
+	public void updateReCalcOrderPriceTotal(String orderNum) {
+		DataCriteria dataCriteria = new DataCriteria();
+		dataCriteria.setParam("orderNum",orderNum);
+		dataCriteria.setParam("updateBy",getCurrentOperator());
+		iOrderDao.reCalcOrderPriceTotal(dataCriteria);
+	}
+
+	public void updateSumOrderItemPriceTotal(String orderNum) {
+		DataCriteria dataCriteria = new DataCriteria();
+		dataCriteria.setParam("orderNum",orderNum);
+		dataCriteria.setParam("updateBy",getCurrentOperator());
+		iOrderDao.sumOrderItemPriceTotal(dataCriteria);
+
+	}
+
+
+	public Order getOrder(String orderNum) {
+		DataCriteria dataCriteria = new DataCriteria();
+		dataCriteria.setParam("orderNum",orderNum);
+		Order order = iOrderDao.getOrder(dataCriteria);
+		order.setOrderItemList(getOrderItems(orderNum));
+		return order;
+	}
+
+	public void delOrderItem(String orderNum,String prodNum) {
+		DataCriteria dataCriteria = new DataCriteria();
+		dataCriteria.setParam("orderNum",orderNum);
+		dataCriteria.setParam("prodNum",prodNum);
+		iOrderDao.delOrderItem(dataCriteria);
+		iOrderDao.reCalcOrderPriceTotal(dataCriteria);
+
+	}
+
+	public void updateOrderItemProdQty(String orderNum, ProdQty prodQty) {
+		DataCriteria dataCriteria = new DataCriteria();
+		dataCriteria.setParam("orderNum",orderNum);
+		dataCriteria.setParam("prodNum",prodQty.getProdNum());
+		dataCriteria.setParam("cases", prodQty.getCases());
+		dataCriteria.setParam("pieces", prodQty.getPieces());
+		iOrderDao.updateOrderItem(dataCriteria);
+		iOrderDao.reCalcOrderPriceTotal(dataCriteria);
+		
+	}
+
+	public boolean existsCust(String custNum) {
+		DataCriteria dataCriteria = new DataCriteria();
+		dataCriteria.setParam("custNum",custNum);
+		if(iOrderDao.getOrderCount(dataCriteria)==0){
+			return false;
+		}
+		return true;
+	}
+
+	public void delInvalidOrderItems(String orderNum) {
+		DataCriteria dataCriteria = new DataCriteria();
+		dataCriteria.setParam("orderNum",orderNum);
+		dataCriteria.setParam("cases",0);
+		dataCriteria.setParam("pieces",0);
+		iOrderDao.delOrderItem(dataCriteria);
+		iOrderDao.reCalcOrderPriceTotal(dataCriteria);
+	}
+}

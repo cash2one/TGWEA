@@ -1,0 +1,268 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+
+<!-- author 刘卿 -->
+<!-- 感谢ibatis的持久层框架 -->
+
+<sqlMap>
+
+	<typeAlias alias="CASHINV" type="com.etaoguan.wea.vo.CashInvoice"/>
+	<typeAlias alias="CASHINVITEM" type="com.etaoguan.wea.vo.CashInvoiceItem"/>
+
+
+	<resultMap id="cashInv" class="CASHINV">
+		<result property="cashNum" column="cash_num"/>
+		<result property="custNum" column="cust_num"/>
+		<result property="ownerNum" column="owner_num"/>
+		<result property="referOrderNum" column="refer_order_num"/>
+		<result property="cashType" column="cash_type"/>
+		<result property="priceTotal" column="price_total"/>
+		<result property="remark" column="remark"/>
+		<result property="createDate" column="create_date"/>
+		<result property="createBy" column="create_by"/>
+		<result property="updateDate" column="update_date"/>
+		<result property="updateBy" column="update_by"/>
+	</resultMap>
+	
+	<resultMap id="compCashInvDataSet" extends="cashInv" class="CASHINV">
+		<result property="customer.custNum" column="cust_num"/>
+		<result property="customer.companyName" column="company_name"/>
+		<result property="order.orderNum" column="order_num"/>
+		<result property="order.realPriceTotal" column="real_price_total"/>
+		<result property="order.settleStatus" column="settle_status"/>
+	</resultMap>
+	
+	<resultMap id="cashInvItem" class="CASHINVITEM">
+		<result property="cashNum" column="cash_num"/>
+		<result property="acctName" column="acct_name"/>
+		<result property="payPrice" column="pay_price"/>
+		<result property="remark" column="remark"/>
+	</resultMap>
+	
+
+	<select id="getCashInvCount" parameterClass="java.util.HashMap" resultClass="java.lang.Integer">
+		SELECT
+		count(1) 
+		FROM
+		cash_invoice where owner_num = #ownerNum#
+		<dynamic>
+			<isNotEmpty property="referOrderNum" prepend="and">
+		 		refer_order_num = #referOrderNum#
+		 	</isNotEmpty>
+			<isNotEmpty property="custNum" prepend="and">
+			    cust_num = #custNum#
+			</isNotEmpty>
+			<isNotEmpty property="cashType" prepend="and">
+			    cash_type = #cashType#
+			</isNotEmpty>
+		</dynamic>
+	</select>
+	
+	<select id="getCashInvDatSet" parameterClass="java.util.HashMap"  resultMap="compCashInvDataSet">
+		SELECT t3.*,t4.company_name FROM 
+		(SELECT t1.*,
+		t2.order_num,
+		t2.real_price_total,
+		t2.settle_status FROM 
+		(SELECT
+		cash_num,
+		cust_num,
+		owner_num,
+		refer_order_num,
+		cash_type,
+		price_total,
+		remark,
+		create_date,
+		create_by,
+		update_date,
+		update_by 
+		FROM 
+		cash_invoice where owner_num = #ownerNum#
+		<dynamic>
+			<isNotEmpty property="referOrderNum" prepend="and">
+		 		refer_order_num = #referOrderNum#
+		 	</isNotEmpty>
+			<isNotEmpty property="custNum" prepend="and">
+			    cust_num = #custNum#
+			</isNotEmpty>
+			<isNotEmpty property="cashType" prepend="and">
+			    cash_type = #cashType#
+			</isNotEmpty>
+		</dynamic>
+		<isNull property="asc">
+			<isNull property="desc">order by create_date desc
+			</isNull>
+		</isNull>
+
+		limit #limit# offset #offset#) t1,
+		`order` t2 where t1.refer_order_num = t2.order_num
+		) t3 left outer join customer t4 on t3.cust_num = t4.cust_num
+	</select>
+	
+	<select id="getCashInvItems" parameterClass="java.util.HashMap"  resultMap="cashInvItem">
+		SELECT
+		cash_num,
+		acct_name,
+		pay_price,
+		remark 
+		FROM 
+		cash_invoice_item where cash_num = #cashNum#
+
+	</select>
+	
+	<insert id="createCashInvItem" parameterClass="CASHINVITEM">
+		insert into cash_invoice_item 
+		(
+		cash_num,
+		acct_name,
+		pay_price,
+		remark 
+		)
+		values(
+			#cashNum#,
+			#acctName#,
+			#payPrice#,
+			#remark#
+		)
+	</insert>
+	
+		
+	<insert id="createCashInv" parameterClass="CASHINV">
+		insert into cash_invoice 
+		(
+		cash_num,
+		cust_num,
+		owner_num,
+		refer_order_num,
+		cash_type,
+		price_total,
+		remark,
+		create_date,
+		create_by,
+		update_date,
+		update_by 
+		)
+		values(
+			#cashNum#,
+			#custNum#,		
+			#ownerNum#,
+			#referOrderNum#,
+			#cashType#,
+			#priceTotal#
+			<isNotEmpty property="remark" prepend=",">
+				#remark#
+			</isNotEmpty>
+			<isEmpty property="remark" prepend=",">
+				''
+			</isEmpty>		
+			<isNotEmpty property="createDate" prepend=",">
+				#createDate#
+			</isNotEmpty>
+			<isEmpty property="createDate" prepend=",">
+				now()
+			</isEmpty>			
+			<isNotEmpty property="createBy" prepend=",">
+				#createBy#
+			</isNotEmpty>
+			<isEmpty property="createBy" prepend=",">
+				''
+			</isEmpty>			
+			<isNotEmpty property="updateDate" prepend=",">
+				#updateDate#
+			</isNotEmpty>
+			<isEmpty property="updateDate" prepend=",">
+				now()
+			</isEmpty>			
+			<isNotEmpty property="updateBy" prepend=",">
+				#updateBy#
+			</isNotEmpty>
+			<isEmpty property="updateBy" prepend=",">
+				''
+			</isEmpty>	
+		)
+
+	</insert>
+	
+
+	<select id="getCashInv" parameterClass="java.util.HashMap" resultMap="cashInv">
+		select cash_num,
+		cust_num,
+		owner_num,
+		refer_order_num,
+		cash_type,
+		price_total,
+		remark,
+		create_date,
+		create_by,
+		update_date,
+		update_by   from cash_invoice where 1=1 
+		<dynamic>
+			<isNotEmpty property="referOrderNum" prepend="and">
+		 		refer_order_num = #referOrderNum#
+		 	</isNotEmpty>
+		 	<isNotEmpty property="cashNum" prepend="and">
+		 		cash_num = #cashNum#
+		 	</isNotEmpty>
+		 </dynamic>
+		 
+		 limit 1
+	</select>
+	
+	<delete id="deleteCashInv" parameterClass="java.util.HashMap">
+		DELETE 
+		FROM
+		cash_invoice where cash_num = #cashNum#
+
+	</delete>
+	
+		
+	<delete id="deleteCashInvItem" parameterClass="java.util.HashMap">
+		DELETE 
+		FROM
+		cash_invoice_item where cash_num = #cashNum# 
+
+	</delete>
+	
+	<update id="updateCashInvByMap"  parameterClass="java.util.HashMap">
+			update cash_invoice set 
+			<isNotEmpty property="cashType">
+				cash_type = #cashType#
+			</isNotEmpty>
+			<isEmpty property="cashType">
+				cash_type = cash_type
+			</isEmpty>
+			<isNotEmpty property="priceTotal" prepend=",">
+				price_total = #priceTotal#
+			</isNotEmpty>
+			<isNotEmpty property="remark" prepend=",">
+				remark = #remark#
+			</isNotEmpty>
+			<isEmpty property="updateDate" prepend=",">
+				update_date = now()
+			</isEmpty>			
+			<isNotEmpty property="updateBy" prepend=",">
+				update_by = #updateBy#
+			</isNotEmpty>
+			<isEmpty property="updateBy" prepend=",">
+				update_by = ''
+			</isEmpty>		
+			where cash_num = #cashNum#
+	</update>
+	
+	<update id="updateCashInv"  parameterClass="CASHINV">
+			update cash_invoice set 
+			cash_type = #cashType#,
+			price_total = #priceTotal#,
+			remark = #remark#,
+			update_date = now(),
+			update_by = #updateBy# 
+			where cash_num = #cashNum#
+	</update>
+	
+	<update id="reCalcCashPriceTotal"  parameterClass="java.util.HashMap">
+			UPDATE cash_invoice 
+			SET price_total = (SELECT SUM(pay_price) price_total FROM cash_invoice_item WHERE cash_num = #cashNum#) 
+			where cash_num = #cashNum#
+			
+	</update>
+</sqlMap>

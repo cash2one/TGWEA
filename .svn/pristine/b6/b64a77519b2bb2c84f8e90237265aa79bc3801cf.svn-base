@@ -1,0 +1,879 @@
+<%@ page language="java" errorPage="/error.jsp" pageEncoding="UTF-8" contentType="text/html;charset=utf-8" %>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /> 
+<title>订单信息列表</title> 
+<%@ include file="/owner/common/owner-sc.jsp"%>
+<script src="${ctx}/owner/js/layout.js" type="text/javascript"></script>
+</head>  
+<body>
+    <div id="main">
+        <div position="top">
+        <%@ include file="/owner/top.jsp" %>
+        </div>
+        <div id="maincontent" position="center" title=" ">
+            <div id="searchbar" style="overflow:hidden">
+                <ul>
+                    <li>
+                        <i class="i-spacing-first">
+                            客户：
+                        </i>
+                        <i class="i-spacing-follow">
+                            <input type="text" id="companyName" />
+                        </i>
+                        <s:if test="#session.whichAuthority.contains(6)">
+                        <i class="i-spacing-follow">
+                            发货仓库：
+                        </i>
+                        <i class="i-spacing-follow">
+                            <input type="text" id="deliverLocation" />
+                        </i>
+                        </s:if>	
+                        <i class="i-spacing-follow">
+                            开始日期:
+                        </i>
+                        <i class="i-spacing-follow">
+                            <input type="text" id="createDateFrom" />
+                        </i>
+                        <i class="i-spacing-follow">
+                            结束日期:
+                        </i>
+                        <i class="i-spacing-follow">
+                            <input type="text" id="createDateTo" />
+                        </i>
+                        <input type="hidden" id="hidCustNum" />
+                        <input type="hidden" id="hidCompanyName" value="" />
+                        <input type="hidden" id="hidDeliverLocation" value="" />
+                        <input type="hidden" id="hidCreateDateFrom" />
+                        <input type="hidden" id="hidCreateDateTo" />
+                    </li>
+                     <s:if test="#session.whichAuthority.contains(5)">
+                    <li class="li-line">
+                        <i class="i-spacing-first">
+                            送货状态：
+                        </i>
+                        <i class="i-spacing-follow">
+                            <input type="text" id="deliverStatus" />
+                        </i>
+                        </s:if>
+            <s:if test="#session.whichAuthority.contains(7)">
+                        <i class="i-spacing-follow">
+                            收款状态：
+                        </i>
+                        <i class="i-spacing-follow">
+                            <input type="text" id="cashStatus" />
+                        </i>
+                        <i class="i-spacing-follow">
+                            结算状态:
+                        </i>
+                        <i class="i-spacing-follow">
+                            <input type="text" id="settleStatus" />
+                        </i>
+                         </s:if>	
+                        <i class="i-spacing-follow">
+                            <input id="searchOrder" type="button" value="搜&nbsp;&nbsp;索" onclick="f_searchOrder()" style="width:66px;"/>
+                        </i>
+                        <input type="hidden" id="hidDeliverStatus" value="-1" />
+                        <input type="hidden" id="hidCashStatus" value="-1" />
+                        <input type="hidden" id="hidSettleStatus" value="-1" />
+                    </li>
+                </ul>
+            </div>
+            <br/>
+            <br/>
+            <div class=" bcolor borderradius adminico" style="margin-left:7rem;"><a name="addNewOrder" href="${ctx}/owner/wAddOrder.action" id="addNewOrder"><img src='${ctx}/images/ico/chuangjian.png' alt='创建订单' title='创建订单'/></a></div>
+            <br/>
+            <div id="maingrid">
+            </div>
+        </div>
+        
+        <div position="bottom">
+         <%@ include file="/owner/bottom.jsp" %>
+        </div>
+        <div position="left" title="主菜单">
+            <%@ include file="/owner/left.jsp" %>
+        </div>
+    </div>
+    <br />
+    <div style="display:none;">
+    </div>
+             
+</body>
+<script type="text/javascript">
+
+    var manager, g;
+    $(function() {
+        $.expandAccordionMenu("ordermenu");
+        $("#companyName").ligerComboBox({
+            onBeforeOpen: f_selectCust,
+            valueFieldID: 'hidCustNum',
+            width: 200
+        });
+        $("#settleStatus").ligerComboBox({
+            data: null,
+            cancelable: false,
+            valueFieldID: 'hidSettleStatus'
+        });
+        $("#deliverLocation").ligerComboBox({
+            data: null,
+            cancelable: false,
+            valueFieldID: 'hidDeliverLocation',
+            valueField: 'whNum',
+            textField: 'whName'
+        });
+        $("#deliverStatus").ligerComboBox({
+            data: null,
+            cancelable: false,
+            valueFieldID: 'hidDeliverStatus'
+        });
+        $("#cashStatus").ligerComboBox({
+            data: null,
+            cancelable: false,
+            valueFieldID: 'hidCashStatus'
+        });
+        $("#createDateFrom").ligerDateEditor({
+            cancelable: false
+        });
+        $("#createDateTo").ligerDateEditor({
+            cancelable: false
+        });
+        f_initOrdersDataGrid();
+        f_initOrderSearchData();
+
+
+    }); 
+    function f_selectCust() {
+        $.ligerDialog.open({
+            title: '选择客户',
+            name: 'winselector',
+            width: 700,
+            height: 350,
+            url: '${ctx}/owner/wListSearchCusts.action?custSearch.companyName=&wpagingRequest.currentPage=1',
+            buttons: [{
+                text: '确定',
+                onclick: f_selectCustOK
+            },
+            {
+                text: '取消',
+                onclick: f_selectCustCancel
+            }]
+        });
+        return false;
+    }
+    function f_selectCustOK(item, dialog) {
+        var fn = dialog.frame.f_select || dialog.frame.window.f_select;
+        var data = fn();
+        if (!data) {
+            alert('请选择客户!');
+            return;
+        }
+        $("#hidCompanyName").val(data.companyName);
+        $("#companyName").val(data.companyName);
+        $("#hidCustNum").val(data.custNum);
+        dialog.close();
+    }
+    function f_selectCustCancel(item, dialog) {
+        dialog.close();
+    }
+
+    function f_searchOrder() {
+        var companyname = $.trim($("#companyName").val());
+        var deliverlocation = liger.get("deliverLocation").getValue();
+        var createdatefrom = liger.get("createDateFrom").inputText.val();
+        var createdateto = liger.get("createDateTo").inputText.val();
+        var deliverstatus = liger.get("deliverStatus").getValue();
+        var cashstatus = liger.get("cashStatus").getValue();
+        var settlestatus = liger.get("settleStatus").getValue();
+
+        if (string.isInvalid(companyname)) {
+            $("#hidCustNum").val("");
+        }
+        var fromtime = Date.parse(createdatefrom);
+        var totime = Date.parse(createdateto); 
+        if (totime < fromtime) {
+            alert("结束时间不能小于开始日期");
+            return;
+        }
+
+        $("#hidCompanyName").val(companyname);
+        $("#hidDeliverLocation").val(deliverlocation);
+        $("#hidCreateDateFrom").val(createdatefrom);
+        $("#hidCreateDateTo").val(createdateto);
+        $("#hidDeliverStatus").val(deliverstatus);
+        $("#hidCashStatus").val(cashstatus);
+        $("#hidSettleStatus").val(settlestatus);
+        $.reloadGridServerData(g, f_getOrdersParam());
+    }
+
+    function f_getOrdersParam() {
+        var custnum = $("#hidCustNum").val();
+        var companyname = $("#hidCompanyName").val();
+        var deliverlocation = $("#hidDeliverLocation").val();
+        var createdatefrom = $("#hidCreateDateFrom").val();
+        var createdateto = $("#hidCreateDateTo").val();
+        var deliverstatus = $("#hidDeliverStatus").val();
+        var cashstatus = $("#hidCashStatus").val();
+        var settlestatus = $("#hidSettleStatus").val();
+        
+        
+            
+        var param = {
+            "orderSearch.custNum": custnum,
+            "orderSearch.deliverLocation": deliverlocation,
+            "orderSearch.createDateFrom": createdatefrom,
+            "orderSearch.createDateTo": createdateto,
+            "orderSearch.deliverStatus": deliverstatus,
+            "orderSearch.cashStatus": cashstatus,
+            "orderSearch.settleStatus": settlestatus,
+            "redtfw":"Y"
+        };
+        return param;
+
+    }
+
+    function f_initOrderSearchData() {
+
+        j4tg.ajaxPost("${ctx}/owner/wGetListOrdersSearchInitData.action", "json", false, {},
+        function(data) {
+            if (data.status == "S") {
+                //             				alert(JSON.stringify(data));
+                liger.get("settleStatus").setData($.transformMap2ComboBoxData(data.respData.settleStatus, -1));
+                liger.get("deliverStatus").setData($.transformMap2ComboBoxData(data.respData.deliverStatus, -1));
+                liger.get("cashStatus").setData($.transformMap2ComboBoxData(data.respData.cashStatus, -1));
+                data.respData.warehouses.push({
+                    "whNum": "",
+                    "whName": "全部"
+                });
+                liger.get("deliverLocation").setData(data.respData.warehouses);
+                if (data.searchParams) {
+
+                    $("#hidDeliverStatus").val(data.searchParams['orderSearch.deliverStatus']);
+                    $("#hidCashStatus").val(data.searchParams['orderSearch.cashStatus']);
+                    $("#hidSettleStatus").val(data.searchParams['orderSearch.settleStatus']);
+                    $("#hidDeliverLocation").val(data.searchParams['orderSearch.deliverLocation']);
+                    $("#createDateFrom").val(data.searchParams['orderSearch.createDateFrom']);
+                    $("#createDateTo").val(data.searchParams['orderSearch.createDateTo']);
+                    $("#hidCreateDateFrom").val(data.searchParams['orderSearch.createDateFrom']);
+                    $("#hidCreateDateTo").val(data.searchParams['orderSearch.createDateTo']);
+                    liger.get("deliverLocation").updateStyle();
+                    liger.get("deliverStatus").updateStyle();
+                    liger.get("cashStatus").updateStyle();
+                    liger.get("deliverStatus").updateStyle();
+                    liger.get("createDateFrom").setValue(data.searchParams['orderSearch.createDateFrom']);
+                    liger.get("createDateTo").setValue(data.searchParams['orderSearch.createDateTo']);
+//                    $.recoverGridCommonParms(g,data.searchParams);
+                    
+                } else {
+                    var nowdate = new Date();
+                    var todate = nowdate.format("yyyy-MM-dd");
+                    nowdate.setDate(nowdate.getDate() - 15);
+                    var fromdate = nowdate.format("yyyy-MM-dd");
+                    $("#hidCreateDateFrom").val(fromdate);
+                    $("#hidCreateDateTo").val(todate);
+                    liger.get("createDateFrom").setValue(fromdate);
+                    liger.get("createDateTo").setValue(todate);
+                    
+                }
+                $.reloadGridServerData(g, f_getOrdersParam(),data.searchParams);
+
+            }
+        },
+        function(data) {
+
+		});
+
+    }
+
+	
+	  
+    function f_initOrdersDataGrid() {
+    
+        g = manager = $("#maingrid").ligerGrid({
+            columns: [{
+                display: '订单编号',
+                name: 'orderNum',
+                isSort: false,
+                align: 'left',
+                width: 100
+            },
+          
+            {
+                display: '公司名',
+                name: 'customer.companyName',
+                isSort: false,
+                align: 'left',
+                width: 250
+            },
+            {
+                display: '标准总价',
+                name: 'stdPriceTotal',
+                isSort: false,
+                align: 'left',
+                width: 80,
+                type: 'float'
+            },
+            {
+                display: '客户总价',
+                name: 'custPriceTotal',
+                isSort: false,
+                align: 'left',
+                width: 80,
+                type: 'float',
+                frozen: true
+            },
+            {
+                display: '调整总价',
+                name: 'realPriceTotal',
+                isSort: false,
+                align: 'left',
+                width: 80,
+                editor: {
+                    type: 'number'
+                }
+            },
+            {
+                display: '在线付款',
+                name: 'onlinePayStatus',
+                align: 'center',
+                width: 80,
+                render: function(rowdata, rowindex, value) {
+                    var h = "";
+                   	if (rowdata.onlinePayStatus == 0) {
+                       	h += "未支付";             	
+                    } else {
+                    	h += "<font color='#FF0000'>已支付</font>";
+                    }
+                    return h;
+
+                }
+            },
+            <s:if test="#session.whichAuthority.contains(5)">  
+            {
+                display: '出库状态',
+                name: 'deliverStatus',
+                align: 'center',
+                width: 80,
+                render: function(rowdata, rowindex, value) {
+                    var h = "";
+                    var deliverStatusName = rowdata.deliverStatusName;
+                    if (rowdata.deliverStatus == 0) {
+                    	if (rowdata.onlinePayStatus == 0) {
+                        	h += "<div style='width:100%' onmouseover='javascript:f_mouseEnter(this);' onmouseout='javascript:f_mouseLeave(this);'><label id='status' >" + deliverStatusName + "</label>";
+                        	h += "<input id='operation' type='button' style='display:none' value='创建送货单' onclick='f_genDeliverInv(" + rowindex + ")'  />";
+                        	h += "</div>";
+                    	}else{
+                    		h += "<div style='width:100%'><label id='status' >" + deliverStatusName + "</label></div>";
+                    	}
+                        
+                    } else {
+                        h += deliverStatusName;
+                    }
+                    return h;
+
+                }
+            },
+            {
+                display: '有无回库',
+                isSort: false,
+                align: 'center',
+                width: 80,
+                render: function(rowdata, rowindex, value) {
+                    var h = "";
+                    if (rowdata.cashStatus == 0 && rowdata.deliverStatus == 2 ) {
+                    	if(rowdata.retInvCount == 0){
+                    		if (rowdata.onlinePayStatus == 0) {
+		                        h += "<div style='width:100%' onmouseover='javascript:f_mouseEnter(this);' onmouseout='javascript:f_mouseLeave(this);'><label id='status' >无</label>";
+		                        h += "<input id='operation' type='button' style='display:none' value='创建回库单' onclick='f_genReturnedInv(" + rowindex + ")'  />";
+		                        h += "</div>";
+                    		}else{
+                    			h += "<div style='width:100%' ><label id='status' >无</label></div>";
+                    		}
+                    	}
+                    	else {
+                            h += "有";
+                        }
+                    } 
+                    return h;
+
+                }
+            },
+           </s:if>	
+            <s:if test="#session.whichAuthority.contains(7)">  
+            {
+                display: '收款状态',
+                name: 'cashStatus',
+                align: 'center',
+                width: 80,
+                render: function(rowdata, rowindex, value) {
+                    var h = "";
+                    var cashStatusName = rowdata.cashStatusName;
+                    if (rowdata.cashStatus == 0) {
+
+                        if (rowdata.deliverStatus == 2) {
+                        	if (rowdata.onlinePayStatus == 0) {
+	                            h += "<div style='width:100%' onmouseover='javascript:f_mouseEnter(this);' onmouseout='javascript:f_mouseLeave(this);'><label id='status' >" + cashStatusName + "</label>";
+	                            h += "<input id='operation' type='button' style='display:none' value='创建收款单' onclick='f_genCashInv(" + rowindex + ")'  />";
+	                            h += "</div>";
+                        	}else{
+                        		h += "<div style='width:100%' ><label id='status' >" + cashStatusName + "</label></div>";
+                        	}
+                        } else {
+                            h += cashStatusName;
+                        }
+                    } else {
+                        h += cashStatusName;
+                    }
+                    return h;
+
+                }
+            },
+            {
+                display: '结算状态',
+                name: 'settleStatus',
+                align: 'center',
+                width: 80,
+                render: function(rowdata, rowindex, value) {
+                    var h = "";
+                    var settleStatusName = rowdata.settleStatusName;
+                    if (rowdata.settleStatus == 0) {
+                        if (rowdata.cashStatus == 1) {
+                        	if (rowdata.onlinePayStatus == 0) {
+	                            h += "<div style='width:100%' onmouseover='javascript:f_mouseEnter(this);' onmouseout='javascript:f_mouseLeave(this);'><label id='status' >" + settleStatusName + "</label>";
+	                            h += "<input id='operation' type='button' style='display:none' value='订单结算' onclick='f_genSettleInv(" + rowindex + ")'  />";
+	                            h += "</div>";
+                        	}else{
+                        		h += "<div style='width:100%'><label id='status' >" + settleStatusName + "</label></div>";
+                        	}
+                        } else {
+                            h += settleStatusName;
+                        }
+                    } else {
+                        h += settleStatusName;
+                    }
+                    return h;
+
+                }
+            },
+            </s:if>	
+            {
+                display: '送货地址',
+                name: 'deliverAddr',
+                isSort: false,
+                align: 'left',
+                width: 200,
+            },
+            {
+                display: '更新日期',
+                name: 'updateDate',
+                align: 'left',
+                width: 100
+            },
+            {
+                display: '更新人',
+                name: 'updateBy',
+                isSort: false,
+                align: 'left',
+                width: 80
+            },
+            {
+                display: '操作',
+                isSort: false,
+                width: 100,
+                render: function(rowdata, rowindex, value) {
+                    var h = "";
+                    if (!rowdata._editing) {
+                    	if (rowdata.onlinePayStatus == 0) {
+	                        if (rowdata.cashStatus == 0) {
+	                            h += "<a href='javascript:f_beginUpdateOrder(" + rowindex + ")'><img src='${ctx}/images/ico/modification.png' alt='修改' title='修改'/></a> ";
+	                        }
+	                        if (rowdata.deliverStatus == 0) {
+	                            h += "<a href='javascript:f_deleteOrder(" + rowindex + ")'><img src='${ctx}/images/ico/delete.png' alt='删除' title='删除'/></a> ";
+	//                            h += "<a href='javascript:f_checkStock(" + rowindex + ")'>库存检查</a> ";
+	                        }
+                    	}
+                    } else {
+                        h += "<a href='javascript:void(0);' onclick='javascript:f_updateOrder(" + rowindex + ")'><img src='${ctx}/images/ico/save.png' alt='保存' title='保存'/></a> ";
+                        h += "<a href='javascript:f_cancelUpdateOrder(" + rowindex + ")'><img src='${ctx}/images/ico/cancel.png' alt='取消' title='取消'/></a> ";
+                    }
+                    return h;
+
+                }
+            }],
+            url: "${ctx}/owner/wListOrdersData.action",
+            pagesizeParmName: "wpagingRequest.perPageUnitNum",
+            pageParmName: "wpagingRequest.currentPage",
+            sortnameParmName: "sortParam.sortBy",
+            sortorderParmName: "sortParam.sortType",
+            pageSize: 20,
+            method: "post",
+            async: false,
+            enabledSort: true,
+            enabledEdit: true,
+            parms: f_getOrdersParam(),
+            dataAction: "server",
+            clickToEdit: false,
+            isScroll: false,
+            frozen: false,
+            pageSizeOptions: [20, 40],
+            showTitle: false,
+            width: 1250,
+            columnWidth: 120,
+            allowHideColumn: false,
+            lazyManualLoadData: true,
+            delayLoad:true,
+            detail: {
+                onShowDetail: f_showOrderItemsData,
+                height: 'auto'
+            }
+        });
+      
+    }
+
+    function f_beginUpdateOrder(rowid) {
+        manager.beginEdit(rowid);
+    }
+    function f_cancelUpdateOrder(rowid) {
+        manager.cancelEdit(rowid);
+    }
+
+    function f_mouseEnter(obj) {
+        $("#status", $(obj)).hide();
+        $("#operation", $(obj)).show();
+    }
+    function f_mouseLeave(obj) {
+        $("#operation", $(obj)).hide();
+        $("#status", $(obj)).show();
+    }
+
+    function f_updateOrder(rowid) {
+
+        var realpricetotal = $.getGridEditColumnData(g, rowid, 'realPriceTotal');
+        var remark = $.getGridEditColumnData(g, rowid, 'remark');
+        if (parseInt(realpricetotal) <= 0) {
+            $.ligerDialog.error('调整金额必须为大于0');
+            //			setTimeout(function () { manager.beginEdit(rowid); }, 15);
+            return;
+        }
+        if (string.isInvalid(remark)) {
+            $.ligerDialog.error('请填写修改备注');
+            return;
+        }
+
+        manager.endEdit(rowid);
+        var order = manager.getRow(rowid);
+        var param = {
+            "order.orderNum": order.orderNum,
+            "order.realPriceTotal": order.realPriceTotal,
+            "order.remark": order.remark
+        };
+        j4tg.ajaxPost("${ctx}/owner/wUpdateOrderRealPriceTotal.action", "json", false, param,
+        function(data) {
+            if (data.status == "S") {
+                $.ligerDialog.success('更新成功');
+                $.reloadGridServerData(g, f_getOrdersParam());
+
+            }
+        },
+        function(data) {
+
+		});
+
+    }
+
+    function f_deleteOrder(rowid) {
+
+        var order = manager.getRow(rowid);
+        $.ligerDialog.confirm('确定要删除么?',
+        function(yes) {
+            if (yes) {
+
+                j4tg.ajaxPost("${ctx}/owner/wDelOrder.action", "json", false, {
+                    "orderNum": order.orderNum
+                },
+                function(data) {
+                    if (data.status == "S") {
+                        $.ligerDialog.success('删除成功');
+                        $.reloadGridServerData(g, f_getOrdersParam());
+                    }
+                },
+                function(data) {
+
+				});
+
+            }
+        });
+    }
+
+    function f_beginUpdateOrderItem(rowid, gridid, parentrowid) {
+
+        $(gridid).ligerGetGridManager().beginEdit(rowid);
+    }
+    function f_cancelUpdateOrderItem(rowid, gridid, parentrowid) {
+        $(gridid).ligerGetGridManager().cancelEdit(rowid);
+    }
+    function f_updateOrderItem(rowid, gridid, parentrowid) {
+        var detailg = $(gridid).ligerGetGridManager();
+
+        var cases = $.getGridEditColumnData(detailg, rowid, 'cases');
+        if (parseInt(cases) <= 0) {
+            $.ligerDialog.error('订单产品数量必须大于0');
+            return;
+        }
+
+        detailg.endEdit(rowid);
+        var orderitem = detailg.getRow(rowid);
+
+        var param = {
+            "orderItem.orderNum": orderitem.orderNum,
+            "orderItem.prodNum": orderitem.prodNum,
+            "orderItem.prodName": orderitem.prodName,
+            "orderItem.cases": orderitem.cases,
+            "orderItem.pieces": orderitem.pieces
+        };
+        j4tg.ajaxPost("${ctx}/owner/wUpdateOrderItem.action", "json", false, param,
+        function(data) {
+            if (data.status == "S") {
+                $.ligerDialog.success('更新成功');
+                $.reloadGridServerData(g, f_getOrdersParam());
+                //endEdit存在延时操作，所需后续需要延时更多
+                setTimeout(function() {
+                    $.genNExtendDetail(manager, parentrowid);
+                },
+                15);
+            }
+        },
+        function(data) {
+
+		});
+
+    }
+
+    function f_deleteOrderItem(rowid, gridid, parentrowid) {
+
+        var orderitem = $(gridid).ligerGetGridManager().getRow(rowid);
+        $.ligerDialog.confirm('确定要删除么?',
+        function(yes) {
+            if (yes) {
+                var param = {
+                    "orderItem.orderNum": orderitem.orderNum,
+                    "orderItem.prodNum": orderitem.prodNum
+                };
+
+                j4tg.ajaxPost("${ctx}/owner/wDelOrderItem.action", "json", false, param,
+                function(data) {
+                    if (data.status == "S") {
+                        $.ligerDialog.success('删除成功');
+                        $.reloadGridServerData(g, f_getOrdersParam());
+                    }
+                },
+                function(data) {
+
+				});
+
+            }
+        });
+    }
+
+    function f_getOrderItemData(orderNum) {
+        var jsonData = {
+            Rows: []
+        };
+        var param = {
+            "orderNum": orderNum
+        };
+        j4tg.ajaxPost("${ctx}/owner/wListOrderItemsData.action", "json", false, param,
+        function(data) {
+            jsonData.Rows = data.respData;
+        },
+        function(data) {
+
+		});
+        return jsonData;
+
+    }
+
+    function f_showOrderItemsData(row, detailPanel, callback) {
+        var parentRowId = row['__index'];
+        var deliverStatus = row['deliverStatus'];
+        var grid = document.createElement('div');
+        var gridid = "dg" + parentRowId;
+        grid.setAttribute("id", gridid);
+        $(detailPanel).append(grid);
+        $(grid).css('margin', 10).ligerGrid({
+            columns: [{
+                display: '产品名称',
+                name: 'prodName',
+                isSort: false,
+                align: 'left',
+                width: 300,
+                type: 'float'
+            },
+            {
+                display: '订购数量',
+                name: 'cases',
+                isSort: false,
+                align: 'left',
+                width: 80,
+                type: 'float',
+                editor: {
+                    type: 'int'
+                }
+            },
+            {
+                display: '单位',
+                name: 'unit',
+                isSort: false,
+                align: 'left',
+                width: 60
+            },
+            {
+                display: '标准价',
+                name: 'stdProdPrice',
+                isSort: false,
+                align: 'left',
+                width: 80
+            },
+            {
+                display: '标准总价',
+                name: 'stdProdPriceTotal',
+                isSort: false,
+                align: 'left',
+                width: 80
+            },
+            {
+                display: '客户价',
+                name: 'custProdPrice',
+                isSort: false,
+                align: 'left',
+                width: 80,
+                frozen: true
+            },
+            {
+                display: '客户总价',
+                name: 'custProdPriceTotal',
+                isSort: false,
+                align: 'left',
+                width: 80,
+                frozen: true
+            },
+            {
+                display: '操作',
+                isSort: false,
+                align: 'left',
+                width: 100,
+                render: function(rowdata, rowindex, value) {
+                    var h = "";
+                    if (!rowdata._editing) {
+                        if (deliverStatus == 0) {
+                            h += "<a href='javascript:f_beginUpdateOrderItem(" + rowindex + "," + gridid + "," + parentRowId + ")'><img src='${ctx}/images/ico/modification.png' alt='APP个性化定制开发' title='修改'/></a> ";
+                            h += "<a href='javascript:f_deleteOrderItem(" + rowindex + "," + gridid + "," + parentRowId + ")'><img src='${ctx}/images/ico/delete.png' alt='APP个性化定制开发' title='删除'/></a> ";
+                        }
+                    } else {
+                        h += "<a href='javascript:f_updateOrderItem(" + rowindex + "," + gridid + "," + parentRowId + ")'><img src='${ctx}/images/ico/save.png' alt='APP个性化定制开发' title='保存'/></a> ";
+                        h += "<a href='javascript:f_cancelUpdateOrderItem(" + rowindex + "," + gridid + "," + parentRowId + ")'><img src='${ctx}/images/ico/cancel.png' alt='APP个性化定制开发' title='取消'/></a> ";
+                    }
+                    return h;
+
+                }
+            }],
+            isScroll: false,
+            showToggleColBtn: false,
+            width: 880,
+            data: f_getOrderItemData(row.orderNum),
+            clickToEdit: false,
+            showTitle: false,
+            enabledEdit: true,
+            columnWidth: 100,
+            onAfterShowData: callback,
+            frozen: false,
+            usePager: false,
+            allowHideColumn: false
+        });
+    }
+
+    function f_genDeliverInv(rowid) {
+
+        var order = manager.getRow(rowid);
+        j4tg.ajaxPost("${ctx}/owner/wGenDeliverInv.action", "json", false, {
+            "orderNum": order.orderNum
+        },
+        function(data) {
+            if (data.status == "S") {
+                $.ligerDialog.success('创建成功');
+                $.reloadGridServerData(g, f_getOrdersParam());
+            }
+        },
+        function(data) {
+
+		});
+    }
+
+    function f_genReturnedInv(rowid) {
+
+        var order = manager.getRow(rowid);
+        location.href = "${ctx}/owner/wEditReturnedInv.action?orderNum=" + order.orderNum;
+    }
+
+    function f_genCashInv(rowid) {
+
+        var order = manager.getRow(rowid);
+        location.href = "${ctx}/owner/wEditCashInv.action?orderNum=" + order.orderNum;
+    }
+
+    function f_genSettleInv(rowid) {
+        var order = manager.getRow(rowid);
+        var viewSettleUrl = "${ctx}/owner/wviewSettleInv.action?orderNum=" + order.orderNum;
+
+        $.ligerDialog.open({
+            height: 700,
+            url: viewSettleUrl,
+            width: 900,
+            showMax: false,
+            showToggle: true,
+            isResize: false,
+            slide: false,
+            title: "结算明细",
+            buttons: [{
+                text: '确定结算',
+                onclick: f_confirmOrderSettlement
+            },
+            {
+                text: '取消',
+                onclick: function(item, dialog) {
+                    dialog.close();
+                }
+            }]
+        });
+
+    }
+    function f_confirmOrderSettlement(item, dialog) {
+        var fn = dialog.frame.f_getOrderNum || dialog.frame.window.f_getOrderNum;
+        var orderNum = fn();
+        if (!orderNum) {
+            alert('操作无效!');
+            return;
+        }
+        j4tg.ajaxPost("${ctx}/owner/wconfirmOrderSettlement.action", "json", false, {
+            "orderNum": orderNum
+        },
+        function(data) {
+            if (data.status == "S") {
+                $.ligerDialog.success('结算成功');
+                $.reloadGridServerData(g, f_getOrdersParam());
+            } else {
+                $.ligerDialog.error(data.message);
+            }
+        },
+        function(data) {
+
+		});
+        dialog.close();
+    }
+
+    function f_checkStock(rowid) {
+    	var order = manager.getRow(rowid);
+
+    }
+</script>
+</html>

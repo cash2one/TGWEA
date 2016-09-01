@@ -1,0 +1,53 @@
+package com.etaoguan.wea.client.mobile.service.impl;
+
+import javax.annotation.Resource;
+
+import org.springframework.stereotype.Service;
+
+import com.etaoguan.wea.client.mobile.service.IMAccessAuthService;
+import com.etaoguan.wea.client.mobile.service.IMCustService;
+import com.etaoguan.wea.client.mobile.vo.CustSearch;
+import com.etaoguan.wea.client.mobile.vo.MPage;
+import com.etaoguan.wea.client.mobile.vo.MPagingRequest;
+import com.etaoguan.wea.client.vo.SortParam;
+import com.etaoguan.wea.common.DataCriteria;
+import com.etaoguan.wea.common.DataSet;
+import com.etaoguan.wea.common.OffsetRequest;
+import com.etaoguan.wea.service.impl.CustService;
+import com.etaoguan.wea.vo.Customer;
+
+@Service("mcustService")
+public class MCustService extends CustService implements IMCustService{
+
+	@Resource(name="maccessAuthService") 
+	private IMAccessAuthService imAccessAuthService;
+	
+	@SuppressWarnings("rawtypes")
+	public MPage listCusts(CustSearch custSearch, SortParam sortParam,
+			MPagingRequest mpagingRequest) {
+		OffsetRequest offsetRequest = mpagingRequest.format2OffsetRequest();
+		DataCriteria dataCriteria = DataCriteria.parseObjProp2Params(custSearch);
+		dataCriteria.extractSortParam(sortParam);
+		DataSet dataSet = listCusts(dataCriteria, offsetRequest);
+		return new MPage(mpagingRequest,dataSet);
+	}
+
+	public boolean existCustName(String ownerNum,String custName) {
+		
+		if(getCustByCustName(ownerNum,custName)!=null){
+			return true;
+		}
+		return false;
+	}
+
+	public Customer getLoginCust(String custNum) {
+		Customer customer = getCust(custNum);
+		if(customer!=null){
+			customer.setAccessOperationList(imAccessAuthService.getCustAccessOperationsByRole());
+		}
+		return customer;
+	}
+
+
+	
+}

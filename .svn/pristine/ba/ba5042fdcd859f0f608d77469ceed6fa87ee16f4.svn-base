@@ -1,0 +1,23 @@
+package com.etaoguan.wea.service.impl;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.etaoguan.wea.dao.IAlipayWapPayResultDao;
+import com.etaoguan.wea.service.IAlipayWapPayResultService;
+import com.etaoguan.wea.vo.AlipayWapPayResult;
+
+@Service("alipayWapPayResultService")
+public class AlipayWapPayResultService  extends BaseService implements IAlipayWapPayResultService {
+
+	@Autowired
+	private IAlipayWapPayResultDao iAlipayWapPayResultDao;
+
+	@Override
+	public int saveAlipayWapPayResult(AlipayWapPayResult alipayWapPayResult) {
+		return iAlipayWapPayResultDao.saveAlipayWapPayResult(alipayWapPayResult);
+	}
+	
+	
+	
+}

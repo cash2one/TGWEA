@@ -1,0 +1,94 @@
+package com.etaoguan.wea.client.web.service.impl;
+
+import java.util.HashMap;
+import java.util.Map;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.etaoguan.wea.client.vo.SortParam;
+import com.etaoguan.wea.client.web.service.IWProdCatService;
+import com.etaoguan.wea.client.web.service.IWProdPriceService;
+import com.etaoguan.wea.client.web.vo.CustProdPriceSearch;
+import com.etaoguan.wea.client.web.vo.ProdPriceSearch;
+import com.etaoguan.wea.client.web.vo.WPage;
+import com.etaoguan.wea.client.web.vo.WPagingRequest;
+import com.etaoguan.wea.common.DataCriteria;
+import com.etaoguan.wea.common.DataSet;
+import com.etaoguan.wea.common.OffsetRequest;
+import com.etaoguan.wea.service.impl.ProdPriceService;
+import com.etaoguan.wea.vo.CustProdPrice;
+import com.etaoguan.wea.vo.ProdPrice;
+
+@Service("wprodPriceService")
+public class WProdPriceService extends ProdPriceService implements IWProdPriceService{
+
+	@Autowired
+	IWProdCatService iWProdCatService;
+	
+	@Override
+	@SuppressWarnings("rawtypes")
+	public WPage listProdPrices(ProdPriceSearch prodPriceSearch,
+			SortParam sortParam, WPagingRequest wpagingRequest) {
+		OffsetRequest offsetRequest = wpagingRequest.format2OffsetRequest();
+		DataCriteria dataCriteria = new DataCriteria();
+		dataCriteria.setParam("ownerNum", prodPriceSearch.getOwnerNum());
+		dataCriteria.setParam("prodName", prodPriceSearch.getProdName());
+		dataCriteria.setParam("prodCatIds", prodPriceSearch.getProductCatIds());
+		DataSet dataSet = listProdPrices(dataCriteria, offsetRequest);
+		
+		return new WPage(wpagingRequest,dataSet);
+	}
+	
+	@Override
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	public Map getListProdPricesSearchInitData(String ownerNum) {
+		Map dataMap = new HashMap();
+		dataMap.put("prodCats",iWProdCatService.getProdCatsByOwnerNum(ownerNum));
+		return dataMap;
+	}
+
+	@Override
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	public Map getListCustProdPricesSearchInitData(String ownerNum) {
+		Map dataMap = new HashMap();
+		dataMap.put("prodCats",iWProdCatService.getProdCatsByOwnerNum(ownerNum));
+		return dataMap;
+	}
+
+	@Override
+	@SuppressWarnings("rawtypes")
+	public WPage listCustProdPrices(CustProdPriceSearch custProdPriceSearch,
+			SortParam sortParam, WPagingRequest wpagingRequest) {
+		OffsetRequest offsetRequest = wpagingRequest.format2OffsetRequest();
+		DataCriteria dataCriteria = new DataCriteria();
+		dataCriteria.setParam("ownerNum", custProdPriceSearch.getOwnerNum());
+		dataCriteria.setParam("prodNum", custProdPriceSearch.getProdNum());
+		dataCriteria.setParam("custNum", custProdPriceSearch.getCustNum());
+		dataCriteria.setParam("prodCatIds", custProdPriceSearch.getProductCatIds());
+		DataSet dataSet = listCustProdPrices(dataCriteria, offsetRequest);
+		
+		return new WPage(wpagingRequest,dataSet);
+	}
+
+	@Override
+	public void saveOrUpdateCustProdPrice(CustProdPrice custProdPrice) {
+		if(existsCustProdPrice(custProdPrice.getCustNum(),custProdPrice.getProdNum())){
+			updateCustProdPrice(custProdPrice.getProdNum(), custProdPrice.getCustNum(),custProdPrice.getProdPrice());
+		}else{	
+			saveCustProdPrice(custProdPrice);
+		}
+
+	}
+	
+	@Override
+	public void saveOrUpdateProdPrice(ProdPrice prodPrice) {
+		if(existsProdPrice(prodPrice.getProdNum())){
+			updateProdPrice(prodPrice.getProdNum(), prodPrice.getProdPrice());
+		}else{	
+			saveProdPrice(prodPrice);
+		}
+
+	}
+
+}

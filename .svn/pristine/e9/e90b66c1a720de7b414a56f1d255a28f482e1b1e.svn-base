@@ -1,0 +1,39 @@
+
+
+<ion-view title="留言板">
+
+    <ion-nav-buttons side="left">
+        <button ng-click="back()" class="button button-clear ion-ios7-arrow-back"></button>
+    </ion-nav-buttons>
+
+    <ion-nav-buttons side="right">
+        <button class="button button-clear ion-edit" style="font-size: 22px;" ng-click="showEditMessage()">
+        </button>
+    </ion-nav-buttons>
+    <ion-content>
+
+    <div class="allMessageList" align="left">
+        <div class='message' ng-repeat="iMessageDatas in iMessageDatas">
+            <div class='message-tittle'>
+                <ul>
+                    <li class='f14' ng-bind="iMessageDatas.name"></li>
+                    <li class='f12' ng-bind="iMessageDatas.createData"></li>
+                </ul>
+            </div>
+            <div class='message-centent'>
+                <ul>
+                    <li class='himg'>
+                        <img src='img/picture.png' ondragstart='return false' onerror=this.src=errImg>
+                    </li>
+                    <li class='hfont' ng-bind="iMessageDatas.messageContent"></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <h2 class="noMore" ng-hide="noMoreHide">已经到底啦</h2>
+    <ion-infinite-scroll icon="icon-spinner icon-spin" distance="0px" on-infinite="messageLoadMore()" ng-hide="loadingHide">
+    </ion-infinite-scroll>
+    </ion-content>
+</ion-view>
+

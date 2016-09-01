@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+
+<sqlMap>
+
+	<typeAlias alias="WeChatCodeSuccess" type="com.etaoguan.wea.vo.WeChatCodeSuccess"/>
+
+
+	<resultMap id="weChatCodeSuccessMap" class="WeChatCodeSuccess">
+		<result property="id" column="id"/>
+		<result property="returnCode" column="return_code"/>
+		<result property="returnMsg" column="return_msg"/>
+		<result property="appid" column="appid"/>
+		<result property="mchId" column="mch_id"/>
+		<result property="deviceInfo" column="device_info"/>
+		<result property="nonceStr" column="nonce_str"/>
+		<result property="sign" column="sign"/>
+		<result property="resultCode" column="result_code"/>
+		<result property="errCode" column="err_code"/>
+		<result property="errCodeDes" column="err_code_des"/>
+		<result property="tradeType" column="trade_type"/>
+		<result property="prepayId" column="prepay_id"/>
+		<result property="codeUrl" column="code_url"/>
+		<result property="createDate" column="create_date"/>	
+	</resultMap>
+	
+	
+	<select id="createCodeSuccess" parameterClass="java.util.HashMap"  resultMap="weChatCodeSuccessMap">
+
+	</select>
+	
+	
+	
+</sqlMap>

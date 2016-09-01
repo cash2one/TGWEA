@@ -1,0 +1,35 @@
+
+
+<ion-view title="产品管理">
+    <ion-nav-buttons side="left">
+        <button ng-click="back()" class="button button-clear button-light ion-ios7-arrow-back barIcon"></button>
+    </ion-nav-buttons>
+    <ion-content>
+        <div class="bar item-input-inset admBarColor padding-left-right-25">
+            <label class="item-input-wrapper light-bg">
+                <i class="ion-ios7-search searchBarIcon"></i>
+                <input type="text" placeholder="请输入产品名" style="font-size: 16px;" ng-model="aProManage.searchVal" ng-change="searchChange()"/>
+            </label>
+            <button class="button button-clear button-light" id="searchBtn" style="color: #454545" ng-click="aProManageSearch()">搜 索</button>
+        </div>
+
+        <div id="mainContent">
+        <div class="list admProList margin-bottom-none" ng-repeat="aEditPros in aEditPros">
+            <div class="item admProHead" ng-bind="aEditPros.name"></div>
+            <div class="floorMain">
+                <div class="item item-thumbnail-left" ng-click="toDetailed(aEditPros.proId)">
+                    <img id="prListImg" _lazysrc="{{aEditPros.img}}" onerror=this.src=errImg>
+                    <p class="managePrice">单价: <span class="assertive" ng-bind="aEditPros.price"></span></p>
+                    <p class="manageNum">库存数量: <span class="assertive" ng-bind="aEditPros.num"></span></p>
+                    <button class="button button-clear managePriceEditBtn" ng-click="updatePrice($index)"><i class="icon-pencil"></i> </button>
+                    <button class="button button-clear manageNumEditBtn" ng-click="updateNum($index)"><i class="icon-pencil"></i></button>
+                </div>
+            </div>
+            <div class="item text-center manageDateRow"><span class="manageDate" ng-bind="aEditPros.date"></span></div>
+        </div>
+        </div>
+        <h2 class="noMore margin-top-none" ng-hide="noMoreHide">已经到底啦</h2>
+        <ion-infinite-scroll  distance="0px" on-infinite="adminProManageLoadMore()" ng-hide="loadingHide" ng-bind-html="text"></ion-infinite-scroll>
+        <div style="height: 30px;"></div>
+    </ion-content>
+</ion-view>

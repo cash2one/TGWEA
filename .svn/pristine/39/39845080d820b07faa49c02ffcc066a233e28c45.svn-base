@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+
+<sqlMap>
+
+	<typeAlias alias="Authority" type="com.etaoguan.wea.vo.Authority" />
+
+	<resultMap id="authorityMap" class="Authority">
+		<result property="authorityId" column="authority_id" />
+		<result property="ownerNum" column="owner_num" />
+		<result property="whichAuthority" column="which_authority" />
+	</resultMap>
+
+	<delete id="deleteAuthority" parameterClass="java.util.HashMap">
+		DELETE 
+		FROM
+		authority where owner_num = #ownerNum#
+
+	</delete>
+	
+    <select id="selectAuthority" parameterClass="java.util.HashMap" resultMap="authorityMap" >
+		SELECT
+		authority.authority_id,
+		authority.owner_num,
+		authority.which_authority
+		FROM
+		authority
+		where
+		owner_num = #ownerNum#
+
+	</select>
+
+	<insert id="insertAuthority" parameterClass="Authority">
+		insert into
+		authority
+		(
+		owner_num,
+		which_authority
+		)
+		values
+		(
+		#ownerNum#,
+		#whichAuthority#
+		)
+
+	</insert>
+
+
+</sqlMap>

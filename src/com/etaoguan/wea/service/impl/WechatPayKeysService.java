@@ -1,0 +1,85 @@
+package com.etaoguan.wea.service.impl;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.etaoguan.wea.common.DataCriteria;
+import com.etaoguan.wea.common.DataSet;
+import com.etaoguan.wea.common.OffsetRequest;
+import com.etaoguan.wea.common.WeaException;
+import com.etaoguan.wea.dao.IWechatPayKeysDao;
+import com.etaoguan.wea.service.IWechatPayKeysService;
+import com.etaoguan.wea.vo.WechatPayKeys;
+
+/**
+ * @author cunli 微信付款的key
+ *
+ */
+@Service("wechatPayKeysService")
+public class WechatPayKeysService extends BaseService implements IWechatPayKeysService{
+
+	@Autowired
+	private IWechatPayKeysDao iWechatPayKeysDao;
+	
+	/* (non-Javadoc)获取客户微信付款的key
+	 * @see com.etaoguan.wea.service.IWechatPayKeysService#wechatPayKeysInformation(java.lang.String)
+	 */
+	@Override
+	public WechatPayKeys wechatPayKeysInformation(String ownerNum) {
+		DataCriteria dataCriteria = new DataCriteria();
+		dataCriteria.setParam("ownerNum",ownerNum);
+		return iWechatPayKeysDao.wechatPayKeysInformation(dataCriteria);
+	}
+
+	/* (non-Javadoc)添加微信key
+	 * @see com.etaoguan.wea.service.IWechatPayKeysService#addWechatPayKeys(com.etaoguan.wea.vo.WechatPayKeys)
+	 */
+	@Override
+	public void addWechatPayKeys(WechatPayKeys wechatPayKeys,String adminName) {
+		String ownerNum = wechatPayKeys.getOwnerNum();
+		
+		//查找这个客户的微信key是否存在
+		if (wechatPayKeysInformation(ownerNum) == null) {//如果这个客户没有添加过，就执行添加微信key
+			
+			wechatPayKeys.setCreateBy(adminName);
+			wechatPayKeys.setUpdateBy(adminName);
+			iWechatPayKeysDao.addWechatPayKeys(wechatPayKeys);
+		}else {
+			throw new WeaException("这个客户的 微支付信息 已经存在！");//在页面给客户提示信息
+		}
+	}
+
+	/* (non-Javadoc)删除微信key
+	 * @see com.etaoguan.wea.service.IWechatPayKeysService#deleteWechatPayKeys(java.lang.String)
+	 */
+	@Override
+	public void deleteWechatPayKeys(String ownerNum) {
+		DataCriteria dataCriteria = new DataCriteria();
+		dataCriteria.setParam("ownerNum",ownerNum);
+		iWechatPayKeysDao.deleteWechatPayKeys(dataCriteria);
+	}
+
+	/* (non-Javadoc)更新微信key
+	 * @see com.etaoguan.wea.service.IWechatPayKeysService#updateWechatPayKeys(com.etaoguan.wea.vo.WechatPayKeys)
+	 */
+	@Override
+	public void updateWechatPayKeys(WechatPayKeys wechatPayKeys,String adminName) {
+		DataCriteria dataCriteria = new DataCriteria();
+		dataCriteria.setParam("ownerNum",wechatPayKeys.getOwnerNum());
+		dataCriteria.setParam("mchId",wechatPayKeys.getMchId());
+		dataCriteria.setParam("payKey",wechatPayKeys.getPayKey());
+		dataCriteria.setParam("remark",wechatPayKeys.getRemark());
+		dataCriteria.setParam("updateBy",adminName);
+		iWechatPayKeysDao.updateWechatPayKeys(dataCriteria);
+	}
+
+	/* (non-Javadoc)微信key列表显示
+	 * @see com.etaoguan.wea.service.IWechatPayKeysService#wechatPayKeysDataSet(com.etaoguan.wea.common.DataCriteria, com.etaoguan.wea.common.OffsetRequest)
+	 */
+	@SuppressWarnings("rawtypes")
+	@Override
+	public DataSet wechatPayKeysDataSet(DataCriteria dataCriteria, OffsetRequest offsetRequest) {
+		return iWechatPayKeysDao.wechatPayKeysDataSet(dataCriteria, offsetRequest);
+	}
+
+}

@@ -1,0 +1,248 @@
+package com.etaoguan.wea.client.web.service.impl;
+
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.imageio.ImageIO;
+
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.etaoguan.wea.client.vo.SortParam;
+import com.etaoguan.wea.client.web.service.IWFileUploadService;
+import com.etaoguan.wea.client.web.service.IWProdCatService;
+import com.etaoguan.wea.client.web.service.IWProductService;
+import com.etaoguan.wea.client.web.vo.BatchFlagChange;
+import com.etaoguan.wea.client.web.vo.ProdImgNode;
+import com.etaoguan.wea.client.web.vo.ProdSearch;
+import com.etaoguan.wea.client.web.vo.WPage;
+import com.etaoguan.wea.client.web.vo.WPagingRequest;
+import com.etaoguan.wea.common.DataCriteria;
+import com.etaoguan.wea.common.DataSet;
+import com.etaoguan.wea.common.FileGenRequest;
+import com.etaoguan.wea.common.FileGenResult;
+import com.etaoguan.wea.common.OffsetRequest;
+import com.etaoguan.wea.common.WeaApplication;
+import com.etaoguan.wea.common.WeaException;
+import com.etaoguan.wea.constant.WeaConstant;
+import com.etaoguan.wea.service.impl.ProductService;
+import com.etaoguan.wea.vo.ProdImg;
+import com.etaoguan.wea.vo.Product;
+
+@Service("wproductService")
+public class WProductService extends ProductService implements IWProductService{
+
+	@Autowired
+	IWProdCatService iWProdCatService;
+	
+	@Autowired
+	IWFileUploadService iWFileUploadService;
+	
+	@Override
+	@SuppressWarnings("rawtypes")
+	public WPage listProducts(ProdSearch productSearch,
+			SortParam sortParam, WPagingRequest wpagingRequest) {
+		OffsetRequest offsetRequest = wpagingRequest.format2OffsetRequest();
+		DataCriteria dataCriteria = new DataCriteria();
+		dataCriteria.setParam("prodName", productSearch.getProductName());
+		dataCriteria.setParam("model", productSearch.getProductModel());
+		dataCriteria.setParam("prodCatIds", productSearch.getProductCatIds());
+		dataCriteria.setParam("showFlag", productSearch.getShowFlag());
+		dataCriteria.setParam("newFlag", productSearch.getNewFlag());
+		dataCriteria.setParam("hotFlag", productSearch.getHotFlag());
+		dataCriteria.setParam("ownerNum", productSearch.getOwnerNum());
+		dataCriteria.setParam("isPublic", productSearch.getIsPublic());
+		dataCriteria.setParam("productNums", productSearch.getProductNums());
+		dataCriteria.setParam("custNum", productSearch.getCustNum());
+		if("updateDate".equalsIgnoreCase(sortParam.getSortBy())){
+			sortParam.setSortBy("update_date");
+		}else if("stdPrice".equalsIgnoreCase(sortParam.getSortBy())){
+			sortParam.setSortBy("std_price");
+		}else{
+			
+			sortParam.setSortBy("");
+		}
+		dataCriteria.extractSortParam(sortParam);
+		DataSet dataSet = listProducts(dataCriteria, offsetRequest);
+		return new WPage(wpagingRequest,dataSet);
+	}
+	
+	@Override
+	@SuppressWarnings("rawtypes")
+	public WPage listCompProducts(ProdSearch productSearch,
+			SortParam sortParam, WPagingRequest wpagingRequest) {
+		OffsetRequest offsetRequest = wpagingRequest.format2OffsetRequest();
+		DataCriteria dataCriteria = new DataCriteria();
+		dataCriteria.setParam("ownerNum", productSearch.getOwnerNum());
+		dataCriteria.setParam("prodName", productSearch.getProductName());
+		dataCriteria.extractSortParam(sortParam);
+		DataSet dataSet = listCompProducts(dataCriteria, offsetRequest);
+		return new WPage(wpagingRequest,dataSet);
+	}
+	
+
+	@Override
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	public Map getListProdsSearchInitData(String ownerNum) {
+		Map dataMap = new HashMap();
+		dataMap.put("prodCats",iWProdCatService.getProdCatsByOwnerNum(ownerNum));
+		return dataMap;
+	}
+
+	@Override
+	public void updateBatchHotFlag(BatchFlagChange batchFlagChange) {
+		this.updateHotFlag(batchFlagChange.getProdNums(), batchFlagChange.getFlag());
+	}
+	/* (non-Javadoc)公开，隐藏
+	 * @see com.etaoguan.wea.client.web.service.IWProductService#updateBatchIsPublic(com.etaoguan.wea.client.web.vo.BatchFlagChange)
+	 */
+	@Override
+	public void updateBatchIsPublic(BatchFlagChange batchFlagChange) {
+		this.updateIsPublic(batchFlagChange.getProdNums(), batchFlagChange.getFlag());
+	}
+
+	@Override
+	public void updateBatchNewFlag(BatchFlagChange batchFlagChange) {
+		this.updateNewFlag(batchFlagChange.getProdNums(), batchFlagChange.getFlag());
+		
+	}
+
+	@Override
+	public void updateBatchShowFlag(BatchFlagChange batchFlagChange) {
+		this.updateShowFlag(batchFlagChange.getProdNums(), batchFlagChange.getFlag());
+		
+	}
+
+	@Override
+	public void updateBatchTopFlag(BatchFlagChange batchFlagChange) {
+		this.updateTopFlag(batchFlagChange.getProdNums(), batchFlagChange.getFlag());
+		
+	}
+
+	@Override
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	public Map getEditProdInitData(String ownerNum,String prodNum) {
+		Map dataMap = new HashMap();
+		dataMap.put("prodCats",iWProdCatService.getProdCatsByOwnerNum(ownerNum));
+		if(StringUtils.isNotEmpty(prodNum)){
+			dataMap.put("prod",getProduct(prodNum));
+		}
+		return dataMap;
+	}
+
+	@Override
+	public void saveOrUpdateProduct(Product product,List<ProdImgNode> prodImgNodeList) {
+		
+		if(prodImgNodeList!=null&&prodImgNodeList.size()>0){
+			List<ProdImg> prodImgs = new ArrayList<ProdImg>(); 
+			for(ProdImgNode prodImgNode:prodImgNodeList){
+				ProdImg prodImg = new ProdImg();
+				prodImg.setImgSeq(prodImgNode.getImgSeq());
+				if(prodImgNode.isAddImg()){
+					FileGenResult targetImgFileGenResult = iWFileUploadService.rename2TargetFile(iWFileUploadService.formatWebPath2FilePath(prodImgNode.getImgUrl()));
+					FileGenResult targetThumbImgFileGenResult = targetImgFileGenResult;
+					if(!prodImgNode.getImgUrl().equals(prodImgNode.getThumbUrl())){
+						targetThumbImgFileGenResult = iWFileUploadService.rename2TargetFile(iWFileUploadService.formatWebPath2FilePath(prodImgNode.getThumbUrl()));
+					}
+					
+					String f1 = targetImgFileGenResult.getFileFullPath();
+					String f2 = targetThumbImgFileGenResult.getFileFullPath();
+					
+					String last1 = iWFileUploadService.formatFilePath2WebPath(f1);
+					String last2 = iWFileUploadService.formatFilePath2WebPath(f2);
+					
+					String whatsAddress = WeaApplication.getInstance().getImgSaveAddr().replace("\\", "/");
+					String url =	last1.replace(whatsAddress, "");
+					String url2 =	last2.replace(whatsAddress, "");
+					
+					prodImg.setImgUrl(url);
+					prodImg.setThumbUrl(url2);
+//					prodImg.setImgUrl(iWFileUploadService.formatFilePath2WebPath(targetImgFileGenResult.getFileFullPath()));
+//					prodImg.setThumbUrl(iWFileUploadService.formatFilePath2WebPath(targetThumbImgFileGenResult.getFileFullPath()));
+					
+				}else{
+					prodImg.setImgUrl(prodImgNode.getImgUrl());
+					prodImg.setThumbUrl(prodImgNode.getThumbUrl());
+				}
+				
+				prodImgs.add(prodImg);
+			}
+			product.setProdImgs(prodImgs);
+		}
+		if(StringUtils.isEmpty(product.getProdNum())){
+			addProduct(product);
+		}else{
+			updateProduct(product);
+		}
+		
+	}
+
+	
+	@Override
+	public ProdImgNode genOwnerProdTmpImgNThumbFile(FileGenRequest fileGenRequest, String thumbWidth, String ownerNum) throws IOException {
+		
+		BufferedImage image=ImageIO.read(fileGenRequest.getUploadFile());
+		
+		checkUploadImg(fileGenRequest, image,WeaConstant.IMG_WIDTH,WeaConstant.IMG_HEIGHT);
+		
+		int w=image.getWidth();
+		if(StringUtils.isEmpty(thumbWidth)){
+				throw new WeaException("缺少缩略图尺寸参数");
+
+		}
+		StringBuffer relativefileDir = new StringBuffer();
+		relativefileDir.append(WeaConstant.OWNER_RES);
+		relativefileDir.append(File.separator);
+		relativefileDir.append(ownerNum);
+		int cx = Integer.parseInt(thumbWidth);
+		FileGenResult tmpFileGenResult = iWFileUploadService.save2TmpFile(relativefileDir.toString(),fileGenRequest);
+		FileGenResult tmpThumbFileGenResult = tmpFileGenResult;
+		if(w>cx){
+			tmpThumbFileGenResult = iWFileUploadService.genTmpThumbFile(tmpFileGenResult.getFileFullPath(), cx);
+		}
+		ProdImgNode prodImgNode = new ProdImgNode();
+		
+		String  t1 = tmpFileGenResult.getFileFullPath();
+		String t2 = tmpThumbFileGenResult.getFileFullPath();
+		
+		String u1 = iWFileUploadService.formatFilePath2WebPath(t1);
+		String whatsAddress = WeaApplication.getInstance().getImgSaveAddr().replace("\\", "/");
+		String u2 = iWFileUploadService.formatFilePath2WebPath(t2).replace(whatsAddress, "").replace(File.separator, "/");
+		
+		prodImgNode.setImgUrl(u1);
+		prodImgNode.setThumbUrl(u2);
+		return prodImgNode;
+	}
+
+	@Override
+	public void delBatchProduct(String[] prodNums) {
+		for(String prodNum:prodNums){
+			delProduct(prodNum);
+		}
+		
+	}
+	
+	/* (non-Javadoc)产品信息
+	 * @see com.etaoguan.wea.client.web.service.IWProductService#listProductsbyid(com.etaoguan.wea.client.web.vo.ProdSearch, com.etaoguan.wea.client.vo.SortParam, com.etaoguan.wea.client.web.vo.WPagingRequest)
+	 */
+	@Override
+	@SuppressWarnings("rawtypes")
+	public WPage listProductsbyid(ProdSearch prodSearch,SortParam sortParam, WPagingRequest mpagingRequest) {
+		OffsetRequest offsetRequest = mpagingRequest.format2OffsetRequest();
+		DataCriteria dataCriteria = new DataCriteria();
+		dataCriteria.setParam("ownerNum", prodSearch.getOwnerNum());
+		dataCriteria.setParam("custNum", prodSearch.getCustNum());
+		dataCriteria.extractSortParam(sortParam);
+		DataSet dataSet = listCompProducts(dataCriteria, offsetRequest);
+		return new WPage(mpagingRequest,dataSet);
+	}
+
+	
+
+}

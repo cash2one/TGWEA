@@ -1,0 +1,76 @@
+package com.etaoguan.wea.dao.impl;
+
+import java.util.List;
+
+import javax.annotation.Resource;
+
+import org.springframework.stereotype.Repository;
+
+import com.etaoguan.wea.common.DataCriteria;
+import com.etaoguan.wea.dao.IOwnerAdminDao;
+import com.etaoguan.wea.vo.OwnerAdmin;
+import com.ibatis.sqlmap.client.SqlMapClient;
+
+@Repository
+public class OwnerAdminDao extends SpringBaseDao implements IOwnerAdminDao{
+
+	@Override
+	@Resource(name="ownerSqlMapClient")
+	public void setSbiSqlMapClient(SqlMapClient sqlMapClient){
+		
+		super.setSqlMapClient(sqlMapClient);
+	}
+	
+	@Override
+	public OwnerAdmin getOwnerAdmin(DataCriteria dataCriteria) {
+		return (OwnerAdmin)this.getSqlMapClientTemplate().queryForObject("getOwnerAdmin", dataCriteria.getParams());
+	}
+	
+	/* (non-Javadoc)根据ownerNum获取管理员列表
+	 * @see com.etaoguan.wea.dao.IOwnerAdminDao#getOwnerAdmins(com.etaoguan.wea.common.DataCriteria)
+	 */
+	@Override
+	@SuppressWarnings("unchecked")
+	public List<OwnerAdmin> getOwnerAdmins(DataCriteria dataCriteria) {
+		return this.getSqlMapClientTemplate().queryForList("getOwnerAdmins", dataCriteria.getParams());
+	}
+	
+
+	/* (non-Javadoc)根据id修改密码
+	 * @see com.etaoguan.wea.dao.IOwnerAdminDao#updateOwnerAdmin(com.etaoguan.wea.common.DataCriteria)
+	 */
+	@Override
+	public void updateOwnerAdmin(DataCriteria dataCriteria) {
+		this.getSqlMapClientTemplate().update("updateOwnerAdminByMap", dataCriteria.getParams());
+		
+	}
+
+	@Override
+	public void addOwnerAdmin(OwnerAdmin ownerAdmin) {
+		this.getSqlMapClientTemplate().insert("createOwnerAdmin", ownerAdmin);
+		
+	}
+
+	@Override
+	public OwnerAdmin getLoginOwnerAdmin(DataCriteria dataCriteria) {
+		return (OwnerAdmin)this.getSqlMapClientTemplate().queryForObject("getLoginOwnerAdmin", dataCriteria.getParams());
+	}
+
+	/* (non-Javadoc)根据id删除管理员
+	 * @see com.etaoguan.wea.dao.IOwnerAdminDao#deleteOwnerAdmin(com.etaoguan.wea.common.DataCriteria)
+	 */
+	@Override
+	public void deleteOwnerAdmin(DataCriteria dataCriteria) {
+		this.getSqlMapClientTemplate().delete("deleteOwnerAdmin", dataCriteria.getParams());
+		
+	}
+
+	/* (non-Javadoc)检查管理员名字是否有重复
+	 * @see com.etaoguan.wea.dao.IOwnerAdminDao#duplicateCheck(com.etaoguan.wea.common.DataCriteria)
+	 */
+	@Override
+	public int duplicateCheck(DataCriteria dataCriteria) {
+		return (Integer) this.getSqlMapClientTemplate().queryForObject("duplicateCheck", dataCriteria.getParams());
+	}
+
+}

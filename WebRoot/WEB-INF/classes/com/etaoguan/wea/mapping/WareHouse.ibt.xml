@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+
+<!-- author 刘卿 -->
+<!-- 感谢ibatis的持久层框架 -->
+
+<sqlMap>
+
+	<typeAlias alias="WAREHOUSE" type="com.etaoguan.wea.vo.WareHouse"/>
+
+	<resultMap id="wareHouse" class="WAREHOUSE">
+		<result property="whNum" column="wh_num"/>
+		<result property="whName" column="wh_name"/>
+		<result property="ownerNum" column="owner_num"/>
+		<result property="address" column="address"/>
+		<result property="remark" column="remark"/>
+		<result property="createDate" column="create_date"/>
+		<result property="createBy" column="create_by"/>
+		<result property="updateDate" column="update_date"/>
+		<result property="updateBy" column="update_by"/>
+	</resultMap>
+
+	<insert id="createWareHouse" parameterClass="WAREHOUSE">
+		insert into warehouse 
+		(
+		wh_num,
+		wh_name,
+		owner_num,
+		address,
+		remark,
+		create_date,
+		create_by,
+		update_date,
+		update_by 
+		)
+		values(
+			#whNum#,
+			#whName#,		
+			#ownerNum#,
+			#address#,
+			#remark#
+			<isNotEmpty property="createDate" prepend=",">
+				#createDate#
+			</isNotEmpty>
+			<isEmpty property="createDate" prepend=",">
+				now()
+			</isEmpty>			
+			<isNotEmpty property="createBy" prepend=",">
+				#createBy#
+			</isNotEmpty>
+			<isEmpty property="createBy" prepend=",">
+				''
+			</isEmpty>			
+			<isNotEmpty property="updateDate" prepend=",">
+				#updateDate#
+			</isNotEmpty>
+			<isEmpty property="updateDate" prepend=",">
+				now()
+			</isEmpty>			
+			<isNotEmpty property="updateBy" prepend=",">
+				#updateBy#
+			</isNotEmpty>
+			<isEmpty property="updateBy" prepend=",">
+				''
+			</isEmpty>		
+		)
+
+	</insert>
+	
+	<select id="getWareHouseList" parameterClass="java.util.HashMap" resultMap="wareHouse">
+	
+		SELECT wh_num,
+		wh_name,
+		owner_num,
+		address,
+		remark,
+		create_date,
+		create_by,
+		update_date,
+		update_by 
+		FROM warehouse  
+		where owner_num = #ownerNum# 
+	</select>
+	
+	<select id="getWareHouse" parameterClass="java.util.HashMap" resultMap="wareHouse">
+	
+		SELECT wh_num,
+		wh_name,
+		owner_num,
+		address,
+		remark,
+		create_date,
+		create_by,
+		update_date,
+		update_by 
+		FROM warehouse  
+		where wh_num = #whNum# 
+	</select>
+	
+	
+	<update id="updateWareHouse"  parameterClass="WAREHOUSE">
+			update warehouse set 
+			wh_name = #whName#,
+			address = #address#,
+			remark = #remark#
+			<isNotEmpty property="updateBy" prepend=",">
+				update_by = #updateBy#
+			</isNotEmpty>
+			<isEmpty property="updateDate" prepend=",">
+				update_date = now()
+			</isEmpty>			
+			<isNotEmpty property="updateBy" prepend=",">
+				update_by = #updateBy#
+			</isNotEmpty>
+			<isEmpty property="updateBy" prepend=",">
+				update_by = ''
+			</isEmpty>	
+			where wh_num =#whNum#
+	</update>
+	
+	<delete id="deleteWareHouse" parameterClass="java.util.HashMap">
+		DELETE 
+		FROM
+		warehouse where wh_num = #whNum# and owner_num = #ownerNum#
+
+	</delete>
+	
+</sqlMap>

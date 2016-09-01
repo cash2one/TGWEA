@@ -1,0 +1,30 @@
+
+    <div class="modal editContent" ng-controller="editMessageCtrl">
+        <ion-header-bar class="bar bar-header ibarColor" ng-style="editStyle">
+
+            <button ng-click="hideEditMessage()" class="button button-clear ion-ios7-arrow-back"></button>
+
+            <h1 class="title">发表留言</h1>
+        </ion-header-bar>
+        <ion-content>
+            <div class="list list-inset editData">
+                <label class="item item-input">
+                    <textarea id="messageId"  placeholder="说点什么吧..." class="no-resize" maxlength="80" ng-model="editMessage.messageVal" event-val></textarea>
+                </label>
+            </div>
+            <div id="numPrompt">还能输入 <span ng-bind="charNum"></span> 个字</div>
+
+            <div class="row padding">
+                <button class="button button-block button-positive " id="sendMessage" ng-click="sendMessage()">提交留言</button>
+            </div>
+
+            <div class="row">
+                <div id="promptLogin" ng-hide="sendMessageIsLogin">
+                    <p><i class="ion-android-information energized"></i>您尚未登录, 将以匿名的方式进行留言.</p>
+                    <a class="button button-block button-positive" id="userToLogin" ng-click="toUserLogin()">我要登陆</a>
+                </div>
+            </div>
+
+        </ion-content>
+
+    </div>
